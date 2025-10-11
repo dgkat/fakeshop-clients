@@ -8,10 +8,10 @@ plugins {
 kotlin {
     androidTarget {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -21,20 +21,26 @@ kotlin {
             isStatic = true
         }
     }
-    
-    js {
+
+    js(IR) {
         outputModuleName = "shared"
         browser()
         binaries.library()
-        generateTypeScriptDefinitions()
-        compilerOptions {
-            target = "es2015"
-        }
     }
-    
+
     sourceSets {
         commonMain.dependencies {
-            // put your Multiplatform dependencies here
+            // Coroutines
+            implementation(libs.kotlinx.coroutines.core)
+
+            // Koin DI
+            implementation(libs.koin.core)
+
+            // DateTime
+            implementation(libs.kotlinx.datetime)
+        }
+        androidMain.dependencies {
+            implementation(libs.kotlinx.coroutines.android)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -46,8 +52,8 @@ android {
     namespace = "org.example.fakeshop_clients.shared"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
