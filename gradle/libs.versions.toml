@@ -30,9 +30,16 @@ kotlinx-datetime = "0.7.1"
 # HTMX
 kotlinx-html = "0.12.0"
 
+#React
+kotlinEmotion = "2025.3.26"
+kotlinReact = "2025.10.5-19.2.0"
+
 [libraries]
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coilCompose" }
+kotlin-emotion = { module = "org.jetbrains.kotlin-wrappers:kotlin-emotion", version.ref = "kotlinEmotion" }
+kotlin-react = { module = "org.jetbrains.kotlin-wrappers:kotlin-react", version.ref = "kotlinReact" }
+kotlin-react-dom = { module = "org.jetbrains.kotlin-wrappers:kotlin-react-dom", version.ref = "kotlinReact" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { module = "junit:junit", version.ref = "junit" }
