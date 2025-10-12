@@ -27,14 +27,12 @@ koin = "4.1.1"
 # Date/Time
 kotlinx-datetime = "0.7.1"
 
-# HTML Compose
-compose-html = "1.7.0"
-
 # HTMX
 kotlinx-html = "0.12.0"
 
 [libraries]
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coilCompose" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { module = "junit:junit", version.ref = "junit" }
