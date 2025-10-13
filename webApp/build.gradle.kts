@@ -7,6 +7,9 @@ kotlin {
         browser {
             commonWebpackConfig {
                 outputFileName = "fakeshop.js"
+                cssSupport {
+                    enabled.set(true)
+                }
             }
         }
         binaries.executable()
