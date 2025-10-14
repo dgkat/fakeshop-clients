@@ -29,6 +29,8 @@ kotlin {
         binaries.library()
     }
 
+    jvm()
+
     sourceSets {
         commonMain.dependencies {
             // Coroutines
@@ -45,6 +47,10 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+        }
+
+        jvmMain.dependencies {
+            implementation(libs.kotlinx.coroutines.core)
         }
     }
 }
