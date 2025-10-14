@@ -30,9 +30,6 @@ fun HTML.productDetailPage(product: FullProduct) {
         // HTMX
         script(src = "https://unpkg.com/htmx.org@1.9.10") {}
 
-        // CSS
-        link(rel = "stylesheet", href = "/static/css/product-detail.css")
-
         // Google Fonts
         link(rel = "preconnect", href = "https://fonts.googleapis.com")
         link(rel = "preconnect", href = "https://fonts.gstatic.com") {
@@ -42,6 +39,14 @@ fun HTML.productDetailPage(product: FullProduct) {
             rel = "stylesheet",
             href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         )
+
+        // Shared CSS from webCommon
+        link(rel = "stylesheet", href = "/webcommon/css/theme.css")
+        link(rel = "stylesheet", href = "/webcommon/css/base.css")
+        link(rel = "stylesheet", href = "/webcommon/css/components.css")
+
+        // Page-specific CSS
+        link(rel = "stylesheet", href = "/static/css/product-detail.css")
     }
 
     body {

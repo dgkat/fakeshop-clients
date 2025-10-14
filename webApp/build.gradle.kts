@@ -28,8 +28,19 @@ kotlin {
             // Koin
             implementation(libs.koin.core)
 
-            // Shared module
+            // Shared modules
+            implementation(project(":webCommon"))
             implementation(project(":shared"))
         }
     }
+}
+
+// Copy webCommon CSS to webApp resources
+tasks.register<Copy>("copyWebCommonResources") {
+    from("${project(":webCommon").projectDir}/src/commonMain/resources")
+    into("${projectDir}/src/jsMain/resources/webCommon")
+}
+
+tasks.named("jsProcessResources") {
+    dependsOn("copyWebCommonResources")
 }

@@ -1,7 +1,8 @@
 package org.example.fakeshop_clients.core.presentation.components
 
 import org.example.fakeshop_clients.features.home.presentation.models.UiBriefProduct
-import react.*
+import react.FC
+import react.Props
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.img
 import react.dom.html.ReactHTML.span
@@ -17,6 +18,8 @@ val ProductCard = FC<ProductCardProps> { props ->
         className = ClassName("product-card")
         onClick = {
             props.onClick(props.product.id)
+            kotlinx.browser.window.location.href =
+                "http://localhost:8081/product/${props.product.id}"
         }
 
         // Product Image

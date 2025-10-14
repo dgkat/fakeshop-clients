@@ -1,3 +1,8 @@
+/* ==========================================
+   THEME.CSS - Design Tokens & CSS Variables
+   Shared between React App and SSR Pages
+   ========================================== */
+
 :root {
     /* ===== Color Palette ===== */
     /* Primary Colors */
@@ -31,6 +36,10 @@
     --color-on-error: #FFFFFF;
     --color-error-container: #F9DEDC;
     --color-on-error-container: #410E0B;
+
+    /* Success */
+    --color-success: #2E7D32;
+    --color-success-container: #E8F5E9;
 
     /* Outline */
     --color-outline: #79747E;
@@ -107,6 +116,12 @@
     --z-index-modal: 1050;
     --z-index-popover: 1060;
     --z-index-tooltip: 1070;
+
+    /* ===== Breakpoints (for reference in JS) ===== */
+    --breakpoint-mobile: 480px;
+    --breakpoint-tablet: 768px;
+    --breakpoint-desktop: 1024px;
+    --breakpoint-wide: 1200px;
 }
 
 /* ===== Dark Mode Theme ===== */
@@ -153,6 +168,12 @@
 
 .headline-medium {
     font-size: var(--font-size-headline-medium);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-normal);
+}
+
+.headline-small {
+    font-size: var(--font-size-headline-small);
     font-weight: var(--font-weight-regular);
     line-height: var(--line-height-normal);
 }

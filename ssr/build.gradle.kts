@@ -21,5 +21,17 @@ dependencies {
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.kotlinx.html)
 
+    //Shared modules
+    implementation(project(":webCommon"))
     implementation(project(":shared"))
+}
+
+// Copy webCommon CSS to server resources
+tasks.register<Copy>("copyWebCommonResources") {
+    from("${project(":webCommon").projectDir}/src/commonMain/resources")
+    into("${projectDir}/src/main/resources/webcommon")
+}
+
+tasks.named("processResources") {
+    dependsOn("copyWebCommonResources")
 }
