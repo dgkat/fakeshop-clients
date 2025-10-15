@@ -1,3 +1,6 @@
+package org.example.fakeshop_clients.features.productDetailPage.presentation
+
+import FullProduct
 import com.yourapp.eshop.server.templates.productDetailPage
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.html.respondHtml
@@ -6,7 +9,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import kotlinx.html.FlowContent
-import kotlinx.html.HTML
 import kotlinx.html.body
 import kotlinx.html.button
 import kotlinx.html.id

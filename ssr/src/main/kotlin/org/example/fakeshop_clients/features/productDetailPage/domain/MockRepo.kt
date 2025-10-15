@@ -4,7 +4,7 @@ object ProductRepository {
             id = "1",
             name = "Wireless Headphones",
             price = 99.99,
-            imageUrl = "https://via.placeholder.com/600x400.png?text=Wireless+Headphones",
+            imageUrl = "https://placehold.co/600x400.png?text=Wireless+Headphones",
             category = "Electronics",
             description = "Premium wireless headphones with active noise cancellation. Enjoy crystal-clear sound quality and all-day comfort with our advanced audio technology. Features 30-hour battery life and quick charge capability.",
             rating = 4.5,

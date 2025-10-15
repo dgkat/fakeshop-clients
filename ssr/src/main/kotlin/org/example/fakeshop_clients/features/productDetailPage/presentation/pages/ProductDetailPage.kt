@@ -46,7 +46,7 @@ fun HTML.productDetailPage(product: FullProduct) {
         link(rel = "stylesheet", href = "/webcommon/css/components.css")
 
         // Page-specific CSS
-        link(rel = "stylesheet", href = "/static/css/product-detail.css")
+        link(rel = "stylesheet", href = "/static/css/product-details.css")
     }
 
     body {

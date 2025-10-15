@@ -13,7 +13,7 @@ import kotlinx.html.li
 import kotlinx.html.p
 import kotlinx.html.title
 import kotlinx.html.ul
-import productRoutes
+import org.example.fakeshop_clients.features.productDetailPage.presentation.productRoutes
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
