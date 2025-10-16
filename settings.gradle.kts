@@ -30,3 +30,6 @@ dependencyResolutionManagement {
 
 include(":composeApp")
 include(":shared")
+include(":webCommon")
+include(":webApp")
+include(":ssr")

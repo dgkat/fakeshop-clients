@@ -13,6 +13,7 @@ kotlin {
     }
 
     listOf(
+        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
@@ -27,6 +28,8 @@ kotlin {
         browser()
         binaries.library()
     }
+
+    jvm()
 
     sourceSets {
         commonMain.dependencies {
@@ -44,6 +47,10 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+        }
+
+        jvmMain.dependencies {
+            implementation(libs.kotlinx.coroutines.core)
         }
     }
 }

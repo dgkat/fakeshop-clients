@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import org.koin.core.parameter.parametersOf
+import org.koin.mp.KoinPlatform.getKoin
 
-class HomeViewModel(
-    private val homeViewStore: HomeViewStore
-) : ViewModel() {
-
+class HomeViewModel() : ViewModel() {
+    private val homeViewStore: HomeViewStore by lazy {
+        getKoin().get<HomeViewStore> { parametersOf(viewModelScope) }
+    }
     val uiState: StateFlow<HomeState> = homeViewStore.uiState
         .stateIn(
             scope = viewModelScope,
