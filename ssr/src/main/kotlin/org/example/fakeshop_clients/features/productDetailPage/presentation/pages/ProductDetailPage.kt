@@ -1,11 +1,10 @@
-package com.yourapp.eshop.server.templates
+package org.example.fakeshop_clients.features.productDetailPage.presentation.pages
 
-import FullProduct
-import kotlinx.html.FlowContent
 import kotlinx.html.HTML
 import kotlinx.html.a
 import kotlinx.html.body
 import kotlinx.html.button
+import kotlinx.html.classes
 import kotlinx.html.div
 import kotlinx.html.footer
 import kotlinx.html.h1
@@ -20,6 +19,8 @@ import kotlinx.html.p
 import kotlinx.html.script
 import kotlinx.html.span
 import kotlinx.html.title
+import org.example.fakeshop_clients.features.productDetailPage.domain.models.FullProduct
+import org.example.fakeshop_clients.features.productDetailPage.presentation.likeButton
 
 fun HTML.productDetailPage(product: FullProduct) {
     head {
@@ -27,8 +28,18 @@ fun HTML.productDetailPage(product: FullProduct) {
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
         title { +product.name }
 
+        // ===== PRELOAD ISLAND BUNDLE =====
+        link(rel = "preload", href = "/static/js/search-island.js") {
+            attributes["as"] = "script"
+            attributes["crossorigin"] = ""
+        }
+
         // HTMX
         script(src = "https://unpkg.com/htmx.org@1.9.10") {}
+
+        // ===== REACT (needed for islands) =====
+        script(src = "https://unpkg.com/react@18/umd/react.development.js") {}
+        script(src = "https://unpkg.com/react-dom@18/umd/react-dom.development.js") {}
 
         // Google Fonts
         link(rel = "preconnect", href = "https://fonts.googleapis.com")
@@ -50,11 +61,24 @@ fun HTML.productDetailPage(product: FullProduct) {
     }
 
     body {
-        // Header
+        // Header with search island
         header(classes = "header") {
             div(classes = "container") {
                 a(href = "/") {
                     h1 { +"E-Shop" }
+                }
+
+                // ===== SEARCH ISLAND CONTAINER =====
+                div {
+                    id = "search-island"
+                    attributes["data-island"] = "search"
+                    classes = setOf("island-container")
+
+                    // React will hydrate here
+                    div {
+                        id = "search-island-root"
+                        attributes["data-hydrate"] = "true"
+                    }
                 }
             }
         }
@@ -141,23 +165,13 @@ fun HTML.productDetailPage(product: FullProduct) {
                 p { +"© 2024 E-Shop. Built with Kotlin Multiplatform + HTMX" }
             }
         }
-    }
-}
 
-fun FlowContent.likeButton(product: FullProduct) {
-    button(classes = "btn btn-like ${if (product.isLiked) "liked" else ""}") {
-        id = "like-button"
-
-        // HTMX attributes
-        attributes["hx-post"] = "/api/products/${product.id}/like"
-        attributes["hx-swap"] = "outerHTML"
-        attributes["hx-target"] = "#like-button"
-
-        span(classes = "like-icon") {
-            if (product.isLiked) +"❤️" else +"🤍"
+        // ===== LOAD ISLAND BUNDLE =====
+        script(src = "/static/js/search-island.js") {
+            attributes["type"] = "module"
         }
-        span(classes = "like-text") {
-            +if (product.isLiked) "Liked" else "Like"
-        }
+
+        // ===== HYDRATOR SCRIPT =====
+        script(src = "/static/js/product-detail-hydrator.js") {}
     }
 }

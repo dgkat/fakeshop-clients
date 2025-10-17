@@ -1,3 +1,5 @@
+import org.example.fakeshop_clients.features.productDetailPage.domain.models.FullProduct
+
 object ProductRepository {
     private val products = mutableMapOf<String, FullProduct>(
         "1" to FullProduct(

@@ -1,7 +1,7 @@
 package org.example.fakeshop_clients.features.productDetailPage.presentation
 
-import FullProduct
-import com.yourapp.eshop.server.templates.productDetailPage
+import ProductRepository
+import org.example.fakeshop_clients.features.productDetailPage.presentation.pages.productDetailPage
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.html.respondHtml
 import io.ktor.server.response.respondText
@@ -13,6 +13,7 @@ import kotlinx.html.body
 import kotlinx.html.button
 import kotlinx.html.id
 import kotlinx.html.span
+import org.example.fakeshop_clients.features.productDetailPage.domain.models.FullProduct
 
 fun Route.productRoutes() {
 
