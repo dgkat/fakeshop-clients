@@ -17,8 +17,20 @@ kotlin {
 
     sourceSets {
         jsMain.dependencies {
+            // Kotlin wrappers for React
             implementation(libs.kotlin.react)
             implementation(libs.kotlin.react.dom)
+            implementation(libs.kotlin.emotion)
+
+            // Coroutines
+            implementation(libs.kotlinx.coroutines.core)
+
+            // Koin
+            implementation(libs.koin.core)
+
+            // Shared modules
+            implementation(project(":webCommon"))
+            implementation(project(":shared"))
         }
     }
 }
