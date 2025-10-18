@@ -15,13 +15,13 @@ class ProductDetailIslandHydrator {
                 return;
             }
 
-            // Now render the button
-            if (window.renderSearchButton) {
+            // Now render the island
+            if (window.renderSearchIsland) {
                 const container = document.getElementById('search-island-root');
                 if (container) {
-                    const button = window.renderSearchButton();
-                    container.appendChild(button);
-                    console.log('[Hydrator] ✅ Button rendered');
+                    const island = window.renderSearchIsland();
+                    container.appendChild(island);
+                    console.log('[Hydrator] ✅ Search island rendered');
                 }
             }
         } catch (error) {
