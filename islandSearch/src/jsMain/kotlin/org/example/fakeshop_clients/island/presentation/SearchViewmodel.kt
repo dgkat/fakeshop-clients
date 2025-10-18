@@ -1,4 +1,3 @@
-package org.example.fakeshop_clients.island.presentation
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -7,43 +6,44 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-// Data class for search state
 data class SearchState(
     val searchTerm: String = "",
-    val results: List<String> = emptyList()
+    val searchResults: List<String> = emptyList()
 )
 
-// Store that holds the business logic
-class SearchStore {
-    private val _uiState = MutableStateFlow<SearchState>(SearchState())
+class SearchStore(private val scope: CoroutineScope) {
+    private val _uiState = MutableStateFlow(SearchState())
     val uiState: StateFlow<SearchState> = _uiState.asStateFlow()
 
-    fun onSearchCharacterAdded() {
+    fun onSearchClick() {
         val currentState = _uiState.value
-        val newTerm = currentState.searchTerm + "A"
-        val newResults = currentState.results + newTerm
+        val nextLetter = when {
+            currentState.searchTerm.isEmpty() -> "a"
+            currentState.searchTerm.length >= 26 -> "a" // Reset after z
+            else -> ('a' + currentState.searchTerm.length).toString()
+        }
 
-        console.log("[SearchStore] Added character: $newTerm, Results: $newResults")
+        val newSearchTerm = currentState.searchTerm + nextLetter
+        val newResults = currentState.searchResults + newSearchTerm
 
         _uiState.value = SearchState(
-            searchTerm = newTerm,
-            results = newResults
+            searchTerm = newSearchTerm,
+            searchResults = newResults
         )
+
+        console.log("Search updated: $newSearchTerm, results: $newResults")
     }
 }
 
-// ViewModel that exposes the store
-class SearchViewmodel {
-    val scope = CoroutineScope(Dispatchers.Main + Job())
-
+class SearchViewModel {
+    private val scope = CoroutineScope(Dispatchers.Main + Job())
     private val searchStore: SearchStore by lazy {
-        SearchStore()
+        SearchStore(scope)
     }
 
     val uiState: StateFlow<SearchState> = searchStore.uiState
 
-    fun onSearchButtonClick() {
-        console.log("[SearchViewmodel] Search button clicked")
-        searchStore.onSearchCharacterAdded()
+    fun onSearchClick() {
+        searchStore.onSearchClick()
     }
 }
