@@ -172,6 +172,6 @@ fun HTML.productDetailPage(product: FullProduct) {
         }
 
         // ===== HYDRATOR SCRIPT =====
-        script(src = "/static/js/product-detail-hydrator.js") {}
+        script(src = "/static/js/universal-hydrator.js") {}
     }
 }

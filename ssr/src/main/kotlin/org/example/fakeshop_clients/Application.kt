@@ -13,6 +13,7 @@ import kotlinx.html.li
 import kotlinx.html.p
 import kotlinx.html.title
 import kotlinx.html.ul
+import org.example.fakeshop_clients.features.homePage.presentation.homeRoute
 import org.example.fakeshop_clients.features.productDetailPage.presentation.productRoutes
 
 fun main(args: Array<String>) {
@@ -32,26 +33,8 @@ fun Application.configureRouting() {
 
         staticResources("/static", "static")
 
-        // Home page (for testing - redirects to web app)
-        get("/") {
-            call.respondHtml {
-                head {
-                    title { +"E-Shop - Home" }
-                }
-                body {
-                    h1 { +"E-Shop Server is Running!" }
-                    p { +"Visit product pages at: /product/{id}" }
-                    ul {
-                        (1..8).forEach { id ->
-                            li {
-                                a(href = "/product/$id") { +"Product $id" }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
+        // Home page
+        homeRoute()
         // Product routes
         productRoutes()
     }
