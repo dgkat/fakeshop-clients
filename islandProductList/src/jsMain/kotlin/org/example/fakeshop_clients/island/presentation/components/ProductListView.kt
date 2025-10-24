@@ -1,7 +1,6 @@
 package org.example.fakeshop_clients.island.presentation.components
 
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.example.fakeshop_clients.island.presentation.ProductListState
@@ -12,7 +11,7 @@ import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h3
 import react.dom.html.ReactHTML.p
-import react.useEffect
+import react.useEffectWithCleanup
 import react.useState
 
 external interface ProductListProps : Props {
@@ -22,7 +21,7 @@ external interface ProductListProps : Props {
 val ProductListView = FC<ProductListProps> { props ->
     var state by useState(ProductListState(isLoading = true))
 
-    useEffect(props.viewModel) {
+    useEffectWithCleanup(props.viewModel) {
         if (props.viewModel != null) {
             val scope = MainScope()
             val job = props.viewModel!!.uiState
@@ -31,26 +30,11 @@ val ProductListView = FC<ProductListProps> { props ->
                 }
                 .launchIn(scope)
 
-            job::cancel
+            onCleanup { job::cancel }
         } else {
             null
         }
     }
-    //TODO find difference between and make sure job::cancel works
- /*   useEffect(props.viewModel) {
-        val scope = MainScope()
-
-        props.viewModel?.let {
-            it.loadCategories(scope)
-            val job = it.uiState
-                .onEach { newState ->
-                    state = newState
-                }
-                .launchIn(scope)
-
-            job.cancel()
-        }
-    }*/
 
     div {
         when {

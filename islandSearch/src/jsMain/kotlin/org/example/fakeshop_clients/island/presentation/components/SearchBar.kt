@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.onEach
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.button
-import react.useEffect
+import react.useEffectWithCleanup
 import react.useState
 
 external interface SearchButtonProps : Props {
@@ -18,7 +18,7 @@ external interface SearchButtonProps : Props {
 val SearchButton = FC<SearchButtonProps> { props ->
     var searchState by useState(SearchState())
 
-    useEffect(props.viewModel) {
+    useEffectWithCleanup(props.viewModel) {
         if (props.viewModel != null) {
             val scope = MainScope()
             val job = props.viewModel!!.uiState
@@ -27,7 +27,7 @@ val SearchButton = FC<SearchButtonProps> { props ->
                 }
                 .launchIn(scope)
 
-            job::cancel
+            onCleanup { job::cancel }
         } else {
             null
         }
