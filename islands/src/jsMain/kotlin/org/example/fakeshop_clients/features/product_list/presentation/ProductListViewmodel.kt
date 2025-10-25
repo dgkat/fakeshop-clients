@@ -1,4 +1,4 @@
-package org.example.fakeshop_clients.island.presentation
+package org.example.fakeshop_clients.features.product_list.presentation
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

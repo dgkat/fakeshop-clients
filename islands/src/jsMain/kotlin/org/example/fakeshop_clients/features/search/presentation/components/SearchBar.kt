@@ -1,10 +1,8 @@
-package org.example.fakeshop_clients.island.presentation.components
-
-import SearchState
-import SearchViewModel
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.example.fakeshop_clients.features.search.presentation.SearchState
+import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.button

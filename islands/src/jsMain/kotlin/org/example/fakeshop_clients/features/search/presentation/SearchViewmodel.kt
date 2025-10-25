@@ -1,4 +1,4 @@
-
+package org.example.fakeshop_clients.features.search.presentation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

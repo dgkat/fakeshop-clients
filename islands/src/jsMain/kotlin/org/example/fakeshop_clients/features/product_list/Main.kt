@@ -1,15 +1,15 @@
 import kotlinx.browser.document
 import kotlinx.browser.window
-import org.example.fakeshop_clients.island.presentation.ProductListViewmodel
-import org.example.fakeshop_clients.island.presentation.components.ProductListView
+import org.example.fakeshop_clients.features.product_list.presentation.ProductListViewmodel
+import org.example.fakeshop_clients.features.product_list.presentation.components.ProductListView
 import react.create
 import react.dom.client.createRoot
 import web.dom.Element
 
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-fun setupProductListIslandModule() {
-    console.log("[setupProductListIslandModule] Setting up product list island...")
+fun setupProductListIsland() {
+    console.log("[setupProductListIsland] Setting up product list island...")
 
     try {
         // Initialize Koin
@@ -25,13 +25,13 @@ fun setupProductListIslandModule() {
             }
         )
 
-        console.log("[setupProductListIslandModule] ✅ Island hydrated successfully")
+        console.log("[setupProductListIsland] ✅ Island hydrated successfully")
 
 
         window.addEventListener("beforeunload", {
             //stopKoin here
         })
     } catch (e: Exception) {
-        console.error("[setupProductListIslandModule] Error:", e.message)
+        console.error("[setupProductListIsland] Error:", e.message)
     }
 }

@@ -6,8 +6,7 @@ kotlin {
     js(IR) {
         browser {
             commonWebpackConfig {
-                outputFileName = "product-list-island.js"
-
+                outputFileName = "islands-bundle.js"
                 cssSupport {
                     enabled.set(true)
                 }
@@ -18,35 +17,28 @@ kotlin {
 
     sourceSets {
         jsMain.dependencies {
-            // Kotlin wrappers for React
             implementation(libs.kotlin.react)
             implementation(libs.kotlin.react.dom)
             implementation(libs.kotlin.emotion)
 
-            // Coroutines
+            implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
 
-            // Koin
-            implementation(libs.koin.core)
-
-            // Shared modules
-            //implementation(project(":islandSearch"))
             implementation(project(":webCommon"))
             implementation(project(":shared"))
         }
     }
 }
 
-tasks.register<Copy>("copyProductListIslandBundle") {
+tasks.register<Copy>("copyIslandsBundle") {
     dependsOn("jsBrowserProductionWebpack")
 
-    // Update the source path to match actual webpack output
     from(layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable"))
     into(project(":ssr").projectDir.resolve("src/main/resources/static/js"))
 
     include("*.js", "*.js.map")
 
     doLast {
-        println("✅ Island bundle copied to SSR static folder")
+        println("✅ Islands bundle copied to SSR static folder")
     }
 }

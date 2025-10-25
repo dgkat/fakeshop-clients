@@ -1,14 +1,14 @@
 import kotlinx.browser.document
 import kotlinx.browser.window
-import org.example.fakeshop_clients.island.presentation.components.SearchButton
+import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
 import react.create
 import react.dom.client.createRoot
 import web.dom.Element
 
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-fun setupIslandModule() {
-    console.log("[setupIslandModule] Setting up search island...")
+fun setupSearchIsland() {
+    console.log("[setupSearchIsland] Setting up search island...")
 
     try {
         // Initialize Koin
@@ -24,13 +24,13 @@ fun setupIslandModule() {
             }
         )
 
-        console.log("[setupIslandModule] ✅ Island hydrated successfully")
+        console.log("[setupSearchIsland] ✅ Island hydrated successfully")
 
 
         window.addEventListener("beforeunload", {
             //stopKoin here
         })
     } catch (e: Exception) {
-        console.error("[setupIslandModule] Error:", e.message)
+        console.error("[setupSearchIsland] Error:", e.message)
     }
 }

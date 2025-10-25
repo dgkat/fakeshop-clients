@@ -22,11 +22,7 @@ fun HTML.homePage() {
         title { +"E-Shop Home" }
 
         // ===== PRELOAD ISLAND BUNDLES =====
-        link(rel = "preload", href = "/static/js/search-island.js") {
-            attributes["as"] = "script"
-            attributes["crossorigin"] = ""
-        }
-        link(rel = "preload", href = "/static/js/product-list-island.js") {
+        link(rel = "preload", href = "/static/js/islands-bundle.js") {
             attributes["as"] = "script"
             attributes["crossorigin"] = ""
         }
@@ -90,10 +86,7 @@ fun HTML.homePage() {
         }
 
         // ===== LOAD ISLAND BUNDLES =====
-        script(src = "/static/js/search-island.js") {
-            attributes["type"] = "module"
-        }
-        script(src = "/static/js/product-list-island.js") {
+        script(src = "/static/js/islands-bundle.js") {
             attributes["type"] = "module"
         }
 

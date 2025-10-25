@@ -29,7 +29,7 @@ fun HTML.productDetailPage(product: FullProduct) {
         title { +product.name }
 
         // ===== PRELOAD ISLAND BUNDLE =====
-        link(rel = "preload", href = "/static/js/search-island.js") {
+        link(rel = "preload", href = "/static/js/islands-bundle.js") {
             attributes["as"] = "script"
             attributes["crossorigin"] = ""
         }
@@ -167,7 +167,7 @@ fun HTML.productDetailPage(product: FullProduct) {
         }
 
         // ===== LOAD ISLAND BUNDLE =====
-        script(src = "/static/js/search-island.js") {
+        script(src = "/static/js/islands-bundle.js") {
             attributes["type"] = "module"
         }
 
