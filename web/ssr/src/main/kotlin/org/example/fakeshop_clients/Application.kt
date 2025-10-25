@@ -27,7 +27,7 @@ fun Application.module() {
 fun Application.configureRouting() {
     routing {
         // Serve static files (CSS, images, etc.)
-        staticResources("/webcommon", "webCommon") {
+        staticResources("/webcommon", "webcommon") {
             // This will serve files from webCommon module's resources
         }
 

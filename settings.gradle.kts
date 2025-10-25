@@ -30,7 +30,7 @@ dependencyResolutionManagement {
 
 include(":composeApp")
 include(":shared")
-include(":webCommon")
-include(":webApp")
-include(":ssr")
-include(":islands")
+include(":web:islands")
+include(":web:ssr")
+include(":web:webApp")
+include(":web:common")

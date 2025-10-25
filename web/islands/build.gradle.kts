@@ -24,7 +24,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
 
-            implementation(project(":webCommon"))
+            implementation(project(":web:common"))
             implementation(project(":shared"))
         }
     }
@@ -34,7 +34,7 @@ tasks.register<Copy>("copyIslandsBundle") {
     dependsOn("jsBrowserProductionWebpack")
 
     from(layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable"))
-    into(project(":ssr").projectDir.resolve("src/main/resources/static/js"))
+    into(project(":web:ssr").projectDir.resolve("src/main/resources/static/js"))
 
     include("*.js", "*.js.map")
 
