@@ -1,3 +1,4 @@
+/* ===== MAIN CONTAINER ===== */
 .product-list-container {
     padding: 20px;
 }
@@ -8,10 +9,12 @@
     gap: 40px;
 }
 
+/* ===== CATEGORY SECTION ===== */
 .category-section {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    position: relative; /* For fade overlay positioning */
 }
 
 .category-title {
@@ -20,13 +23,18 @@
     margin: 0;
 }
 
+/* ===== PRODUCTS ROW (SCROLLABLE) ===== */
 .products-row {
     display: flex;
     gap: 16px;
     overflow-x: auto;
     padding-bottom: 8px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory; /* Snap to items when scrolling */
 }
 
+/* Desktop scrollbar styling */
 .products-row::-webkit-scrollbar {
     height: 8px;
 }
@@ -36,21 +44,7 @@
     border-radius: 4px;
 }
 
-.loading-view,
-.error-view {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    gap: 16px;
-}
-
-.error-message {
-    color: #dc2626;
-    font-weight: 500;
-}
-
+/* ===== PRODUCT CARD ===== */
 .product-card {
     background-color: var(--color-surface);
     border-radius: var(--radius-md);
@@ -61,6 +55,9 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-width: 280px;
+    flex-shrink: 0; /* Prevent squishing */
+    scroll-snap-align: start; /* Snap to start of each card */
 }
 
 .product-card:hover {
@@ -68,6 +65,7 @@
     transform: translateY(-4px);
 }
 
+/* ===== PRODUCT IMAGE ===== */
 .product-image-container {
     width: 100%;
     height: 200px;
@@ -89,6 +87,7 @@
     transform: scale(1.05);
 }
 
+/* ===== PRODUCT INFO ===== */
 .product-info {
     padding: var(--spacing-md);
     display: flex;
@@ -128,4 +127,122 @@
     font-weight: var(--font-weight-bold);
     color: var(--color-primary);
     margin-top: auto;
+}
+
+/* ===== LOADING & ERROR STATES ===== */
+.loading-view,
+.error-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 16px;
+}
+
+.error-message {
+    color: #dc2626;
+    font-weight: 500;
+}
+
+/* ===== TABLET STYLES ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .product-card {
+        min-width: 220px;
+    }
+
+    .product-image-container {
+        height: 180px;
+    }
+}
+
+/* ===== MOBILE STYLES (PHONES & TABLETS) ===== */
+@media (max-width: 768px) {
+    /* Reduce padding on mobile */
+    .product-list-container {
+        padding: 12px;
+    }
+
+    .categories-container {
+        gap: 24px;
+    }
+
+    .category-title {
+        font-size: 20px;
+        padding: 0 4px;
+    }
+
+    /* Products row adjustments */
+    .products-row {
+        gap: 12px;
+        padding: 0 4px;
+
+        /* Hide scrollbar on mobile for cleaner look */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+    }
+
+    .products-row::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 8px; /* Account for padding-bottom */
+        width: 60px;
+        background: linear-gradient(to right, transparent, var(--color-background));
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .products-row::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+    }
+
+    /* Smaller cards on mobile */
+    .product-card {
+        min-width: 160px;
+        max-width: 160px;
+    }
+
+    .product-image-container {
+        height: 160px;
+    }
+
+    .product-info {
+        padding: var(--spacing-sm);
+    }
+
+    .product-name {
+        font-size: var(--font-size-body-large);
+    }
+
+    .product-price {
+        font-size: var(--font-size-title-medium);
+    }
+}
+
+/* ===== VERY SMALL PHONES ===== */
+@media (max-width: 480px) {
+    .product-list-container {
+        padding: 8px;
+    }
+
+    .category-title {
+        font-size: 18px;
+    }
+
+    .product-card {
+        min-width: 140px;
+        max-width: 140px;
+    }
+
+    .product-image-container {
+        height: 140px;
+    }
+
+    /* Adjust fade overlay for smaller screens */
+    .category-section::after {
+        width: 40px;
+        top: 44px;
+    }
 }
