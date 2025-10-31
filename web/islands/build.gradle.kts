@@ -30,8 +30,14 @@ kotlin {
     }
 }
 
+tasks.register<Copy>("copyIslandResources") {
+    from("${project(":web:islands").projectDir}/src/jsMain/resources")
+    into("${project(":web:ssr").projectDir}/src/main/resources/common")
+}
+
 tasks.register<Copy>("copyIslandsBundle") {
     dependsOn("jsBrowserProductionWebpack")
+    dependsOn("copyIslandResources")
 
     from(layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable"))
     into(project(":web:ssr").projectDir.resolve("src/main/resources/static/js"))

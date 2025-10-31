@@ -7,12 +7,10 @@ import org.example.fakeshop_clients.features.product_list.presentation.ProductLi
 import org.example.fakeshop_clients.features.product_list.presentation.ProductListViewmodel
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
-import react.dom.html.ReactHTML.h3
-import react.dom.html.ReactHTML.p
 import react.useEffectWithCleanup
 import react.useState
+import web.cssom.ClassName
 
 external interface ProductListProps : Props {
     var viewModel: ProductListViewmodel?
@@ -37,39 +35,26 @@ val ProductListView = FC<ProductListProps> { props ->
     }
 
     div {
+        className = ClassName("product-list-container")
+
         when {
             state.isLoading -> {
-                p { +"Loading products..." }
-                button {
-                    onClick = {
-                        console.log("[Get fake items] Clicked!")
-                        props.viewModel?.loadCategories()
-                    }
-                    +"Get fake items "
+                LoadingView {
+                    onLoadClick = { props.viewModel?.loadCategories() }
                 }
             }
 
             state.error != null -> {
-                p { +"Error: ${state.error}" }
+                ErrorView {
+                    errorMessage = state.error!!
+                }
             }
 
             else -> {
-                state.categories.forEach { categoryRow ->
-                    div {
-
-                        h3 { +categoryRow.category }
-                        div {
-                            categoryRow.products.forEach { product ->
-                                div {
-
-                                    p { +product.name }
-                                    p { +"$${product.price}" }
-                                    button {
-                                        +"View Details"
-                                    }
-                                }
-                            }
-                        }
+                CategoriesView {
+                    categories = state.categories
+                    onProductClick = { productId ->
+                        console.log("[ProductList] Product clicked: $productId")
                     }
                 }
             }

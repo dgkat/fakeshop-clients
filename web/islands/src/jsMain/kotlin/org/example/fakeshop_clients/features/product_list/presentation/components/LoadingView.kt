@@ -1,0 +1,27 @@
+package org.example.fakeshop_clients.features.product_list.presentation.components
+
+import react.FC
+import react.Props
+import react.dom.html.ReactHTML.button
+import react.dom.html.ReactHTML.div
+import react.dom.html.ReactHTML.p
+import web.cssom.ClassName
+
+external interface LoadingViewProps : Props {
+    var onLoadClick: () -> Unit
+}
+
+val LoadingView = FC<LoadingViewProps> { props ->
+    div {
+        className = ClassName("loading-view")
+        p { +"Loading products..." }
+        button {
+            className = ClassName("btn btn-primary")
+            onClick = {
+                console.log("[Get fake items] Clicked!")
+                props.onLoadClick()
+            }
+            +"Get fake items"
+        }
+    }
+}

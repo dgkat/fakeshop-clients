@@ -45,12 +45,12 @@ fun HTML.homePage() {
         )
 
         // Shared CSS from webCommon
-        link(rel = "stylesheet", href = "/webcommon/css/theme.css")
-        link(rel = "stylesheet", href = "/webcommon/css/base.css")
-        link(rel = "stylesheet", href = "/webcommon/css/components.css")
+        link(rel = "stylesheet", href = "/common/css/theme.css")
+        link(rel = "stylesheet", href = "/common/css/base.css")
+        link(rel = "stylesheet", href = "/common/css/components.css")
 
         // Page-specific CSS
-        link(rel = "stylesheet", href = "/static/css/home.css")
+        link(rel = "stylesheet", href = "/common/static/css/product-list.css")
     }
 
     body {

@@ -47,7 +47,7 @@ object FakeDataGenerator {
                 id = "$category-$i",
                 name = "$category Product $i",
                 price = (10.0 + i * 5.5),
-                imageUrl = "https://via.placeholder.com/600x400.png?text=$category $i",
+                imageUrl = "https://placehold.co/400x280.png?text=$category $i",
                 category = category
             )
         }
