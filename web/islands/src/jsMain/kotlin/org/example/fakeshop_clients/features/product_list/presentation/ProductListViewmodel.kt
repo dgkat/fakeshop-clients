@@ -1,22 +1,29 @@
 package org.example.fakeshop_clients.features.product_list.presentation
 
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.features.home.presentation.models.UiBriefProduct
 
 class ProductListViewmodel() {
     private val _uiState = MutableStateFlow(ProductListState(isLoading = true))
     val uiState: StateFlow<ProductListState> = _uiState.asStateFlow()
 
-    fun loadCategories() {
+    init {
+        MainScope().launch {
+            loadCategories()
+        }
+    }
+
+    suspend fun loadCategories() {
         //scope.launch {
         try {
             console.log("[ProductListStore] Loading categories...")
             _uiState.value = ProductListState(isLoading = true)
-
-            // Simulate loading delay
-            //delay(500)
+            delay(500)
 
             val categories = FakeDataGenerator.getAllCategories()
 

@@ -15,12 +15,12 @@
     width: 100%;
 }
 
-.product-image {
+/*.product-image {
     width: 100%;
     height: auto;
     border-radius: var(--radius-md);
     object-fit: cover;
-}
+}*/
 
 .product-info-section {
     display: flex;

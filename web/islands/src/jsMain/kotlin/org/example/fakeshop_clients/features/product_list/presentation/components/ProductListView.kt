@@ -40,7 +40,7 @@ val ProductListView = FC<ProductListProps> { props ->
         when {
             state.isLoading -> {
                 LoadingView {
-                    onLoadClick = { props.viewModel?.loadCategories() }
+                    onLoadClick = { }
                 }
             }
 
