@@ -5,6 +5,9 @@ import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h3
+import react.useEffect
+import react.useRef
+import react.useState
 import web.cssom.ClassName
 
 external interface CategorySectionProps : Props {
@@ -13,6 +16,30 @@ external interface CategorySectionProps : Props {
 }
 
 val CategorySection = FC<CategorySectionProps> { props ->
+    val scrollRef = useRef<web.html.HTMLDivElement>(null)
+    var showLeftShadow by useState(false)
+    var showRightShadow by useState(true)
+
+    // Check scroll position
+    val checkScroll = {
+        scrollRef.current?.let { element ->
+            val scrollLeft = element.scrollLeft
+            val scrollWidth = element.scrollWidth
+            val clientWidth = element.clientWidth
+
+            // Show left shadow if scrolled from start
+            showLeftShadow = scrollLeft > 10
+
+            // Show right shadow if not at end
+            showRightShadow = scrollLeft < (scrollWidth - clientWidth - 10)
+        }
+    }
+
+    // Check scroll on mount and when products change
+    useEffect(props.category.products) {
+        checkScroll()
+    }
+
     div {
         className = ClassName("category-section")
 
@@ -22,14 +49,28 @@ val CategorySection = FC<CategorySectionProps> { props ->
             +props.category.category
         }
 
-        // Products row (horizontal scroll)
+        // Wrapper for products row with shadows
         div {
-            className = ClassName("products-row")
+            className = when {
+                showLeftShadow && showRightShadow -> ClassName("products-row-wrapper show-left-shadow show-right-shadow")
+                showLeftShadow -> ClassName("products-row-wrapper show-left-shadow")
+                showRightShadow -> ClassName("products-row-wrapper show-right-shadow")
+                else -> ClassName("products-row-wrapper")
+            }
 
-            props.category.products.forEach { product ->
-                ProductCard {
-                    this.product = product
-                    onClick = props.onProductClick
+            // Products row (horizontal scroll)
+            div {
+                ref = scrollRef
+                className = ClassName("products-row")
+                onScroll = {
+                    checkScroll()
+                }
+
+                props.category.products.forEach { product ->
+                    ProductCard {
+                        this.product = product
+                        onClick = props.onProductClick
+                    }
                 }
             }
         }
