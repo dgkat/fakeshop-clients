@@ -1,71 +1,14 @@
 package org.example.fakeshop_clients.features.product_list.presentation
 
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import org.example.fakeshop_clients.features.home.presentation.models.UiBriefProduct
+import org.example.fakeshop_clients.features.home.presentation.productList.ProductListViewStore
 
 class ProductListViewmodel() {
-    private val _uiState = MutableStateFlow(ProductListState(isLoading = true))
-    val uiState: StateFlow<ProductListState> = _uiState.asStateFlow()
 
-    init {
-        MainScope().launch {
-            loadCategories()
-        }
-    }
+    private val scope = MainScope()
 
-    suspend fun loadCategories() {
-        //scope.launch {
-        try {
-            console.log("[ProductListStore] Loading categories...")
-            _uiState.value = ProductListState(isLoading = true)
-            delay(500)
+    private val store = ProductListViewStore(scope = scope)
 
-            val categories = FakeDataGenerator.getAllCategories()
+    val uiState = store.productListState
 
-            _uiState.value = ProductListState(
-                categories = categories,
-                isLoading = false,
-                error = null
-            )
-
-            console.log("[ProductListStore] Loaded ${categories.size} categories")
-        } catch (e: Exception) {
-            console.error("[ProductListStore] Error loading categories:", e.message)
-            _uiState.value = ProductListState(
-                isLoading = false,
-                error = e.message
-            )
-        }
-        //  }
-    }
-}
-
-object FakeDataGenerator {
-    private val categories = listOf("Electronics", "Clothing", "Books", "Home & Garden")
-
-    fun getCategoryProducts(category: String): List<UiBriefProduct> {
-        return (1..5).map { i ->
-            UiBriefProduct(
-                id = "$category-$i",
-                name = "$category Product $i",
-                price = (10.0 + i * 5.5),
-                imageUrl = "https://placehold.co/400x280.png?text=$category $i",
-                category = category
-            )
-        }
-    }
-
-    fun getAllCategories(): List<CategoryRow> {
-        return categories.map { category ->
-            CategoryRow(
-                category = category,
-                products = getCategoryProducts(category)
-            )
-        }
-    }
 }

@@ -1,6 +1,6 @@
-package org.example.fakeshop_clients.features.product_list.presentation
+package org.example.fakeshop_clients.features.home.presentation.productList
 
-import org.example.fakeshop_clients.features.home.presentation.models.UiBriefProduct
+import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 
 data class ProductListState(
     val categories: List<CategoryRow> = emptyList(),

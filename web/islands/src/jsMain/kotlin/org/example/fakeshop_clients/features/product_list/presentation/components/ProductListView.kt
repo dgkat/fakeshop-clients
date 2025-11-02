@@ -3,7 +3,7 @@ package org.example.fakeshop_clients.features.product_list.presentation.componen
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.example.fakeshop_clients.features.product_list.presentation.ProductListState
+import org.example.fakeshop_clients.features.home.presentation.productList.ProductListState
 import org.example.fakeshop_clients.features.product_list.presentation.ProductListViewmodel
 import react.FC
 import react.Props

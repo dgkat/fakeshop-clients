@@ -1,7 +1,7 @@
 package org.example.fakeshop_clients.features.home.domain
 
 import kotlinx.coroutines.delay
-import org.example.fakeshop_clients.features.home.presentation.models.UiBriefProduct
+import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 
 class GetProductsUseCase {
 

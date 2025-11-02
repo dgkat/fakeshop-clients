@@ -1,4 +1,4 @@
-package org.example.fakeshop_clients.features.home.presentation.models
+package org.example.fakeshop_clients.core.presentation.models
 
 data class UiBriefProduct(
     val id: String,

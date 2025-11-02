@@ -4,7 +4,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.example.fakeshop_clients.core.presentation.components.ProductCard
-import org.example.fakeshop_clients.features.home.presentation.models.UiBriefProduct
+import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.button

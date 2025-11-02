@@ -1,7 +1,7 @@
 package org.example.fakeshop_clients.features.product_list.presentation.components
 
 import kotlinx.browser.window
-import org.example.fakeshop_clients.features.home.presentation.models.UiBriefProduct
+import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div

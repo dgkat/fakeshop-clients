@@ -10,7 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import org.example.fakeshop_clients.features.home.presentation.HomeScreenAndroid
+import org.example.fakeshop_clients.features.home.presentation.HomeScreen
 import org.example.fakeshop_clients.ui.theme.FakeShopTheme
 
 class MainActivity : ComponentActivity() {
@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreenAndroid()
+                    HomeScreen()
                 }
             }
         }
