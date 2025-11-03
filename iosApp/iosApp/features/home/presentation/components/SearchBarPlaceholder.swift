@@ -1,0 +1,33 @@
+//
+//  SearchBarPlaceholder.swift
+//  iosApp
+//
+//  Created by Dimitrios Katoudis on 3/11/25.
+//
+
+import Foundation
+import SwiftUI
+import Shared
+
+struct SearchBarPlaceholder: View {
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                Text("Search products...")
+                    .foregroundColor(.secondary)
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
+            .background(Color(.systemGray6))
+            .cornerRadius(10)
+        }
+        .frame(height: 40)
+        .padding(.horizontal)
+    }
+}

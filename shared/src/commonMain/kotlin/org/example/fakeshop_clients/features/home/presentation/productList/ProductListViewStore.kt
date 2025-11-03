@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.features.home.presentation.productList
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +39,14 @@ class ProductListViewStore(
                 isLoading = false,
                 error = e.message
             )
+        }
+    }
+
+    companion object {
+        //TODO remove and inject scope with koin
+        // Factory function with default scope - visible to Swift
+        fun create(): ProductListViewStore {
+            return ProductListViewStore(scope = MainScope())
         }
     }
 }

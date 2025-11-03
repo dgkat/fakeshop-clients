@@ -1,8 +1,11 @@
+import co.touchlab.skie.configuration.FlowInterop
+import co.touchlab.skie.configuration.SuspendInterop
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.skieLibrary)
 }
 
 kotlin {
@@ -64,5 +67,16 @@ android {
     }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+}
+
+skie {
+    features {
+        group {
+            // Enable Flow interop - makes Flow → AsyncSequence
+            FlowInterop.Enabled(true)
+            // Enable suspend interop - makes suspend → async
+            SuspendInterop.Enabled(true)
+        }
     }
 }
