@@ -99,7 +99,6 @@ struct ProductCard: View {
     }
 }
 
-// Custom button style to prevent default blue tint
 struct CardButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

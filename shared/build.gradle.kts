@@ -23,6 +23,8 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Shared"
             isStatic = true
+
+            export(libs.koin.core)
         }
     }
 
@@ -40,7 +42,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
 
             // Koin DI
-            implementation(libs.koin.core)
+            api(libs.koin.core)
 
             // DateTime
             implementation(libs.kotlinx.datetime)

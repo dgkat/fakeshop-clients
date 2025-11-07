@@ -13,18 +13,16 @@ class ProductListViewModel: ObservableObject {
     @Published var state: ProductListState
     
     private let viewStore: ProductListViewStore
+    private let scope: Kotlinx_coroutines_coreCoroutineScope
     private var stateObservationTask: Task<Void, Never>?
     
     init() {
-        // Get ViewStore from Koin
-        //let koin = KoinHelper.shared.koin
-        //self.viewStore = koin.get(objCClass: ProductListViewStore.self) as! ProductListViewStore
-        
-        self.viewStore = ProductListViewStore.companion.create()
-        // Initialize with current state
-        self.state = viewStore.productListState.value 
-        
-        // Start observing state changes
+        self.scope = ScopeHelperKt.createMainScope()
+
+        self.viewStore = KoinHelper.shared.iosHelper.getProductListViewStore(scope: scope)
+
+        self.state = viewStore.productListState.value
+
         observeState()
     }
     
@@ -51,6 +49,7 @@ class ProductListViewModel: ObservableObject {
     }
     
     deinit {
+        ScopeHelperKt.cancelScope(scope: scope)
         stateObservationTask?.cancel()
     }
 }

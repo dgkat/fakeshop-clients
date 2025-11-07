@@ -8,9 +8,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
+import org.example.fakeshop_clients.features.home.domain.ProductListService
 
 class ProductListViewStore(
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val productListService: ProductListService
 ) {
     private val _productListState = MutableStateFlow(ProductListState(isLoading = true))
     val productListState: StateFlow<ProductListState> = _productListState.asStateFlow()
@@ -27,6 +29,7 @@ class ProductListViewStore(
             delay(500)
 
             val categories = FakeDataGenerator.getAllCategories()
+            println("productListService accessed, size: ${productListService.getProducts().size}")
 
             _productListState.value = ProductListState(
                 categories = categories,
@@ -39,14 +42,6 @@ class ProductListViewStore(
                 isLoading = false,
                 error = e.message
             )
-        }
-    }
-
-    companion object {
-        //TODO remove and inject scope with koin
-        // Factory function with default scope - visible to Swift
-        fun create(): ProductListViewStore {
-            return ProductListViewStore(scope = MainScope())
         }
     }
 }
