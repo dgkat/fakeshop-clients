@@ -13,7 +13,7 @@ coilCompose = "2.7.0"
 composeMultiplatform = "1.9.0"
 skie = "0.10.6"
 junit = "4.13.2"
-kotlin = "2.2.10"
+kotlin = "2.2.21"
 
 # Coroutines
 kotlinx-coroutines = "1.10.2"
