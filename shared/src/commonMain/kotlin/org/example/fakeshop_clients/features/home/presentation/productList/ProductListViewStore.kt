@@ -37,6 +37,8 @@ class ProductListViewStore(
                 error = null
             )
 
+            productListService.testApiCalls()
+
         } catch (e: Exception) {
             _productListState.value = ProductListState(
                 isLoading = false,

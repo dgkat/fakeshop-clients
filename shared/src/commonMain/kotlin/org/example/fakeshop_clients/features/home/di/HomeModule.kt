@@ -12,6 +12,6 @@ val homeModule = module {
         GetProductsUseCase()
     }
     factory<ProductListService> {
-        ProductListServiceImpl()
+        ProductListServiceImpl(get())
     }
 }

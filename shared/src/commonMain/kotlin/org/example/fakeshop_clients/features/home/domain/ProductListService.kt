@@ -4,4 +4,6 @@ import org.example.fakeshop_clients.features.home.presentation.productList.Categ
 
 interface ProductListService {
     fun getProducts(): List<CategoryRow>
+
+    suspend fun testApiCalls()
 }

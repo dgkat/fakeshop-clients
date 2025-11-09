@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.skieLibrary)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -46,9 +47,18 @@ kotlin {
 
             // DateTime
             implementation(libs.kotlinx.datetime)
+
+            //Ktor
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content)
+
+            implementation(libs.kotlinx.serialization.json)
         }
         androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.android)
+
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -56,6 +66,12 @@ kotlin {
 
         jvmMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
+        }
+        jsMain.dependencies {
+            implementation(npm("axios", "1.6.2"))
         }
     }
 }
