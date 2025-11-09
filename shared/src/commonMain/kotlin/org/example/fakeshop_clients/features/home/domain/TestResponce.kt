@@ -9,6 +9,24 @@ data class TestResponse(
     val id: String,
     val name: String
 )
+@Serializable
+data class CreateObjectRequest(
+    val name: String,
+    val data: Data
+)
+
+@Serializable
+data class CreateObjectResponse(
+    val id: String,
+    val name: String,
+    val data: Data,
+    val createdAt: String
+)
+
+@Serializable
+data class DeleteResponse(
+    val message: String
+)
 
 @Serializable
 data class Data(
