@@ -69,6 +69,7 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
         jsMain.dependencies {
             implementation(npm("axios", "1.13.2"))
@@ -89,7 +90,7 @@ android {
 }
 
 skie {
-    isEnabled = false
+    isEnabled = true
     features {
         group {
             // Enable Flow interop - makes Flow → AsyncSequence
