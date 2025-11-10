@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.core
 
+import org.example.fakeshop_clients.core.di.webCoroutineModule
 import org.example.fakeshop_clients.core.di.webInfrastructureModule
 import org.example.fakeshop_clients.features.home.di.homeModule
 import org.example.fakeshop_clients.features.product_list.di.productListModule
@@ -17,6 +18,7 @@ object WebKoinManager {
             //TODO clean up modules and move to respective features
             startKoin {
                 modules(
+                    webCoroutineModule,
                     webInfrastructureModule,
                     homeModule,
                     productListModule,

@@ -71,7 +71,7 @@ kotlin {
             implementation(libs.ktor.client.darwin)
         }
         jsMain.dependencies {
-            implementation(npm("axios", "1.6.2"))
+            implementation(npm("axios", "1.13.2"))
         }
     }
 }

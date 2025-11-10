@@ -12,6 +12,7 @@ import org.example.fakeshop_clients.core.data.KtorClient
 import org.koin.dsl.module
 
 val androidInfrastructureModule = module {
+    //TODO update to real url
     val testUrl = "https://api.restful-api.dev"
 
     val parsedUrl = Url(testUrl)
