@@ -40,6 +40,7 @@ class ProductListViewStore(
             productListService.testApiCalls()
 
         } catch (e: Exception) {
+            println("Error loading categories: ${e.message}")
             _productListState.value = ProductListState(
                 isLoading = false,
                 error = e.message

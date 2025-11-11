@@ -48,17 +48,17 @@ kotlin {
             // DateTime
             implementation(libs.kotlinx.datetime)
 
-            //Ktor
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.content)
-
             implementation(libs.kotlinx.serialization.json)
         }
         androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.android)
 
+            //Ktor
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.client.auth)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -68,8 +68,12 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
         }
         iosMain.dependencies {
+            //Ktor
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content)
             implementation(libs.ktor.client.darwin)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.client.auth)
         }
         jsMain.dependencies {
             implementation(npm("axios", "1.13.2"))
@@ -90,7 +94,7 @@ android {
 }
 
 skie {
-    isEnabled = true
+    isEnabled = false
     features {
         group {
             // Enable Flow interop - makes Flow → AsyncSequence

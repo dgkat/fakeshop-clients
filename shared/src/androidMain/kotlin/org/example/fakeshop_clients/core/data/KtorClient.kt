@@ -12,7 +12,7 @@ import io.ktor.http.contentType
 import io.ktor.util.reflect.TypeInfo
 import kotlin.reflect.KClass
 
-class KtorClient(private val http: HttpClient) : ApiClient {
+class KtorClient(val http: HttpClient) : ApiClient {
 
     override suspend fun <T : Any> get(path: String, responseType: KClass<T>): T {
         val response = http.get(path)
