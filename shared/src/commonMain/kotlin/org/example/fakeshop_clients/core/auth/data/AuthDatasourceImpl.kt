@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.core.auth.data
 
 import org.example.fakeshop_clients.core.auth.data.models.LoginRequest
+import org.example.fakeshop_clients.core.auth.data.models.RefreshTokenRequest
 import org.example.fakeshop_clients.core.auth.data.models.TokenRefreshResponse
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.post
@@ -13,5 +14,13 @@ class AuthDatasourceImpl(private val authClient: ApiClient) : AuthDatasource {
             body = loginRequest
         )
         return response
+    }
+
+    override suspend fun refreshToken(refreshToken: String): TokenRefreshResponse {
+        val refreshRequest = RefreshTokenRequest(refreshToken)
+        return authClient.post<TokenRefreshResponse, RefreshTokenRequest>(
+            path = "/api/auth/refresh",
+            body = refreshRequest
+        )
     }
 }

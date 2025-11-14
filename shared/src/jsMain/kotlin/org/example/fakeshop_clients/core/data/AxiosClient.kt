@@ -1,8 +1,11 @@
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.await
+import kotlinx.coroutines.promise
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import org.example.fakeshop_clients.core.auth.data.AuthDatasource
 import org.example.fakeshop_clients.core.auth.data.AuthTokenProvider
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.AxiosRequestConfig
@@ -11,7 +14,10 @@ import org.example.fakeshop_clients.core.data.axios
 import kotlin.js.Promise
 import kotlin.reflect.KClass
 
-class AxiosClient(private val baseUrl: String) : ApiClient {
+class AxiosClient(
+    private val baseUrl: String,
+    private val authDatasource: AuthDatasource
+) : ApiClient {
 
     private val jsonParser = Json {
         ignoreUnknownKeys = true
@@ -20,6 +26,8 @@ class AxiosClient(private val baseUrl: String) : ApiClient {
 
     private var isRefreshing = false
     private var refreshSubscribers: MutableList<(String) -> Unit> = mutableListOf()
+
+    private val scope = MainScope()
 
     init {
         setupInterceptors()
@@ -76,22 +84,26 @@ class AxiosClient(private val baseUrl: String) : ApiClient {
                     val refreshToken = AuthTokenProvider.refreshToken
 
                     if (refreshToken != null) {
-                        return@use refreshAccessToken(refreshToken)
-                            .then { newAccessToken ->
+                        return@use scope.promise {
+                            try {
+                                val response = authDatasource.refreshToken(refreshToken)
+
                                 console.log("Token refresh successful")
-                                AuthTokenProvider.accessToken = newAccessToken
-                                originalRequest.headers.Authorization = "Bearer $newAccessToken"
-                                onTokenRefreshed(newAccessToken)
-                                retryRequest(originalRequest)
-                            }
-                            .catch { refreshError ->
+                                AuthTokenProvider.accessToken = response.accessToken
+                                AuthTokenProvider.refreshToken = response.refreshToken
+
+                                originalRequest.headers.Authorization = "Bearer ${response.accessToken}"
+                                onTokenRefreshed(response.accessToken)
+
+                                retryRequest(originalRequest).await()
+                            } catch (refreshError: Throwable) {
                                 console.error("Token refresh failed:", refreshError)
                                 onTokenRefreshFailed()
-                                Promise.reject(refreshError)
-                            }
-                            .finally {
+                                throw refreshError
+                            } finally {
                                 isRefreshing = false
                             }
+                        }
                     }
                 }
 
@@ -109,21 +121,6 @@ class AxiosClient(private val baseUrl: String) : ApiClient {
             "delete" -> axios.delete(config.url ?: "", config)
             else -> Promise.reject(js("new Error('Unsupported method')"))
         }
-    }
-
-    private fun refreshAccessToken(refreshToken: String): Promise<String> {
-        val requestBody = js("({})")
-        requestBody.refreshToken = refreshToken
-
-        return axios.post("$baseUrl/api/auth/refresh", requestBody)
-            .then { response ->
-                val data = response.data
-                val newAccessToken = data.accessToken as String
-                val newRefreshToken = data.refreshToken as? String
-
-                newRefreshToken?.let { AuthTokenProvider.refreshToken = it }
-                newAccessToken
-            }
     }
 
     private fun onTokenRefreshed(token: String) {

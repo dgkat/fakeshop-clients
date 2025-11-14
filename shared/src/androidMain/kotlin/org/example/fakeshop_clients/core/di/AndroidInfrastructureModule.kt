@@ -16,6 +16,8 @@ import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.example.fakeshop_clients.core.auth.data.AuthDatasource
+import org.example.fakeshop_clients.core.auth.data.AuthDatasourceImpl
 import org.example.fakeshop_clients.core.auth.data.AuthTokenProvider
 import org.example.fakeshop_clients.core.auth.data.models.RefreshTokenRequest
 import org.example.fakeshop_clients.core.auth.data.models.TokenRefreshResponse
@@ -33,7 +35,7 @@ val androidInfrastructureModule = module {
         OkHttp.create()
     }
 
-    single<HttpClient>(named("authHttpClient")) {
+    single<HttpClient>(named("publicHttpClient")) {
         HttpClient(get<HttpClientEngine>()) {
             install(ContentNegotiation) {
                 json(Json {
@@ -50,13 +52,17 @@ val androidInfrastructureModule = module {
         }
     }
 
-    single<ApiClient>(named("authClient")) {
-        val authHttpClient: HttpClient = get(named("authHttpClient"))
+    single<ApiClient>(named("publicClient")) {
+        val authHttpClient: HttpClient = get(named("publicHttpClient"))
         KtorClient(authHttpClient)
     }
 
+    single<AuthDatasource> {
+        AuthDatasourceImpl(get(named("publicClient")))
+    }
+
     single<ApiClient> {
-        val authHttpClient: HttpClient = get(named("authHttpClient"))
+        val authDatasource: AuthDatasource = get()
 
         KtorClient(
             HttpClient(get<HttpClientEngine>()) {
@@ -83,11 +89,8 @@ val androidInfrastructureModule = module {
                                 ?: return@refreshTokens null
 
                             try {
-                                val response: TokenRefreshResponse = authHttpClient.post("/api/auth/refresh") {
-                                    markAsRefreshTokenRequest()
-                                    contentType(ContentType.Application.Json)
-                                    setBody(RefreshTokenRequest(refreshToken))
-                                }.body<TokenRefreshResponse>()
+                                val response = authDatasource.refreshToken(refreshToken)
+
                                 println("New tokens received: accessToken -> ${response.accessToken} refreshToken -> ${response.refreshToken}")
 
                                 AuthTokenProvider.accessToken = response.accessToken

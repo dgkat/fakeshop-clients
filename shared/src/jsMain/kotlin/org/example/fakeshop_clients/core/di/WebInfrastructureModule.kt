@@ -1,17 +1,26 @@
 package org.example.fakeshop_clients.core.di
 
 import AxiosClient
+import org.example.fakeshop_clients.core.auth.data.AuthDatasource
+import org.example.fakeshop_clients.core.auth.data.AuthDatasourceImpl
 import org.example.fakeshop_clients.core.data.ApiClient
+import org.example.fakeshop_clients.core.data.PublicAxiosCLient
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val webInfrastructureModule = module {
-    single<ApiClient> {
-        AxiosClient("http://localhost:8080")
+    val baseUrl = "http://localhost:8080"
+
+    single<ApiClient>(named("publicClient")) {
+        PublicAxiosCLient(baseUrl)
     }
 
-    // Alias for authClient - same instance
-    single<ApiClient>(named("authClient")) {
-        get<ApiClient>() // Returns the same client
+    single<AuthDatasource> {
+        AuthDatasourceImpl(get(named("publicClient")))
+    }
+
+    single<ApiClient> {
+        val authDatasource: AuthDatasource = get()
+        AxiosClient(baseUrl, authDatasource)
     }
 }
