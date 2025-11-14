@@ -10,6 +10,11 @@ kotlin {
                 cssSupport {
                     enabled.set(true)
                 }
+
+                devServer = devServer?.copy(
+                    port = 3000, // pick any available port
+                    open = false
+                )
             }
         }
         binaries.executable()

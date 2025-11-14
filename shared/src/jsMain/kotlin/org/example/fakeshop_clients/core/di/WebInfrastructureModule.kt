@@ -1,12 +1,17 @@
 package org.example.fakeshop_clients.core.di
 
+import AxiosClient
 import org.example.fakeshop_clients.core.data.ApiClient
-import org.example.fakeshop_clients.core.data.AxiosClient
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val webInfrastructureModule = module {
-    //TODO update to real url
     single<ApiClient> {
-        AxiosClient("https://api.restful-api.dev")
+        AxiosClient("http://localhost:8080")
+    }
+
+    // Alias for authClient - same instance
+    single<ApiClient>(named("authClient")) {
+        get<ApiClient>() // Returns the same client
     }
 }

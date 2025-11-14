@@ -7,14 +7,48 @@ import kotlin.js.Promise
 external val axios: Axios
 
 external interface Axios {
-    fun get(url: String): Promise<AxiosResponse>
-    fun post(url: String, data: Any?): Promise<AxiosResponse>
-    fun put(url: String, data: Any?): Promise<AxiosResponse>
-    fun delete(url: String): Promise<AxiosResponse>
+    fun get(url: String, config: AxiosRequestConfig = definedExternally): Promise<AxiosResponse>
+    fun post(url: String, data: Any?, config: AxiosRequestConfig = definedExternally): Promise<AxiosResponse>
+    fun put(url: String, data: Any?, config: AxiosRequestConfig = definedExternally): Promise<AxiosResponse>
+    fun delete(url: String, config: AxiosRequestConfig = definedExternally): Promise<AxiosResponse>
+
+    // Call axios directly with config (for retrying)
+    operator fun invoke(config: AxiosRequestConfig): Promise<AxiosResponse>
+
+    val interceptors: AxiosInterceptors
+}
+
+external interface AxiosInterceptors {
+    val request: AxiosInterceptorManager<AxiosRequestConfig>
+    val response: AxiosInterceptorManager<AxiosResponse>
+}
+
+external interface AxiosInterceptorManager<T> {
+    fun use(
+        onFulfilled: (T) -> dynamic,
+        onRejected: ((dynamic) -> dynamic)? = definedExternally
+    ): Int
+
+    fun eject(id: Int)
+}
+
+external interface AxiosRequestConfig {
+    var url: String?
+    var method: String?
+    var headers: dynamic
+    var data: Any?
+    var _retry: Boolean?
 }
 
 external interface AxiosResponse {
     val data: dynamic
     val status: Int
     val statusText: String
+    val config: AxiosRequestConfig
+}
+
+external interface AxiosError {
+    val config: AxiosRequestConfig
+    val response: AxiosResponse?
+    val message: String?
 }

@@ -1,10 +1,14 @@
-package org.example.fakeshop_clients.core.data
-
 import kotlinx.coroutines.await
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import org.example.fakeshop_clients.core.auth.data.AuthTokenProvider
+import org.example.fakeshop_clients.core.data.ApiClient
+import org.example.fakeshop_clients.core.data.AxiosRequestConfig
+import org.example.fakeshop_clients.core.data.AxiosResponse
+import org.example.fakeshop_clients.core.data.axios
+import kotlin.js.Promise
 import kotlin.reflect.KClass
 
 class AxiosClient(private val baseUrl: String) : ApiClient {
@@ -12,6 +16,123 @@ class AxiosClient(private val baseUrl: String) : ApiClient {
     private val jsonParser = Json {
         ignoreUnknownKeys = true
         isLenient = true
+    }
+
+    private var isRefreshing = false
+    private var refreshSubscribers: MutableList<(String) -> Unit> = mutableListOf()
+
+    init {
+        setupInterceptors()
+    }
+
+    private fun setupInterceptors() {
+        axios.interceptors.request.use(
+            onFulfilled = { config ->
+                console.log("Request:", config.method, config.url)
+
+                AuthTokenProvider.accessToken?.let { token ->
+                    if (config.headers == null) {
+                        config.headers = js("{}")
+                    }
+                    config.headers.Authorization = "Bearer $token"
+                }
+
+                config
+            },
+            onRejected = { error ->
+                console.error("Request error:", error)
+                Promise.reject(error)
+            }
+        )
+
+        axios.interceptors.response.use(
+            onFulfilled = { response ->
+                console.log("Response:", response.status, response.config.url)
+                response
+            },
+            onRejected = { error ->
+                val originalRequest = error.config
+                val status = error.response?.status
+
+                if (status == 401 && originalRequest._retry != true) {
+                    if (isRefreshing) {
+                        console.log("Token refresh in progress, queuing request...")
+
+                        return@use Promise { resolve, reject ->
+                            refreshSubscribers.add { token ->
+                                originalRequest.headers.Authorization = "Bearer $token"
+                                retryRequest(originalRequest)
+                                    .then { resolve(it) }
+                                    .catch { reject(it) }
+                            }
+                        }
+                    }
+
+                    originalRequest._retry = true
+                    isRefreshing = true
+
+                    console.log("Token expired, attempting refresh...")
+
+                    val refreshToken = AuthTokenProvider.refreshToken
+
+                    if (refreshToken != null) {
+                        return@use refreshAccessToken(refreshToken)
+                            .then { newAccessToken ->
+                                console.log("Token refresh successful")
+                                AuthTokenProvider.accessToken = newAccessToken
+                                originalRequest.headers.Authorization = "Bearer $newAccessToken"
+                                onTokenRefreshed(newAccessToken)
+                                retryRequest(originalRequest)
+                            }
+                            .catch { refreshError ->
+                                console.error("Token refresh failed:", refreshError)
+                                onTokenRefreshFailed()
+                                Promise.reject(refreshError)
+                            }
+                            .finally {
+                                isRefreshing = false
+                            }
+                    }
+                }
+
+                console.error("Response error:", status, error.message)
+                Promise.reject(error)
+            }
+        )
+    }
+
+    private fun retryRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
+        return when (config.method?.lowercase()) {
+            "get" -> axios.get(config.url ?: "", config)
+            "post" -> axios.post(config.url ?: "", config.data, config)
+            "put" -> axios.put(config.url ?: "", config.data, config)
+            "delete" -> axios.delete(config.url ?: "", config)
+            else -> Promise.reject(js("new Error('Unsupported method')"))
+        }
+    }
+
+    private fun refreshAccessToken(refreshToken: String): Promise<String> {
+        val requestBody = js("({})")
+        requestBody.refreshToken = refreshToken
+
+        return axios.post("$baseUrl/api/auth/refresh", requestBody)
+            .then { response ->
+                val data = response.data
+                val newAccessToken = data.accessToken as String
+                val newRefreshToken = data.refreshToken as? String
+
+                newRefreshToken?.let { AuthTokenProvider.refreshToken = it }
+                newAccessToken
+            }
+    }
+
+    private fun onTokenRefreshed(token: String) {
+        refreshSubscribers.forEach { callback -> callback(token) }
+        refreshSubscribers.clear()
+    }
+
+    private fun onTokenRefreshFailed() {
+        refreshSubscribers.clear()
     }
 
     override suspend fun <T : Any> get(path: String, responseType: KClass<T>): T {
@@ -28,11 +149,9 @@ class AxiosClient(private val baseUrl: String) : ApiClient {
         @Suppress("UNCHECKED_CAST")
         val bodySerializer = body::class.serializer() as SerializationStrategy<B>
         val bodyJson = jsonParser.encodeToString(bodySerializer, body)
-
         val bodyObject = JSON.parse<dynamic>(bodyJson)
 
         val response = axios.post("$baseUrl$path", bodyObject).await()
-
         return parseResponse(response.data, responseType)
     }
 
@@ -45,7 +164,6 @@ class AxiosClient(private val baseUrl: String) : ApiClient {
         @Suppress("UNCHECKED_CAST")
         val bodySerializer = body::class.serializer() as SerializationStrategy<B>
         val bodyJson = jsonParser.encodeToString(bodySerializer, body)
-
         val bodyObject = JSON.parse<dynamic>(bodyJson)
 
         val response = axios.put("$baseUrl$path", bodyObject).await()
