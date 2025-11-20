@@ -17,10 +17,10 @@ class ProductListServiceImpl(
     }
 
     override suspend fun testApiCalls() {
-        val tokens = authDatasource.login(username = "admin@mail.com", password = "admin")
+        /*val tokens = authDatasource.login(username = "admin@mail.com", password = "admin")
         AuthTokenProvider.refreshToken = tokens.refreshToken
         AuthTokenProvider.accessToken = tokens.accessToken
-
+*/
         println("accessToken: ${AuthTokenProvider.accessToken}")
         println("refreshToken: ${AuthTokenProvider.refreshToken}")
         val products = apiClient.get<BriefProductsResponse>("/api/admin/products")

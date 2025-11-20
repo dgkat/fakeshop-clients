@@ -10,7 +10,7 @@ class AuthDatasourceImpl(private val authClient: ApiClient) : AuthDatasource {
     override suspend fun login(username: String, password: String): TokenRefreshResponse {
         val loginRequest = LoginRequest(username, password)
         val response = authClient.post<TokenRefreshResponse, LoginRequest>(
-            path = "/api/auth/login",
+            path = "/api/web/auth/login",
             body = loginRequest
         )
         return response

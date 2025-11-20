@@ -12,10 +12,14 @@ external interface Axios {
     fun put(url: String, data: Any?, config: AxiosRequestConfig = definedExternally): Promise<AxiosResponse>
     fun delete(url: String, config: AxiosRequestConfig = definedExternally): Promise<AxiosResponse>
 
-    // Call axios directly with config (for retrying)
     operator fun invoke(config: AxiosRequestConfig): Promise<AxiosResponse>
 
     val interceptors: AxiosInterceptors
+    val defaults: AxiosDefaults
+}
+
+external interface AxiosDefaults {
+    var withCredentials: Boolean
 }
 
 external interface AxiosInterceptors {
@@ -38,6 +42,7 @@ external interface AxiosRequestConfig {
     var headers: dynamic
     var data: Any?
     var _retry: Boolean?
+    var withCredentials: Boolean?
 }
 
 external interface AxiosResponse {

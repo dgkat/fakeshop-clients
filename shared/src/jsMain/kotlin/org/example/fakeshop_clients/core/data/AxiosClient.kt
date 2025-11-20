@@ -30,6 +30,7 @@ class AxiosClient(
     private val scope = MainScope()
 
     init {
+        axios.defaults.withCredentials = true
         setupInterceptors()
     }
 
@@ -37,14 +38,7 @@ class AxiosClient(
         axios.interceptors.request.use(
             onFulfilled = { config ->
                 console.log("Request:", config.method, config.url)
-
-                AuthTokenProvider.accessToken?.let { token ->
-                    if (config.headers == null) {
-                        config.headers = js("{}")
-                    }
-                    config.headers.Authorization = "Bearer $token"
-                }
-
+                config.withCredentials = true
                 config
             },
             onRejected = { error ->
@@ -67,8 +61,7 @@ class AxiosClient(
                         console.log("Token refresh in progress, queuing request...")
 
                         return@use Promise { resolve, reject ->
-                            refreshSubscribers.add { token ->
-                                originalRequest.headers.Authorization = "Bearer $token"
+                            refreshSubscribers.add { _ ->
                                 retryRequest(originalRequest)
                                     .then { resolve(it) }
                                     .catch { reject(it) }
@@ -81,28 +74,21 @@ class AxiosClient(
 
                     console.log("Token expired, attempting refresh...")
 
-                    val refreshToken = AuthTokenProvider.refreshToken
+                    return@use scope.promise {
+                        try {
+                            authDatasource.refreshToken("")
 
-                    if (refreshToken != null) {
-                        return@use scope.promise {
-                            try {
-                                val response = authDatasource.refreshToken(refreshToken)
+                            console.log("Token refresh successful")
 
-                                console.log("Token refresh successful")
-                                AuthTokenProvider.accessToken = response.accessToken
-                                AuthTokenProvider.refreshToken = response.refreshToken
+                            onTokenRefreshed("")
 
-                                originalRequest.headers.Authorization = "Bearer ${response.accessToken}"
-                                onTokenRefreshed(response.accessToken)
-
-                                retryRequest(originalRequest).await()
-                            } catch (refreshError: Throwable) {
-                                console.error("Token refresh failed:", refreshError)
-                                onTokenRefreshFailed()
-                                throw refreshError
-                            } finally {
-                                isRefreshing = false
-                            }
+                            retryRequest(originalRequest).await()
+                        } catch (refreshError: Throwable) {
+                            console.error("Token refresh failed:", refreshError)
+                            onTokenRefreshFailed()
+                            throw refreshError
+                        } finally {
+                            isRefreshing = false
                         }
                     }
                 }

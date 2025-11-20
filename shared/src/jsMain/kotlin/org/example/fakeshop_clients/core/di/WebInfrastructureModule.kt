@@ -5,6 +5,7 @@ import org.example.fakeshop_clients.core.auth.data.AuthDatasource
 import org.example.fakeshop_clients.core.auth.data.AuthDatasourceImpl
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.PublicAxiosCLient
+import org.example.fakeshop_clients.core.data.WebAuthDatasourceImpl
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -16,7 +17,7 @@ val webInfrastructureModule = module {
     }
 
     single<AuthDatasource> {
-        AuthDatasourceImpl(get(named("publicClient")))
+        WebAuthDatasourceImpl(get(named("publicClient")))
     }
 
     single<ApiClient> {
