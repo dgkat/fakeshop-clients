@@ -1,4 +1,4 @@
-package org.example.fakeshop_clients.core.data
+package org.example.fakeshop_clients.core.data.axios
 
 import kotlin.js.Promise
 

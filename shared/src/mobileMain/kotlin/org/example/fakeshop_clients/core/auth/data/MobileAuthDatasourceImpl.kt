@@ -6,11 +6,11 @@ import org.example.fakeshop_clients.core.auth.data.models.TokenRefreshResponse
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.post
 
-class AuthDatasourceImpl(private val authClient: ApiClient) : AuthDatasource {
+class MobileAuthDatasourceImpl(private val authClient: ApiClient) : MobileAuthDatasource {
     override suspend fun login(username: String, password: String): TokenRefreshResponse {
         val loginRequest = LoginRequest(username, password)
         val response = authClient.post<TokenRefreshResponse, LoginRequest>(
-            path = "/api/web/auth/login",
+            path = "/api/auth/mobile/login",
             body = loginRequest
         )
         return response
@@ -19,7 +19,7 @@ class AuthDatasourceImpl(private val authClient: ApiClient) : AuthDatasource {
     override suspend fun refreshToken(refreshToken: String): TokenRefreshResponse {
         val refreshRequest = RefreshTokenRequest(refreshToken)
         return authClient.post<TokenRefreshResponse, RefreshTokenRequest>(
-            path = "/api/auth/refresh",
+            path = "/api/auth/mobile/refresh",
             body = refreshRequest
         )
     }

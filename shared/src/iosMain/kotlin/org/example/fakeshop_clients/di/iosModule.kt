@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.di
 
 import kotlinx.coroutines.CoroutineScope
+import org.example.fakeshop_clients.core.auth.di.mobileInfrastructureModule
 import org.example.fakeshop_clients.core.di.iosInfrastructureModule
 import org.example.fakeshop_clients.features.home.di.homeModule
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListViewStore
@@ -26,7 +27,7 @@ val iosModule = module {
 }
 
 fun initKoinIos() = startKoin {
-    modules(iosInfrastructureModule, homeModule, iosModule)
+    modules(iosInfrastructureModule, mobileInfrastructureModule, homeModule, iosModule)
 }
 
 class IOSKoinHelper : KoinComponent {

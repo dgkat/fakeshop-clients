@@ -1,8 +1,7 @@
 package org.example.fakeshop_clients.features.home.domain
 
 import kotlinx.coroutines.delay
-import org.example.fakeshop_clients.core.auth.data.AuthDatasource
-import org.example.fakeshop_clients.core.auth.data.AuthTokenProvider
+import org.example.fakeshop_clients.core.auth.domain.AuthRepository
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.get
 import org.example.fakeshop_clients.features.home.data.models.BriefProductsResponse
@@ -10,19 +9,15 @@ import org.example.fakeshop_clients.features.home.presentation.productList.Categ
 
 class ProductListServiceImpl(
     private val apiClient: ApiClient,
-    private val authDatasource: AuthDatasource
+    private val authRepository: AuthRepository
 ) : ProductListService {
     override fun getProducts(): List<CategoryRow> {
         return emptyList()
     }
 
     override suspend fun testApiCalls() {
-        /*val tokens = authDatasource.login(username = "admin@mail.com", password = "admin")
-        AuthTokenProvider.refreshToken = tokens.refreshToken
-        AuthTokenProvider.accessToken = tokens.accessToken
-*/
-        println("accessToken: ${AuthTokenProvider.accessToken}")
-        println("refreshToken: ${AuthTokenProvider.refreshToken}")
+        val loginSuccess = authRepository.login(username = "admin@mail.com", password = "admin")
+        println("products loginSuccess -> $loginSuccess")
         val products = apiClient.get<BriefProductsResponse>("/api/admin/products")
 
         println("products -> ${products.briefProducts}")
@@ -31,16 +26,14 @@ class ProductListServiceImpl(
 
 
         val products2 = apiClient.get<BriefProductsResponse>("/api/admin/products")
-        println("accessToken2: ${AuthTokenProvider.accessToken}")
-        println("refreshToken2: ${AuthTokenProvider.refreshToken}")
+
         println("products2 -> ${products2.briefProducts}")
 
         delay(120 * 1000)
 
 
         val products3 = apiClient.get<BriefProductsResponse>("/api/admin/products")
-        println("accessToken3: ${AuthTokenProvider.accessToken}")
-        println("refreshToken3: ${AuthTokenProvider.refreshToken}")
+
         println("products3 -> $products3")
 
         /*        try {

@@ -5,18 +5,17 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import org.example.fakeshop_clients.core.auth.data.AuthDatasource
-import org.example.fakeshop_clients.core.auth.data.AuthTokenProvider
 import org.example.fakeshop_clients.core.data.ApiClient
-import org.example.fakeshop_clients.core.data.AxiosRequestConfig
-import org.example.fakeshop_clients.core.data.AxiosResponse
-import org.example.fakeshop_clients.core.data.axios
+import org.example.fakeshop_clients.core.data.WebAuthDatasource
+import org.example.fakeshop_clients.core.data.axios.AxiosRequestConfig
+import org.example.fakeshop_clients.core.data.axios.AxiosResponse
+import org.example.fakeshop_clients.core.data.axios.axios
 import kotlin.js.Promise
 import kotlin.reflect.KClass
 
 class AxiosClient(
     private val baseUrl: String,
-    private val authDatasource: AuthDatasource
+    private val webAuthDatasource: WebAuthDatasource
 ) : ApiClient {
 
     private val jsonParser = Json {
@@ -76,7 +75,7 @@ class AxiosClient(
 
                     return@use scope.promise {
                         try {
-                            authDatasource.refreshToken("")
+                            webAuthDatasource.refreshToken()
 
                             console.log("Token refresh successful")
 

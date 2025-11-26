@@ -13,6 +13,9 @@ val homeModule = module {
     }
 
     factory<ProductListService> {
-        ProductListServiceImpl(apiClient = get(), authDatasource = get())
+        ProductListServiceImpl(
+            apiClient = get(),
+            authRepository = get(),
+        )
     }
 }

@@ -1,10 +1,11 @@
-package org.example.fakeshop_clients.core.data
+package org.example.fakeshop_clients.core.data.axios
 
 import kotlinx.coroutines.await
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import org.example.fakeshop_clients.core.data.ApiClient
 import kotlin.reflect.KClass
 
 class PublicAxiosCLient(private val baseUrl: String) : ApiClient {
