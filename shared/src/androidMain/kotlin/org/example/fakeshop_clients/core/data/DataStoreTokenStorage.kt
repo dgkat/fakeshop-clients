@@ -22,7 +22,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = "secure_token_storage"
 )
 
-class AndroidTokenStorage(private val context: Context) : TokenStorage {
+class DataStoreTokenStorage(private val context: Context) : TokenStorage {
 
     private val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
 

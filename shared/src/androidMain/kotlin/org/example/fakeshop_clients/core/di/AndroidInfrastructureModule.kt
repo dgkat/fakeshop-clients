@@ -4,7 +4,7 @@ import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.http.Url
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
-import org.example.fakeshop_clients.core.data.AndroidTokenStorage
+import org.example.fakeshop_clients.core.data.DataStoreTokenStorage
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -18,7 +18,7 @@ val androidInfrastructureModule = module {
     }
 
     single<TokenStorage> {
-        AndroidTokenStorage(context = get())
+        DataStoreTokenStorage(context = get())
     }
 
     single<HttpClientEngine> {
