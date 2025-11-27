@@ -112,7 +112,7 @@ android {
 }
 
 skie {
-    isEnabled = false
+    isEnabled = true
     features {
         group {
             // Enable Flow interop - makes Flow → AsyncSequence
