@@ -31,7 +31,6 @@ fun initKoinIos() = startKoin {
 }
 
 class IOSKoinHelper : KoinComponent {
-    @Throws(Exception::class)
     fun getProductListViewStore(scope: CoroutineScope): ProductListViewStore {
         return get { parametersOf(scope) }
     }

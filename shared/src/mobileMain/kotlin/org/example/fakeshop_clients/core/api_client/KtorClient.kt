@@ -1,4 +1,4 @@
-package org.example.fakeshop_clients.core.data
+package org.example.fakeshop_clients.core.api_client
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -10,6 +10,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.util.reflect.TypeInfo
+import org.example.fakeshop_clients.core.data.ApiClient
 import kotlin.reflect.KClass
 
 class KtorClient(val http: HttpClient) : ApiClient {
