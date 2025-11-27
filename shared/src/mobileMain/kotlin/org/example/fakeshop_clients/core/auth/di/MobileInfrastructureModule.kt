@@ -11,7 +11,7 @@ import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.example.fakeshop_clients.core.api_client.KtorClient
-import org.example.fakeshop_clients.core.auth.data.AuthTokenProvider
+import org.example.fakeshop_clients.core.auth.data.TokenStorage
 import org.example.fakeshop_clients.core.auth.data.MobileAuthDatasource
 import org.example.fakeshop_clients.core.auth.data.MobileAuthDatasourceImpl
 import org.example.fakeshop_clients.core.auth.data.MobileAuthRepository
@@ -24,10 +24,9 @@ val mobileInfrastructureModule = module {
     single<AuthRepository>{
         MobileAuthRepository(
             mobileAuthDatasource = get(),
-            authTokenProvider = AuthTokenProvider
+            tokenStorage = get()
         )
     }
-    //TODO inject real token provider when impl
 
     single<HttpClient>(named("publicHttpClient")) {
 
@@ -60,6 +59,7 @@ val mobileInfrastructureModule = module {
 
     single<ApiClient> {
         val mobileAuthDatasource: MobileAuthDatasource = get()
+        val tokenStorage : TokenStorage = get()
 
         KtorClient(
             HttpClient(get<HttpClientEngine>()) {
@@ -74,17 +74,17 @@ val mobileInfrastructureModule = module {
                 install(Auth) {
                     bearer {
                         loadTokens {
-                            AuthTokenProvider.accessToken?.let {
+                            tokenStorage.getAccessToken()?.let {
                                 BearerTokens(
                                     accessToken = it,
-                                    refreshToken = AuthTokenProvider.refreshToken ?: ""
+                                    refreshToken = tokenStorage.getRefreshToken() ?: ""
                                 )
                             }
                         }
 
                         refreshTokens {
                             val refreshToken = oldTokens?.refreshToken
-                                ?: AuthTokenProvider.refreshToken
+                                ?: tokenStorage.getRefreshToken()
                                 ?: return@refreshTokens null
 
                             try {
@@ -92,8 +92,10 @@ val mobileInfrastructureModule = module {
 
                                 println("New tokens received: accessToken -> ${response.accessToken} refreshToken -> ${response.refreshToken}")
 
-                                AuthTokenProvider.accessToken = response.accessToken
-                                AuthTokenProvider.refreshToken = response.refreshToken
+                                tokenStorage.saveTokens(
+                                    accessToken = response.accessToken,
+                                    refreshToken = response.refreshToken
+                                )
 
                                 BearerTokens(
                                     accessToken = response.accessToken,

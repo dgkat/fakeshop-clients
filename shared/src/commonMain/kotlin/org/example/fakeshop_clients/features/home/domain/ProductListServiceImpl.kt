@@ -16,8 +16,8 @@ class ProductListServiceImpl(
     }
 
     override suspend fun testApiCalls() {
-        val loginSuccess = authRepository.login(username = "admin@mail.com", password = "admin")
-        println("products loginSuccess -> $loginSuccess")
+        /*val loginSuccess = authRepository.login(username = "admin@mail.com", password = "admin")
+        println("products loginSuccess -> $loginSuccess")*/
         val products = apiClient.get<BriefProductsResponse>("/api/admin/products")
 
         println("products -> ${products.briefProducts}")
