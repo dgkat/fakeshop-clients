@@ -16,7 +16,10 @@ junit = "4.13.2"
 kotlin = "2.2.21"
 datastore-preferences = "1.2.0"
 
+# Android
+navigationCompose = "2.9.6"
 # Coroutines
+
 kotlinx-coroutines = "1.10.2"
 
 # Networking
@@ -88,6 +91,7 @@ ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "kto
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

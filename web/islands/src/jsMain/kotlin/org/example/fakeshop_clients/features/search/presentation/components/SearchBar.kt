@@ -1,3 +1,5 @@
+package org.example.fakeshop_clients.features.search.presentation.components
+
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach

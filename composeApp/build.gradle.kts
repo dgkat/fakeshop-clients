@@ -27,6 +27,7 @@ kotlin {
             //Coil
             implementation(libs.coil.compose)
             implementation(libs.coil.svg)
+            implementation(libs.androidx.navigation.compose)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

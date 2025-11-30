@@ -1,7 +1,6 @@
 package org.example.fakeshop_clients.features.home.presentation.productList
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,10 +40,10 @@ class ProductListViewStore(
 
         } catch (e: Exception) {
             println("Error loading categories: ${e.message}")
-            _productListState.value = ProductListState(
+            /*_productListState.value = ProductListState(
                 isLoading = false,
                 error = e.message
-            )
+            )*/
         }
     }
 }

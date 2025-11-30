@@ -29,7 +29,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun HomeScreen(
     productListViewModel: ProductListViewModel = koinViewModel(),
-    searchViewModel: SearchViewModel = koinViewModel()
+    searchViewModel: SearchViewModel = koinViewModel(),
+    onProductClick: (String) -> Unit
 ) {
     val uiState by productListViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -40,7 +41,7 @@ fun HomeScreen(
     ) { paddingValues ->
         HomeContent(
             productListState = uiState,
-            onProductClick = productListViewModel::onProductClick,
+            onProductClick = onProductClick,
             onRetry = {},
             modifier = Modifier.padding(paddingValues)
         )

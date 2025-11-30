@@ -1,6 +1,7 @@
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
+import org.example.fakeshop_clients.features.search.presentation.components.SearchButton
 import react.create
 import react.dom.client.createRoot
 import web.dom.Element

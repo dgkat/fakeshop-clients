@@ -8,13 +8,8 @@ import org.koin.mp.KoinPlatform.getKoin
 
 class ProductListViewModel(
 ) : ViewModel() {
-    private val store : ProductListViewStore by lazy {
+    private val store: ProductListViewStore by lazy {
         getKoin().get<ProductListViewStore> { parametersOf(viewModelScope) }
     }
-
     val uiState = store.productListState
-
-    fun onProductClick(productId: String) {
-    }
-
 }
