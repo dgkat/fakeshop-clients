@@ -4,8 +4,8 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import org.example.fakeshop_clients.core.di.webCoreModule
 import org.example.fakeshop_clients.core.navigation.mobile.BottomNav
+import org.example.fakeshop_clients.core.presentation.components.Header
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesPage
-import org.example.fakeshop_clients.features.home.presentation.HomeViewmodel
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsPage
 import org.example.fakeshop_clients.features.profile.presentation.ProfilePage
 import org.koin.core.context.GlobalContext
@@ -64,6 +64,8 @@ val SpaApp = FC<Props> {
             createRoute(
                 path = "/",
                 element = FC<Props> {
+                    Header()
+
                     div {
                         className = ClassName("main-content")
                         div {
