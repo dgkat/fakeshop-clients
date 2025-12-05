@@ -15,10 +15,13 @@ import kotlinx.html.img
 import kotlinx.html.link
 import kotlinx.html.main
 import kotlinx.html.meta
+import kotlinx.html.onClick
 import kotlinx.html.p
 import kotlinx.html.script
 import kotlinx.html.span
 import kotlinx.html.title
+import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
+import org.example.fakeshop_clients.features.core.navigation.mobile.bottomNavigation
 import org.example.fakeshop_clients.features.productDetailPage.domain.models.FullProduct
 import org.example.fakeshop_clients.features.productDetailPage.presentation.likeButton
 
@@ -32,6 +35,11 @@ fun HTML.productDetailPage(product: FullProduct) {
         link(rel = "preload", href = "/static/js/islands-bundle.js") {
             attributes["as"] = "script"
             attributes["crossorigin"] = ""
+        }
+
+        // Prefetch SPA bundle
+        link(rel = "prefetch", href = "/static/js/spa-bundle.js") {
+            attributes["as"] = "script"
         }
 
         // HTMX
@@ -55,15 +63,24 @@ fun HTML.productDetailPage(product: FullProduct) {
         link(rel = "stylesheet", href = "/common/css/theme.css")
         link(rel = "stylesheet", href = "/common/css/base.css")
         link(rel = "stylesheet", href = "/common/css/components.css")
+        link(rel = "stylesheet", href = "/common/css/navigation.css")
+        link(rel = "stylesheet", href = "/common/css/view-transitions.css")
 
         // Page-specific CSS
         link(rel = "stylesheet", href = "/static/css/product-details.css")
     }
 
     body {
+        attributes["data-page"] = "product-detail"
         // Header with search island
         header(classes = "header") {
             div(classes = "container") {
+
+                button(classes = "back-button") {
+                    onClick = "window.history.back()"
+                    +"← Back"
+                }
+
                 a(href = "/") {
                     h1 { +"E-Shop" }
                 }
@@ -80,16 +97,15 @@ fun HTML.productDetailPage(product: FullProduct) {
                         attributes["data-hydrate"] = "true"
                     }
                 }
+
+                // Desktop navigation
+                desktopNavigation(activeTab = null)
             }
         }
 
         // Main Content
         main(classes = "main-content") {
             div(classes = "container") {
-                // Back button
-                a(href = "/", classes = "back-button") {
-                    +"← Back to Products"
-                }
 
                 div(classes = "product-detail") {
                     // Product Image
@@ -166,6 +182,9 @@ fun HTML.productDetailPage(product: FullProduct) {
             }
         }
 
+        // Bottom Navigation
+        bottomNavigation(activeTab = null)
+
         // ===== LOAD ISLAND BUNDLE =====
         script(src = "/static/js/islands-bundle.js") {
             attributes["type"] = "module"
@@ -173,5 +192,6 @@ fun HTML.productDetailPage(product: FullProduct) {
 
         // ===== HYDRATOR SCRIPT =====
         script(src = "/static/js/universal-hydrator.js") {}
+        script(src = "/static/js/view-transitions.js") {}
     }
 }

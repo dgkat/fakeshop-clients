@@ -5,6 +5,7 @@ import io.ktor.server.http.content.staticResources
 import io.ktor.server.routing.routing
 import org.example.fakeshop_clients.features.homePage.presentation.homeRoute
 import org.example.fakeshop_clients.features.productDetailPage.presentation.productRoutes
+import org.example.fakeshop_clients.features.spaPage.presentation.spaRoutes
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -27,5 +28,7 @@ fun Application.configureRouting() {
         homeRoute()
         // Product routes
         productRoutes()
+        // Spa routes
+        spaRoutes()
     }
 }

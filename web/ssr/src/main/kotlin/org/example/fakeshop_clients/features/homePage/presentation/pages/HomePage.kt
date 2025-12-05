@@ -14,6 +14,8 @@ import kotlinx.html.meta
 import kotlinx.html.p
 import kotlinx.html.script
 import kotlinx.html.title
+import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
+import org.example.fakeshop_clients.features.core.navigation.mobile.bottomNavigation
 
 fun HTML.homePage() {
     head {
@@ -25,6 +27,11 @@ fun HTML.homePage() {
         link(rel = "preload", href = "/static/js/islands-bundle.js") {
             attributes["as"] = "script"
             attributes["crossorigin"] = ""
+        }
+
+        // PREFETCH SPA BUNDLE for smooth transition to SPA pages
+        link(rel = "prefetch", href = "/static/js/spa-bundle.js") {
+            attributes["as"] = "script"
         }
 
         // HTMX
@@ -48,12 +55,15 @@ fun HTML.homePage() {
         link(rel = "stylesheet", href = "/common/css/theme.css")
         link(rel = "stylesheet", href = "/common/css/base.css")
         link(rel = "stylesheet", href = "/common/css/components.css")
+        link(rel = "stylesheet", href = "/common/css/navigation.css")
+        link(rel = "stylesheet", href = "/common/css/view-transitions.css")
 
         // Page-specific CSS
         link(rel = "stylesheet", href = "/common/static/css/product-list.css")
     }
 
     body {
+        attributes["data-page"] = "home"
         // Header with E-Shop branding and search island
         header(classes = "header") {
             div(classes = "container") {
@@ -64,6 +74,9 @@ fun HTML.homePage() {
                     id = "search-island-root"
                     classes = setOf("island-container")
                 }
+
+                // Desktop navigation
+                desktopNavigation(activeTab = "home")
             }
         }
 
@@ -84,6 +97,9 @@ fun HTML.homePage() {
                 p { +"© 2024 E-Shop. Built with Kotlin Multiplatform + Islands Architecture" }
             }
         }
+
+        // Bottom Navigation (Mobile only)
+        bottomNavigation(activeTab = "home")
 
         // ===== LOAD ISLAND BUNDLES =====
         script(src = "/static/js/islands-bundle.js") {

@@ -24,6 +24,7 @@ kotlin {
         jsMain.dependencies {
             implementation(libs.kotlin.react)
             implementation(libs.kotlin.react.dom)
+            implementation(libs.kotlin.react.router.dom)
             implementation(libs.kotlin.emotion)
 
             implementation(libs.koin.core)
