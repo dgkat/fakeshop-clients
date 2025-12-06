@@ -66,7 +66,7 @@ fun HTML.homePage() {
         attributes["data-page"] = "home"
         // Header with E-Shop branding and search island
         header(classes = "header") {
-            div(classes = "container") {
+            div(classes = "container header-content") {
                 h1 { +"E-Shop" }
 
                 // ===== SEARCH ISLAND CONTAINER =====

@@ -74,7 +74,7 @@ fun HTML.productDetailPage(product: FullProduct) {
         attributes["data-page"] = "product-detail"
         // Header with search island
         header(classes = "header") {
-            div(classes = "container") {
+            div(classes = "container header-content") {
 
                 button(classes = "back-button") {
                     onClick = "window.history.back()"
