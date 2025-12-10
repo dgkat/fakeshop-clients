@@ -11,17 +11,19 @@ import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.example.fakeshop_clients.core.api_client.KtorClient
-import org.example.fakeshop_clients.core.auth.data.TokenStorage
+import org.example.fakeshop_clients.core.auth.data.LogoutUser
 import org.example.fakeshop_clients.core.auth.data.MobileAuthDatasource
 import org.example.fakeshop_clients.core.auth.data.MobileAuthDatasourceImpl
 import org.example.fakeshop_clients.core.auth.data.MobileAuthRepository
+import org.example.fakeshop_clients.core.auth.data.MobileLogoutUser
+import org.example.fakeshop_clients.core.auth.data.TokenStorage
 import org.example.fakeshop_clients.core.auth.domain.AuthRepository
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val mobileInfrastructureModule = module {
-    single<AuthRepository>{
+    single<AuthRepository> {
         MobileAuthRepository(
             mobileAuthDatasource = get(),
             tokenStorage = get()
@@ -30,7 +32,7 @@ val mobileInfrastructureModule = module {
 
     single<HttpClient>(named("publicHttpClient")) {
 
-        val parsedUrl : Url = get(named("parsedUrl"))
+        val parsedUrl: Url = get(named("parsedUrl"))
 
         HttpClient(get<HttpClientEngine>()) {
             install(ContentNegotiation) {
@@ -59,7 +61,7 @@ val mobileInfrastructureModule = module {
 
     single<ApiClient> {
         val mobileAuthDatasource: MobileAuthDatasource = get()
-        val tokenStorage : TokenStorage = get()
+        val tokenStorage: TokenStorage = get()
 
         KtorClient(
             HttpClient(get<HttpClientEngine>()) {
@@ -116,4 +118,7 @@ val mobileInfrastructureModule = module {
             }
         )
     }
+
+    factory<LogoutUser> { MobileLogoutUser(get(), get()) }
+
 }

@@ -1,9 +1,19 @@
 package org.example.fakeshop_clients.core.data
 
 import org.example.fakeshop_clients.core.auth.data.models.LoginRequest
+import org.example.fakeshop_clients.core.auth.data.models.SignUpRequest
 import org.example.fakeshop_clients.core.data.models.WebAuthResponse
 
 class WebAuthDatasourceImpl(private val publicClient: ApiClient) : WebAuthDatasource {
+    override suspend fun signUp(username: String, password: String): Boolean {
+        val signUpRequest = SignUpRequest(username, password)
+        val response = publicClient.post<WebAuthResponse, SignUpRequest>(
+            path = "/api/auth/web/signup",
+            body = signUpRequest
+        )
+        return response.success
+    }
+
     override suspend fun login(username: String, password: String): Boolean {
         val loginRequest = LoginRequest(username, password)
         val response = publicClient.post<WebAuthResponse, LoginRequest>(
