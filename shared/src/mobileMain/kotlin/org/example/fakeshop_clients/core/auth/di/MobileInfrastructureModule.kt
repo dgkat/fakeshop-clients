@@ -79,7 +79,7 @@ val mobileInfrastructureModule = module {
                             tokenStorage.getAccessToken()?.let {
                                 BearerTokens(
                                     accessToken = it,
-                                    refreshToken = tokenStorage.getRefreshToken() ?: ""
+                                    refreshToken = null
                                 )
                             }
                         }
