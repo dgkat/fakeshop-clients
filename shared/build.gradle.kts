@@ -7,6 +7,9 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.skieLibrary)
     alias(libs.plugins.kotlinSerialization)
+
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
 }
 
 kotlin {
@@ -63,6 +66,21 @@ kotlin {
                 implementation(libs.ktor.client.content)
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.ktor.client.auth)
+
+                // Compose Multiplatform
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                implementation(compose.ui)
+                implementation(compose.components.resources)
+
+                // Lifecycle ViewModel (multiplatform)
+                implementation(libs.androidx.lifecycle.viewmodelCompose)
+                implementation(libs.androidx.lifecycle.runtimeCompose)
+
+                // Koin for Compose
+                implementation(libs.koin.compose)
+                implementation(libs.koin.compose.viewmodel)
             }
         }
 
