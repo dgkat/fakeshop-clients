@@ -8,8 +8,8 @@ plugins {
     alias(libs.plugins.skieLibrary)
     alias(libs.plugins.kotlinSerialization)
 
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+/*    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)*/
 }
 
 kotlin {
@@ -67,7 +67,7 @@ kotlin {
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.ktor.client.auth)
 
-                // Compose Multiplatform
+/*                // Compose Multiplatform
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material3)
@@ -80,7 +80,7 @@ kotlin {
 
                 // Koin for Compose
                 implementation(libs.koin.compose)
-                implementation(libs.koin.compose.viewmodel)
+                implementation(libs.koin.compose.viewmodel)*/
             }
         }
 

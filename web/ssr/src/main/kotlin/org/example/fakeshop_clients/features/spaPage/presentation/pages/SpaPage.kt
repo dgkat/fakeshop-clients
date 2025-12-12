@@ -40,6 +40,7 @@ fun HTML.spaPage() {
         link(rel = "stylesheet", href = "/common/css/navigation.css")
         link(rel = "stylesheet", href = "/common/css/view-transitions.css")
         link(rel = "stylesheet", href = "/common/css/spa.css")
+        link(rel = "stylesheet", href = "/common/css/profile-page.css")
     }
 
     body {
