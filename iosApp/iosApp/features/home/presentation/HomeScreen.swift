@@ -4,7 +4,7 @@
 
 import Foundation
 import SwiftUI
-import Shared
+import ComposeApp
 
 struct HomeView: View {
     @StateObject private var searchViewModel = SearchViewmodel()

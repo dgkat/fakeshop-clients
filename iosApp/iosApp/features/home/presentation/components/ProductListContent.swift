@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-import Shared
+import ComposeApp
 
 struct ProductListContent: View {
     let categories: [CategoryRow]

@@ -1,7 +1,6 @@
-package org.example.fakeshop_clients.features.profile
+package org.example.fakeshop_clients.features.profile.di
 
 import kotlinx.coroutines.CoroutineScope
-import org.example.fakeshop_clients.features.profile.di.profileModule
 import org.example.fakeshop_clients.features.profile.presentation.ProfileViewModel
 import org.example.fakeshop_clients.features.profile.presentation.ProfileViewStore
 import org.koin.core.module.dsl.viewModel

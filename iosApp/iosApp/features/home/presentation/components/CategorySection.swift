@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-import Shared
+import ComposeApp
 
 struct CategorySection: View {
     let categoryRow: CategoryRow

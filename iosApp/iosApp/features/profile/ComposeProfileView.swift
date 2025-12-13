@@ -7,7 +7,7 @@
 
 import SwiftUI
 import UIKit
-import Shared
+import ComposeApp
 
 struct ComposeProfileView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
