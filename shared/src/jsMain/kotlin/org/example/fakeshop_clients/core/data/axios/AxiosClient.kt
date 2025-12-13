@@ -1,3 +1,5 @@
+package org.example.fakeshop_clients.core.data.axios
+
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.promise
@@ -7,9 +9,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.WebAuthDatasource
-import org.example.fakeshop_clients.core.data.axios.AxiosRequestConfig
-import org.example.fakeshop_clients.core.data.axios.AxiosResponse
-import org.example.fakeshop_clients.core.data.axios.axios
 import kotlin.js.Promise
 import kotlin.reflect.KClass
 
@@ -24,7 +23,7 @@ class AxiosClient(
     }
 
     private var isRefreshing = false
-    private var refreshSubscribers: MutableList<(String) -> Unit> = mutableListOf()
+    private var refreshSubscribers: MutableList<(Throwable?) -> Unit> = mutableListOf()
 
     private val scope = MainScope()
 
@@ -60,10 +59,14 @@ class AxiosClient(
                         console.log("Token refresh in progress, queuing request...")
 
                         return@use Promise { resolve, reject ->
-                            refreshSubscribers.add { _ ->
-                                retryRequest(originalRequest)
-                                    .then { resolve(it) }
-                                    .catch { reject(it) }
+                            refreshSubscribers.add { refreshError ->
+                                if (refreshError != null) {
+                                    reject(refreshError)
+                                } else {
+                                    retryRequest(originalRequest)
+                                        .then { resolve(it) }
+                                        .catch { reject(it) }
+                                }
                             }
                         }
                     }
@@ -79,12 +82,12 @@ class AxiosClient(
 
                             console.log("Token refresh successful")
 
-                            onTokenRefreshed("")
+                            onTokenRefreshed()
 
                             retryRequest(originalRequest).await()
                         } catch (refreshError: Throwable) {
                             console.error("Token refresh failed:", refreshError)
-                            onTokenRefreshFailed()
+                            onTokenRefreshFailed(refreshError)
                             throw refreshError
                         } finally {
                             isRefreshing = false
@@ -108,12 +111,13 @@ class AxiosClient(
         }
     }
 
-    private fun onTokenRefreshed(token: String) {
-        refreshSubscribers.forEach { callback -> callback(token) }
+    private fun onTokenRefreshed() {
+        refreshSubscribers.forEach { callback -> callback(null) }
         refreshSubscribers.clear()
     }
 
-    private fun onTokenRefreshFailed() {
+    private fun onTokenRefreshFailed(error: Throwable) {
+        refreshSubscribers.forEach { callback -> callback(error) }
         refreshSubscribers.clear()
     }
 

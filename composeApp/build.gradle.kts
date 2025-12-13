@@ -1,10 +1,14 @@
+import co.touchlab.skie.configuration.FlowInterop
+import co.touchlab.skie.configuration.SuspendInterop
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.skieLibrary)
 }
 
 kotlin {
@@ -14,20 +18,31 @@ kotlin {
         }
     }
 
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+
+            export(project(":shared"))
+        }
+    }
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
 
-            // Koin
-            implementation(libs.koin.android)
-            implementation(libs.koin.compose)
-            implementation(libs.koin.compose.viewmodel)
-
             //Coil
             implementation(libs.coil.compose)
             implementation(libs.coil.svg)
             implementation(libs.androidx.navigation.compose)
+
+            //Koin
+            implementation(libs.koin.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -39,7 +54,24 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
-            implementation(projects.shared)
+            // Koin
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+
+            api(projects.shared)
+        }
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+
+        val iosMain by creating {
+            dependsOn(commonMain.get())
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
+
+            dependencies {
+            }
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -78,3 +110,14 @@ dependencies {
     debugImplementation(compose.uiTooling)
 }
 
+skie {
+    isEnabled = true
+    features {
+        group {
+            // Enable Flow interop - makes Flow → AsyncSequence
+            FlowInterop.Enabled(true)
+            // Enable suspend interop - makes suspend → async
+            SuspendInterop.Enabled(true)
+        }
+    }
+}

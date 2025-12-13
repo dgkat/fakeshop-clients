@@ -59,7 +59,9 @@ struct MainTabView: View {
             .tag(Tab.notifications)
             
             NavigationStack(path: $profilePath) {
-                ProfileView()
+                ComposeProfileView()
+                    .navigationBarTitleDisplayMode(.inline)
+                    .navigationTitle("Porfile")
                     .navigationDestination(for: String.self) { productId in
                         ProductDetailView(productId: productId)
                     }

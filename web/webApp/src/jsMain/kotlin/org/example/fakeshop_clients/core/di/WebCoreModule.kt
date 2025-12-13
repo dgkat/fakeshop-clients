@@ -1,6 +1,9 @@
 package org.example.fakeshop_clients.core.di
 
-import org.example.fakeshop_clients.features.home.di.homeModule
-import org.example.fakeshop_clients.features.home.di.webHomeModule
+import org.example.fakeshop_clients.features.profile.di.webProfileModule
 
-val webCoreModule = listOf(webHomeModule, homeModule)
+val webCoreModule = listOf(
+    webCoroutineModule,
+    webInfrastructureModule,
+    webProfileModule
+)

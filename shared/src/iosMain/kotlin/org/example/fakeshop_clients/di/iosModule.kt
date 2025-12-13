@@ -27,7 +27,9 @@ val iosModule = module {
 }
 
 fun initKoinIos() = startKoin {
-    modules(iosInfrastructureModule, mobileInfrastructureModule, homeModule, iosModule)
+    modules(
+        iosInfrastructureModule, mobileInfrastructureModule, homeModule, iosModule
+    )
 }
 
 class IOSKoinHelper : KoinComponent {

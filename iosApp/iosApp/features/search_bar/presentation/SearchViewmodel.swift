@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Shared
+import ComposeApp
 
 @MainActor
 class SearchViewmodel: ObservableObject {

@@ -8,7 +8,6 @@ import org.example.fakeshop_clients.core.presentation.components.Header
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesPage
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsPage
 import org.example.fakeshop_clients.features.profile.presentation.ProfilePage
-import org.koin.core.context.GlobalContext
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.context.GlobalContext.stopKoin
 import react.FC
@@ -29,17 +28,8 @@ fun main() {
         modules(webCoreModule)
     }
 
-    val koin = GlobalContext.get()
-    //val viewModel = koin.get<HomeViewmodel>()
-
     val rootElement = document.getElementById("spa-root") as? Element
         ?: error("Root element not found")
-
-    /*createRoot(rootElement).render(
-        HomeScreenWeb.create {
-            this.viewModel = viewModel
-        }
-    )*/
 
     createRoot(rootElement).render(SpaApp.create())
 

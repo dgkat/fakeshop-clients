@@ -5,7 +5,7 @@
 //  Created by Dimitrios Katoudis on 3/11/25.
 //
 import Foundation
-import Shared
+import ComposeApp
 import Combine
 
 @MainActor
