@@ -6,8 +6,7 @@ import org.example.fakeshop_clients.features.home.presentation.productList.Produ
 import org.koin.core.parameter.parametersOf
 import org.koin.mp.KoinPlatform.getKoin
 
-class ProductListViewModel(
-) : ViewModel() {
+class ProductListViewModel() : ViewModel() {
     private val store: ProductListViewStore by lazy {
         getKoin().get<ProductListViewStore> { parametersOf(viewModelScope) }
     }
