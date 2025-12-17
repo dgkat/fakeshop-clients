@@ -22,11 +22,12 @@ class SearchViewStore(
             SearchEvent.CancelClicked -> deactivateSearch()
             SearchEvent.SearchClicked -> activateSearch()
             is SearchEvent.ProductClicked -> onProductClicked(event.productId)
+            SearchEvent.ClearQuery -> clearQuery()
         }
     }
 
     private fun onQueryChanged(query: String) {
-        _searchState.update { it.copy(query = query) }
+        _searchState.update { it.copy(query = query,isActive = true) }
 
         scope.launch {
             // TODO add debounce when real call is added
@@ -50,5 +51,9 @@ class SearchViewStore(
         //TODO navigate to product details
         println("Product clicked: $productId")
         deactivateSearch()
+    }
+
+    private fun clearQuery(){
+        _searchState.update { it.copy(query = "") }
     }
 }

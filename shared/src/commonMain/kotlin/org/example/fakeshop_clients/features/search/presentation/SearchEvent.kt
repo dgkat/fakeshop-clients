@@ -5,4 +5,5 @@ sealed class SearchEvent {
     data object SearchClicked : SearchEvent()
     data object CancelClicked : SearchEvent()
     data class ProductClicked(val productId: String) : SearchEvent()
+    data object ClearQuery : SearchEvent()
 }

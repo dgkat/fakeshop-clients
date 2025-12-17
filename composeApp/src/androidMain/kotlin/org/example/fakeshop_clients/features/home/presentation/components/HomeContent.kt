@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,13 +32,16 @@ import org.example.fakeshop_clients.features.home.presentation.ErrorState
 import org.example.fakeshop_clients.features.home.presentation.LoadingState
 import org.example.fakeshop_clients.features.home.presentation.productList.CategoryRow
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListState
+import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarScrollState
 
 @Composable
 fun HomeContent(
     productListState: ProductListState,
     onProductClick: (String) -> Unit,
     onRetry: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues,
+    scrollState: SearchBarScrollState
 ) {
 
     val categories = productListState.categories
@@ -46,7 +50,9 @@ fun HomeContent(
         ProductListContent(
             categories = productListState.categories,
             onProductClick = onProductClick,
-            modifier = modifier
+            modifier = modifier,
+            contentPadding = contentPadding,
+            scrollState = scrollState
         )
     }
 
@@ -67,11 +73,20 @@ fun HomeContent(
 private fun ProductListContent(
     categories: List<CategoryRow>,
     onProductClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues,
+    scrollState: SearchBarScrollState
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 8.dp)
+        modifier = modifier
+            .fillMaxSize()
+            .nestedScroll(scrollState.nestedScrollConnection),
+        contentPadding = PaddingValues(
+            top = contentPadding.calculateTopPadding() + 16.dp,
+            bottom = 16.dp,
+            start = 16.dp,
+            end = 16.dp
+        )
     ) {
         items(
             items = categories,
