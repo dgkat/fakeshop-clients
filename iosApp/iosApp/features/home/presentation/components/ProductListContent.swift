@@ -12,9 +12,10 @@ import ComposeApp
 struct ProductListContent: View {
     let categories: [CategoryRow]
     let onProductClick: (String) -> Void
+    let onScrollOffsetChange: (CGFloat) -> Void
     
     var body: some View {
-        ScrollView {
+        ScrollableVStack(onScroll: onScrollOffsetChange) {
             LazyVStack(alignment: .leading, spacing: 16, pinnedViews: []) {
                 ForEach(categories, id: \.category) { categoryRow in
                     CategorySection(
