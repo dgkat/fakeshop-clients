@@ -4,7 +4,6 @@ import org.example.fakeshop_clients.core.navigation.desktop.DesktopNav
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.a
-import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h1
 import react.dom.html.ReactHTML.header
@@ -21,13 +20,6 @@ val Header = FC<Props> {
                     href = "/"
                     +"E-Shop"
                 }
-            }
-            button {
-                onClick = {
-                    console.log("[SearchButton] Clicked!")
-                    //TODO replace with actual search impl
-                }
-                +"Search functionality coming soon"
             }
             DesktopNav()
         }

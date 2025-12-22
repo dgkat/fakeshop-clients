@@ -65,6 +65,7 @@ fun HTML.productDetailPage(product: FullProduct) {
         link(rel = "stylesheet", href = "/common/css/components.css")
         link(rel = "stylesheet", href = "/common/css/navigation.css")
         link(rel = "stylesheet", href = "/common/css/view-transitions.css")
+        link(rel = "stylesheet", href = "/common/css/search-bar.css")
 
         // Page-specific CSS
         link(rel = "stylesheet", href = "/static/css/product-details.css")

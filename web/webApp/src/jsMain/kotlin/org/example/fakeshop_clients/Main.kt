@@ -8,8 +8,12 @@ import org.example.fakeshop_clients.core.presentation.components.Header
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesPage
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsPage
 import org.example.fakeshop_clients.features.profile.presentation.ProfilePage
+import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
+import org.example.fakeshop_clients.features.search.presentation.components.SearchBar
+import org.example.fakeshop_clients.features.search.utils.BehaviorMapping
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.context.GlobalContext.stopKoin
+import org.koin.mp.KoinPlatform.getKoin
 import react.FC
 import react.Props
 import react.ReactElement
@@ -20,6 +24,9 @@ import react.router.Outlet
 import react.router.RouteObject
 import react.router.dom.RouterProvider
 import react.router.dom.createBrowserRouter
+import react.router.useLocation
+import react.router.useNavigate
+import react.useMemo
 import web.cssom.ClassName
 import web.dom.Element
 
@@ -53,18 +60,7 @@ val SpaApp = FC<Props> {
         arrayOf(
             createRoute(
                 path = "/",
-                element = FC<Props> {
-                    Header()
-
-                    div {
-                        className = ClassName("main-content")
-                        div {
-                            className = ClassName("container")
-                            Outlet()
-                        }
-                    }
-                    BottomNav()
-                }.create(),
+                element = SpaLayout.create(),
                 children = arrayOf(
                     createRoute("favorites", FavoritesPage.create()),
                     createRoute("notifications", NotificationsPage.create()),
@@ -77,4 +73,40 @@ val SpaApp = FC<Props> {
     RouterProvider {
         this.router = router
     }
+}
+
+val SpaLayout = FC<Props> {
+    // Get SearchViewModel from Koin (singleton)
+    val viewModel = useMemo { getKoin().get<SearchViewModel>() }
+    val navigate = useNavigate()
+    val location = useLocation()
+
+    // Determine behavior based on current route
+    val behavior = useMemo(location.pathname) {
+        BehaviorMapping.getSearchBarBehaviorFromRoute(location.pathname)
+    }
+
+    // SearchBar component
+    SearchBar {
+        this.viewModel = viewModel
+        this.behavior = behavior
+        this.onNavigateToProduct = { productId ->
+            navigate("/product/$productId")
+        }
+    }
+
+    // Header
+    Header()
+
+    // Main content area
+    div {
+        className = ClassName("main-content")
+        div {
+            className = ClassName("container")
+            Outlet()
+        }
+    }
+
+    // Bottom navigation
+    BottomNav()
 }

@@ -31,6 +31,7 @@ kotlin {
 
             // Shared modules
             implementation(project(":web:common"))
+            implementation(project(":web:searchCommon"))
             implementation(project(":shared"))
         }
     }

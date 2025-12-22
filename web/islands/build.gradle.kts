@@ -31,6 +31,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
 
             implementation(project(":web:common"))
+            implementation(project(":web:searchCommon"))
             implementation(project(":shared"))
         }
     }
