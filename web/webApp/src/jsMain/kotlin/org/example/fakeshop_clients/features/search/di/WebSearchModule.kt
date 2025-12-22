@@ -6,7 +6,6 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val webSearchModule = module {
-    // Include shared searchModule for SearchService
     includes(searchModule)
 
     single {
@@ -16,7 +15,7 @@ val webSearchModule = module {
         )
     }
 
-    factory { (store: SearchViewStore) ->
-        SearchViewModel(store = store)
+    factory {
+        SearchViewModel(store = get())
     }
 }

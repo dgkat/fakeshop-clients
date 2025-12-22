@@ -41,18 +41,17 @@ val SearchBar = FC<SearchBarProps> { props ->
         }
     }
 
-    val scrollState = if (props.behavior == SearchBarBehavior.SCROLL_REACTIVE) {
-        useScrollOffset(maxOffset = 72.0)
-    } else {
-        null
-    }
-
+    // Always call useScrollOffset (hooks must be called unconditionally)
+    val scrollState = useScrollOffset(maxOffset = 72.0)
     val containerRef = useRef<HTMLDivElement>(null)
 
-    // Apply transform to DOM element when scroll state changes
-    useEffect(scrollState?.offset) {
-        if (scrollState != null) {
+    // Apply transform to DOM element when scroll state changes (only for scroll-reactive behavior)
+    useEffect(scrollState.offset, props.behavior) {
+        if (props.behavior == SearchBarBehavior.SCROLL_REACTIVE) {
             containerRef.current?.style?.transform = "translateY(${scrollState.offset}px)"
+        } else {
+            // Reset transform for non-scroll-reactive behaviors
+            containerRef.current?.style?.transform = "translateY(0px)"
         }
     }
 
