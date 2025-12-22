@@ -9,7 +9,6 @@ import org.example.fakeshop_clients.features.favorites.presentation.FavoritesPag
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsPage
 import org.example.fakeshop_clients.features.profile.presentation.ProfilePage
 import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
-import org.example.fakeshop_clients.features.search.presentation.components.SearchBar
 import org.example.fakeshop_clients.features.search.utils.BehaviorMapping
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.context.GlobalContext.stopKoin
@@ -81,22 +80,30 @@ val SpaLayout = FC<Props> {
     val navigate = useNavigate()
     val location = useLocation()
 
-    // Determine behavior based on current route
-    val behavior = useMemo(location.pathname) {
+    // Determine search bar behavior based on current route
+    val searchBehavior = useMemo(location.pathname) {
         BehaviorMapping.getSearchBarBehaviorFromRoute(location.pathname)
     }
 
-    // SearchBar component
-    SearchBar {
-        this.viewModel = viewModel
-        this.behavior = behavior
+    // Determine header scroll behavior based on current route
+    val headerBehavior = useMemo(location.pathname) {
+        when {
+            location.pathname.startsWith("/favorites") -> "scroll-reactive"
+            location.pathname.startsWith("/profile") -> "static"
+            location.pathname.startsWith("/notifications") -> "scroll-reactive"
+            else -> "scroll-reactive"
+        }
+    }
+
+    // Header (renders SearchBar inside on desktop, above on mobile)
+    Header {
+        this.behavior = headerBehavior
+        this.searchViewModel = viewModel
+        this.searchBehavior = searchBehavior
         this.onNavigateToProduct = { productId ->
             navigate("/product/$productId")
         }
     }
-
-    // Header
-    Header()
 
     // Main content area
     div {
