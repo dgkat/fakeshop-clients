@@ -9,6 +9,7 @@ import org.example.fakeshop_clients.features.favorites.presentation.FavoritesPag
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsPage
 import org.example.fakeshop_clients.features.profile.presentation.ProfilePage
 import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
+import org.example.fakeshop_clients.features.search.presentation.components.SearchBar
 import org.example.fakeshop_clients.features.search.utils.BehaviorMapping
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.context.GlobalContext.stopKoin
@@ -95,7 +96,19 @@ val SpaLayout = FC<Props> {
         }
     }
 
-    // Header (renders SearchBar inside on desktop, above on mobile)
+    // Mobile: SearchBar rendered separately (outside header since header is hidden)
+    div {
+        className = ClassName("mobile-search-container")
+        SearchBar {
+            this.viewModel = viewModel
+            this.behavior = searchBehavior
+            this.onNavigateToProduct = { productId ->
+                navigate("/product/$productId")
+            }
+        }
+    }
+
+    // Desktop: Header contains SearchBar
     Header {
         this.behavior = headerBehavior
         this.searchViewModel = viewModel

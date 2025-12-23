@@ -55,8 +55,11 @@ val SearchBar = FC<SearchBarProps> { props ->
         if (!isDesktop && props.behavior == SearchBarBehavior.SCROLL_REACTIVE) {
             // Mobile: apply transform (current behavior)
             containerRef.current?.style?.transform = "translateY(${scrollState.offset}px)"
+        } else if (props.behavior == SearchBarBehavior.HIDDEN) {
+            // Hidden: let CSS class handle the transform
+            containerRef.current?.style?.transform = ""
         } else {
-            // Desktop or non-scroll-reactive: no transform
+            // Desktop or STATIC: no transform
             containerRef.current?.style?.transform = "translateY(0px)"
         }
     }

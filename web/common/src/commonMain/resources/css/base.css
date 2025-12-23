@@ -36,10 +36,50 @@ body {
     padding: 0 var(--spacing-xl);
 }
 
+/* ===== Mobile Search Container (SPA only) ===== */
+/* Mobile: Show search bar outside header */
+.mobile-search-container {
+    display: block;
+}
+
+/* Desktop: Hide mobile search container (search bar is inside header) */
+@media (min-width: 768px) {
+    .mobile-search-container {
+        display: none;
+    }
+}
+
 /* ===== Header (Shared Top Bar) ===== */
-/* Mobile: Hide header (bottom nav is primary navigation) */
+/* Mobile: Header is invisible but search island can still render */
 .header {
-    display: none;
+    position: relative;
+}
+
+/* Mobile: Hide header content but keep structure for search island */
+@media (max-width: 767px) {
+    .header {
+        height: 0;
+        overflow: visible; /* Allow search island to escape */
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .header-content {
+        visibility: hidden; /* Hide header content */
+        height: 0;
+    }
+
+    /* But keep search island visible */
+    .header-content .island-container {
+        visibility: visible;
+    }
+
+    /* Hide logo and nav on mobile */
+    .header-content .logo,
+    .header-content .desktop-nav,
+    .header-content .back-button {
+        display: none;
+    }
 }
 
 /* Desktop: Fixed header with scroll animations */

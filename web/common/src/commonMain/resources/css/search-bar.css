@@ -15,9 +15,11 @@
     will-change: transform; /* Performance optimization for GPU acceleration */
 }
 
-/* Hidden state - completely hidden on mobile */
+/* Hidden state - slide up with animation */
 .search-bar-container.search-bar-hidden {
-    display: none;
+    transform: translateY(-100%) !important;
+    transition: transform 0.3s ease-in-out;
+    pointer-events: none; /* Prevent interaction when hidden */
 }
 
 /* ===== Search Input Area ===== */
