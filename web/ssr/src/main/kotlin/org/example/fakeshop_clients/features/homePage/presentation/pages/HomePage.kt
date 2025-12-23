@@ -67,13 +67,14 @@ fun HTML.homePage() {
         attributes["data-page"] = "home"
         // Header with E-Shop branding and search island
         header(classes = "header") {
+            attributes["data-scroll-behavior"] = "scroll-reactive"
             div(classes = "container header-content") {
-                h1 { +"E-Shop" }
+                h1(classes = "logo") { +"E-Shop" }
 
                 // ===== SEARCH ISLAND CONTAINER =====
                 div {
                     id = "search-island-root"
-                    classes = setOf("island-container")
+                    classes = setOf("island-container", "header-center")
                 }
 
                 // Desktop navigation
@@ -109,5 +110,8 @@ fun HTML.homePage() {
 
         // ===== UNIVERSAL HYDRATOR SCRIPT =====
         script(src = "/static/js/universal-hydrator.js") {}
+
+        // ===== HEADER SCROLL BEHAVIOR (Desktop only) =====
+        script(src = "/static/js/header-scroll.js") {}
     }
 }

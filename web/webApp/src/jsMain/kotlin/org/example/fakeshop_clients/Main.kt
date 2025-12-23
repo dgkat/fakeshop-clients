@@ -81,22 +81,42 @@ val SpaLayout = FC<Props> {
     val navigate = useNavigate()
     val location = useLocation()
 
-    // Determine behavior based on current route
-    val behavior = useMemo(location.pathname) {
+    // Determine search bar behavior based on current route
+    val searchBehavior = useMemo(location.pathname) {
         BehaviorMapping.getSearchBarBehaviorFromRoute(location.pathname)
     }
 
-    // SearchBar component
-    SearchBar {
-        this.viewModel = viewModel
-        this.behavior = behavior
+    // Determine header scroll behavior based on current route
+    val headerBehavior = useMemo(location.pathname) {
+        when {
+            location.pathname.startsWith("/favorites") -> "scroll-reactive"
+            location.pathname.startsWith("/profile") -> "static"
+            location.pathname.startsWith("/notifications") -> "scroll-reactive"
+            else -> "scroll-reactive"
+        }
+    }
+
+    // Mobile: SearchBar rendered separately (outside header since header is hidden)
+    div {
+        className = ClassName("mobile-search-container")
+        SearchBar {
+            this.viewModel = viewModel
+            this.behavior = searchBehavior
+            this.onNavigateToProduct = { productId ->
+                navigate("/product/$productId")
+            }
+        }
+    }
+
+    // Desktop: Header contains SearchBar
+    Header {
+        this.behavior = headerBehavior
+        this.searchViewModel = viewModel
+        this.searchBehavior = searchBehavior
         this.onNavigateToProduct = { productId ->
             navigate("/product/$productId")
         }
     }
-
-    // Header
-    Header()
 
     // Main content area
     div {

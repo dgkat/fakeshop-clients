@@ -15,6 +15,13 @@
     will-change: transform; /* Performance optimization for GPU acceleration */
 }
 
+/* Hidden state - slide up with animation */
+.search-bar-container.search-bar-hidden {
+    transform: translateY(-100%) !important;
+    transition: transform 0.3s ease-in-out;
+    pointer-events: none; /* Prevent interaction when hidden */
+}
+
 /* ===== Search Input Area ===== */
 .search-bar-input {
     display: flex;
@@ -187,7 +194,7 @@
 }
 
 /* ===== Mobile Responsive ===== */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     .search-bar-input {
         margin: var(--spacing-xs) var(--spacing-md);
         padding: var(--spacing-sm) var(--spacing-md);
@@ -201,6 +208,30 @@
 
     .search-result-item {
         padding: var(--spacing-sm) var(--spacing-md);
+    }
+}
+
+/* ===== Desktop: Search bar inside header ===== */
+@media (min-width: 768px) {
+    .search-bar-container {
+        position: static; /* Remove fixed positioning */
+        flex: 1; /* Take available space in header */
+        max-width: 600px; /* Constrain width */
+        z-index: auto; /* Inherit from parent */
+        background-color: transparent; /* Header provides background */
+        transform: none !important; /* Disable individual transform - header handles scroll */
+    }
+
+    .search-bar-input {
+        margin: 0; /* Remove margins when inside header */
+        padding: var(--spacing-sm) var(--spacing-md); /* Consistent smaller padding on desktop */
+    }
+
+    /* Hidden state on desktop - invisible but maintains layout space */
+    .search-bar-container.search-bar-hidden {
+        display: flex; /* Override mobile display: none */
+        visibility: hidden; /* Invisible but takes up space */
+        pointer-events: none; /* Non-interactive */
     }
 }
 

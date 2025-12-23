@@ -45,26 +45,37 @@ val SearchBar = FC<SearchBarProps> { props ->
     val scrollState = useScrollOffset(maxOffset = 72.0)
     val containerRef = useRef<HTMLDivElement>(null)
 
-    // Apply transform to DOM element when scroll state changes (only for scroll-reactive behavior)
-    useEffect(scrollState.offset, props.behavior) {
-        if (props.behavior == SearchBarBehavior.SCROLL_REACTIVE) {
+    // Check if we're on desktop (>= 768px)
+    val isDesktop by useState { kotlinx.browser.window.matchMedia("(min-width: 768px)").matches }
+
+    // Apply transform to DOM element when scroll state changes
+    // Mobile: Apply transform for scroll-reactive behavior
+    // Desktop: No transform (header handles scrolling)
+    useEffect(scrollState.offset, props.behavior, isDesktop) {
+        if (!isDesktop && props.behavior == SearchBarBehavior.SCROLL_REACTIVE) {
+            // Mobile: apply transform (current behavior)
             containerRef.current?.style?.transform = "translateY(${scrollState.offset}px)"
+        } else if (props.behavior == SearchBarBehavior.HIDDEN) {
+            // Hidden: let CSS class handle the transform
+            containerRef.current?.style?.transform = ""
         } else {
-            // Reset transform for non-scroll-reactive behaviors
+            // Desktop or STATIC: no transform
             containerRef.current?.style?.transform = "translateY(0px)"
         }
     }
 
-    // Don't render if hidden
-    if (props.behavior == SearchBarBehavior.HIDDEN) {
-        return@FC
+    // Show shadow based on behavior (only on mobile with STATIC behavior)
+    val showShadow = !isDesktop && props.behavior == SearchBarBehavior.STATIC
+
+    // Build class name based on behavior
+    val containerClass = if (props.behavior == SearchBarBehavior.HIDDEN) {
+        "search-bar-container search-bar-hidden"
+    } else {
+        "search-bar-container"
     }
 
-    // Show shadow based on behavior
-    val showShadow = props.behavior == SearchBarBehavior.STATIC
-
     div {
-        className = ClassName("search-bar-container")
+        className = ClassName(containerClass)
         ref = containerRef
 
         // Search input

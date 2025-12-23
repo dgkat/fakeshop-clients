@@ -13,6 +13,7 @@ html {
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-y: scroll; /* Always show scrollbar to prevent layout shift */
 }
 
 body {
@@ -35,15 +36,76 @@ body {
     padding: 0 var(--spacing-xl);
 }
 
+/* ===== Mobile Search Container (SPA only) ===== */
+/* Mobile: Show search bar outside header */
+.mobile-search-container {
+    display: block;
+}
+
+/* Desktop: Hide mobile search container (search bar is inside header) */
+@media (min-width: 768px) {
+    .mobile-search-container {
+        display: none;
+    }
+}
+
 /* ===== Header (Shared Top Bar) ===== */
+/* Mobile: Header is invisible but search island can still render */
 .header {
-    background-color: var(--color-primary-container);
-    color: var(--color-on-primary-container);
-    padding: var(--spacing-lg) 0;
-    box-shadow: var(--shadow-sm);
-    position: sticky;
-    top: 0;
-    z-index: var(--z-index-sticky);
+    position: relative;
+}
+
+/* Mobile: Hide header content but keep structure for search island */
+@media (max-width: 767px) {
+    .header {
+        height: 0;
+        overflow: visible; /* Allow search island to escape */
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .header-content {
+        visibility: hidden; /* Hide header content */
+        height: 0;
+    }
+
+    /* But keep search island visible */
+    .header-content .island-container {
+        visibility: visible;
+    }
+
+    /* Hide logo and nav on mobile */
+    .header-content .logo,
+    .header-content .desktop-nav,
+    .header-content .back-button {
+        display: none;
+    }
+}
+
+/* Desktop: Fixed header with scroll animations */
+@media (min-width: 768px) {
+    .header {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: var(--z-index-fixed);
+        background-color: var(--color-primary-container);
+        color: var(--color-on-primary-container);
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.3s ease-in-out;
+        will-change: transform;
+    }
+
+    .header-content {
+        padding: var(--spacing-md) 0;
+        min-height: 64px; /* Ensure consistent height across all pages */
+    }
+
+    .header-scroll-hidden {
+        transform: translateY(-100%);
+    }
 }
 
 .header h1 {
@@ -65,19 +127,32 @@ body {
 .header-content {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .header-content {
+        gap: 24px; /* More generous spacing on desktop */
+    }
 }
 
 .logo {
     margin: 0;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     flex-shrink: 0;
+    line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+    .logo {
+        font-size: 24px; /* Consistent size on desktop */
+    }
 }
 
 .logo a {
     text-decoration: none;
-    color: var(--primary-color);
+    color: inherit;
 }
 
 .header-center {
@@ -88,25 +163,54 @@ body {
 .back-button {
     background: transparent;
     border: none;
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    padding: 8px 12px;
-    color: var(--text-primary);
+    padding: 4px 8px;
+    color: inherit;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
-    border-radius: 8px;
-    transition: background 0.2s;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+    line-height: 1;
+    height: 28px; /* Fixed height to match logo */
+    white-space: nowrap;
 }
 
 .back-button:hover {
-    background: var(--surface-hover);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 768px) {
+    .back-button {
+        font-size: 14px;
+        padding: 4px 8px;
+        height: 28px; /* Same as logo to prevent height increase */
+    }
 }
 
 /* ===== Main Content ===== */
 .main-content {
     padding: var(--spacing-2xl) 0;
     min-height: calc(100vh - 200px);
+}
+
+/* Mobile: Padding for fixed search bar + bottom nav */
+@media (max-width: 767px) {
+    .main-content {
+        padding-top: 72px; /* Search bar height */
+        padding-bottom: 80px; /* Bottom nav height */
+    }
+}
+
+/* Desktop: Padding for fixed header (includes search bar) */
+@media (min-width: 768px) {
+    .main-content {
+        padding-top: 120px; /* Header height */
+    }
 }
 
 /* ===== Footer ===== */
@@ -195,15 +299,7 @@ body {
         padding: 0 var(--spacing-lg);
     }
 
-    .header {
-        padding: var(--spacing-md) 0;
-    }
-
     .header h1 {
         font-size: var(--font-size-headline-small);
-    }
-
-    .main-content {
-        padding: var(--spacing-lg) 0;
     }
 }
