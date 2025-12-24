@@ -1,0 +1,23 @@
+/* SPA.CSS - SPA-specific styles only */
+
+.page-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 16px;
+}
+
+.placeholder-icon {
+    font-size: 64px;
+}
+
+.page-placeholder h2 {
+    margin: 0;
+}
+
+.page-placeholder p {
+    color: var(--text-secondary);
+    margin: 0;
+}

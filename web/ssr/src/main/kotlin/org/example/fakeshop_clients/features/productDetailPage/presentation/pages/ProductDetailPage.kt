@@ -59,16 +59,9 @@ fun HTML.productDetailPage(product: FullProduct) {
             href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         )
 
-        // Shared CSS from webCommon
-        link(rel = "stylesheet", href = "/common/css/theme.css")
-        link(rel = "stylesheet", href = "/common/css/base.css")
-        link(rel = "stylesheet", href = "/common/css/components.css")
-        link(rel = "stylesheet", href = "/common/css/navigation.css")
-        link(rel = "stylesheet", href = "/common/css/view-transitions.css")
-        link(rel = "stylesheet", href = "/common/css/search-bar.css")
-
-        // Page-specific CSS
-        link(rel = "stylesheet", href = "/static/css/product-details.css")
+        // CSS Bundles (split bundle approach for optimal caching)
+        link(rel = "stylesheet", href = "/static/css/bundles/common.css")         // Cached across all pages
+        link(rel = "stylesheet", href = "/static/css/bundles/product-detail.css") // Product detail specific
     }
 
     body {
