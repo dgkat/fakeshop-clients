@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		5AA5FFFB340234B9E7F6F090 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		5AA5FFFB340234B9E7F6F090 /* Exceptions for "iosApp" folder in "iosApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,7 +24,7 @@
 		0A153A9F51C9978A7D9C4F81 /* iosApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				5AA5FFFB340234B9E7F6F090 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+				5AA5FFFB340234B9E7F6F090 /* Exceptions for "iosApp" folder in "iosApp" target */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -138,12 +138,16 @@
 /* Begin PBXShellScriptBuildPhase section */
 		490FB71BBFEC8EAAF0287B0C /* Compile Kotlin */ = {
 			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
 			inputPaths = (
 			);
 			name = "Compile Kotlin";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
 			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
 		};
 		50BCE6C78DEAB286111A2D1E /* Compile Kotlin Framework */ = {

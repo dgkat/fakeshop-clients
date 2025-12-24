@@ -33,14 +33,9 @@ fun HTML.spaPage() {
             href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         )
 
-        // CSS
-        link(rel = "stylesheet", href = "/common/css/theme.css")
-        link(rel = "stylesheet", href = "/common/css/base.css")
-        link(rel = "stylesheet", href = "/common/css/components.css")
-        link(rel = "stylesheet", href = "/common/css/navigation.css")
-        link(rel = "stylesheet", href = "/common/css/view-transitions.css")
-        link(rel = "stylesheet", href = "/common/css/spa.css")
-        link(rel = "stylesheet", href = "/common/css/profile-page.css")
+        // CSS Bundles (split bundle approach for optimal caching)
+        link(rel = "stylesheet", href = "/static/css/bundles/common.css")  // Cached across all pages
+        link(rel = "stylesheet", href = "/static/css/bundles/spa.css")     // SPA specific
     }
 
     body {

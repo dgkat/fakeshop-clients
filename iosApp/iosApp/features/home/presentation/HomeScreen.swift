@@ -7,9 +7,9 @@ import SwiftUI
 import ComposeApp
 
 struct HomeView: View {
-    @StateObject private var searchViewModel = SearchViewmodel()
     @StateObject private var productListViewModel = ProductListViewModel()
     @Binding var navigationPath : NavigationPath
+    let onScrollOffsetChange: (CGFloat) -> Void
     
     var body: some View {
         ZStack {
@@ -28,18 +28,11 @@ struct HomeView: View {
                     categories: productListViewModel.state.categories,
                     onProductClick: { productId in
                         navigationPath.append(productId)
-                    }
+                    },
+                    onScrollOffsetChange: onScrollOffsetChange 
                 )
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                SearchBarPlaceholder {
-                    // TODO: Navigate to search screen
-                    print("Search tapped")
-                }
-            }
-        }
     }
 }

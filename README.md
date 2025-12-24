@@ -37,19 +37,29 @@ in your IDE’s toolbar or build it directly from the terminal:
 To build and run the development version of the web app, use the run configuration from the run widget
 in your IDE’s toolbar or run it directly from the terminal:
 1. Install [Node.js](https://nodejs.org/en/download) (which includes `npm`)
-2. Build Kotlin/JS shared code:
-   - on macOS/Linux
-     ```shell
-     ./gradlew :shared:jsBrowserDevelopmentLibraryDistribution
-     ```
-   - on Windows
-     ```shell
-     .\gradlew.bat :shared:jsBrowserDevelopmentLibraryDistribution
-     ```
-3. Build and run the web application
+
+2. Build and run the web application
+
+- Islands bundle (will build and copy to ssr)
    ```shell
-   npm install
-   npm run start
+   ./gradlew :web:islands:copyIslandsBundle
+   ```
+- Spa(webApp) bundle (will build and copy to ssr)
+   ```shell
+   ./gradlew :web:webApp:copySpaBundle
+   ```
+- SSR (Includes islands and spa)
+   ```shell
+   ./gradlew :web:ssr:run
+   ```
+
+For cache related issues
+   ```shell
+  ./gradlew :clean
+   ```
+And for yarnlock related issues
+   ```shell
+  ./gradlew :kotlinUpgradeYarnLock
    ```
 
 ### Build and Run iOS Application
