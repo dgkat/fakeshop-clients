@@ -1,9 +1,12 @@
 package org.example.fakeshop_clients.features.search.presentation
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.features.search.domain.SearchService
@@ -16,6 +19,12 @@ class SearchViewStore(
     private val _searchState = MutableStateFlow(SearchState())
     val searchState: StateFlow<SearchState> = _searchState.asStateFlow()
 
+    private val queryFlow = MutableStateFlow("")
+
+    init {
+        observeQueryChanges()
+    }
+
     fun onEvent(event: SearchEvent) {
         when (event) {
             is SearchEvent.QueryChanged -> onQueryChanged(event.query)
@@ -26,17 +35,26 @@ class SearchViewStore(
         }
     }
 
-    private fun onQueryChanged(query: String) {
-        _searchState.update { it.copy(query = query,isActive = true) }
-
+    @OptIn(FlowPreview::class)
+    private fun observeQueryChanges() {
         scope.launch {
-            // TODO add debounce when real call is added
-            // check if query is empty/hasnt changed
-            // minimum num of characters to search ?
-
-            val searchResults = searchService.searchByQuery(query)
-            _searchState.update { it.copy(results = searchResults) }
+            queryFlow
+                .debounce(300)
+                .filter { it.length >= 2 || it.isEmpty() }
+                .collect { query ->
+                    if (query.isEmpty()) {
+                        _searchState.update { it.copy(results = emptyList()) }
+                    } else {
+                        val searchResults = searchService.searchByQuery(query)
+                        _searchState.update { it.copy(results = searchResults) }
+                    }
+                }
         }
+    }
+
+    private fun onQueryChanged(query: String) {
+        _searchState.update { it.copy(query = query, isActive = true) }
+        queryFlow.update { query }
     }
 
     private fun deactivateSearch() {
@@ -53,7 +71,7 @@ class SearchViewStore(
         deactivateSearch()
     }
 
-    private fun clearQuery(){
+    private fun clearQuery() {
         _searchState.update { it.copy(query = "") }
     }
 }
