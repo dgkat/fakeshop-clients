@@ -17,3 +17,20 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
+kotlin-js-store/
+
+CLAUDE.md
+
+# Generated web bundles (copied by gradle tasks)
+web/ssr/src/main/resources/static/js/islands-bundle.js
+web/ssr/src/main/resources/static/js/islands-bundle.js.map
+web/ssr/src/main/resources/static/js/spa-bundle.js
+web/ssr/src/main/resources/static/js/spa-bundle.js.map
+
+# Generated CSS bundles (created by bundleCss task)
+web/common/build/bundled-css/
+web/ssr/src/main/resources/static/css/bundles/
+
+# Copied web common resources (duplicates of web/common module)
+web/ssr/src/main/resources/common/
+web/webApp/src/jsMain/resources/common/

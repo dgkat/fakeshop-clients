@@ -51,28 +51,23 @@ fun HTML.homePage() {
             href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         )
 
-        // Shared CSS from webCommon
-        link(rel = "stylesheet", href = "/common/css/theme.css")
-        link(rel = "stylesheet", href = "/common/css/base.css")
-        link(rel = "stylesheet", href = "/common/css/components.css")
-        link(rel = "stylesheet", href = "/common/css/navigation.css")
-        link(rel = "stylesheet", href = "/common/css/view-transitions.css")
-
-        // Page-specific CSS
-        link(rel = "stylesheet", href = "/common/static/css/product-list.css")
+        // CSS Bundles (split bundle approach for optimal caching)
+        link(rel = "stylesheet", href = "/static/css/bundles/common.css")  // Cached across all pages
+        link(rel = "stylesheet", href = "/static/css/bundles/home.css")    // Home page specific
     }
 
     body {
         attributes["data-page"] = "home"
         // Header with E-Shop branding and search island
         header(classes = "header") {
+            attributes["data-scroll-behavior"] = "scroll-reactive"
             div(classes = "container header-content") {
-                h1 { +"E-Shop" }
+                h1(classes = "logo") { +"E-Shop" }
 
                 // ===== SEARCH ISLAND CONTAINER =====
                 div {
                     id = "search-island-root"
-                    classes = setOf("island-container")
+                    classes = setOf("island-container", "header-center")
                 }
 
                 // Desktop navigation
@@ -108,5 +103,8 @@ fun HTML.homePage() {
 
         // ===== UNIVERSAL HYDRATOR SCRIPT =====
         script(src = "/static/js/universal-hydrator.js") {}
+
+        // ===== HEADER SCROLL BEHAVIOR (Desktop only) =====
+        script(src = "/static/js/header-scroll.js") {}
     }
 }

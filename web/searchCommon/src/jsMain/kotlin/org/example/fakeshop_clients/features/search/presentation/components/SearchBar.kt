@@ -1,0 +1,118 @@
+package org.example.fakeshop_clients.features.search.presentation.components
+
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.example.fakeshop_clients.features.search.presentation.SearchBarBehavior
+import org.example.fakeshop_clients.features.search.presentation.SearchEvent
+import org.example.fakeshop_clients.features.search.presentation.SearchState
+import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
+import org.example.fakeshop_clients.features.search.presentation.hooks.useScrollOffset
+import react.FC
+import react.Props
+import react.dom.html.ReactHTML.div
+import react.useEffect
+import react.useEffectWithCleanup
+import react.useRef
+import react.useState
+import web.cssom.ClassName
+import web.html.HTMLDivElement
+
+external interface SearchBarProps : Props {
+    var viewModel: SearchViewModel
+    var behavior: SearchBarBehavior
+    var onNavigateToProduct: (String) -> Unit
+}
+
+val SearchBar = FC<SearchBarProps> { props ->
+    var searchState by useState(SearchState())
+
+    // Subscribe to ViewModel state changes
+    useEffectWithCleanup(props.viewModel) {
+        val scope = MainScope()
+        val job = props.viewModel.uiState
+            .onEach { newState ->
+                searchState = newState
+            }
+            .launchIn(scope)
+
+        onCleanup {
+            job.cancel()
+        }
+    }
+
+    // Always call useScrollOffset (hooks must be called unconditionally)
+    val scrollState = useScrollOffset(maxOffset = 72.0)
+    val containerRef = useRef<HTMLDivElement>(null)
+
+    // Check if we're on desktop (>= 768px)
+    val isDesktop by useState { kotlinx.browser.window.matchMedia("(min-width: 768px)").matches }
+
+    // Apply transform to DOM element when scroll state changes
+    // Mobile: Apply transform for scroll-reactive behavior
+    // Desktop: No transform (header handles scrolling)
+    useEffect(scrollState.offset, props.behavior, isDesktop) {
+        if (!isDesktop && props.behavior == SearchBarBehavior.SCROLL_REACTIVE) {
+            // Mobile: apply transform (current behavior)
+            containerRef.current?.style?.transform = "translateY(${scrollState.offset}px)"
+        } else if (props.behavior == SearchBarBehavior.HIDDEN) {
+            // Hidden: let CSS class handle the transform
+            containerRef.current?.style?.transform = ""
+        } else {
+            // Desktop or STATIC: no transform
+            containerRef.current?.style?.transform = "translateY(0px)"
+        }
+    }
+
+    // Show shadow based on behavior (only on mobile with STATIC behavior)
+    val showShadow = !isDesktop && props.behavior == SearchBarBehavior.STATIC
+
+    // Build class name based on behavior
+    val containerClass = if (props.behavior == SearchBarBehavior.HIDDEN) {
+        "search-bar-container search-bar-hidden"
+    } else {
+        "search-bar-container"
+    }
+
+    div {
+        className = ClassName(containerClass)
+        ref = containerRef
+
+        // Search input
+        SearchBarInput {
+            this.query = searchState.query
+            this.showShadow = showShadow
+            this.onQueryChange = { newQuery ->
+                props.viewModel.onEvent(SearchEvent.QueryChanged(newQuery))
+            }
+            this.onClear = {
+                props.viewModel.onEvent(SearchEvent.ClearQuery)
+            }
+        }
+    }
+
+    // Backdrop when active (rendered as sibling to container)
+    if (searchState.isActive && props.behavior != SearchBarBehavior.HIDDEN) {
+        div {
+            SearchBackdrop {
+                this.onClick = {
+                    props.viewModel.onEvent(SearchEvent.CancelClicked)
+                }
+            }
+        }
+    }
+
+    // Results overlay when active (rendered as sibling to container)
+    if (searchState.isActive && props.behavior != SearchBarBehavior.HIDDEN) {
+        div {
+            SearchResultsOverlay {
+                this.results = searchState.results
+                this.isLoading = searchState.isLoading
+                this.onResultClick = { result ->
+                    props.onNavigateToProduct(result.productId)
+                    props.viewModel.onEvent(SearchEvent.CancelClicked)
+                }
+            }
+        }
+    }
+}

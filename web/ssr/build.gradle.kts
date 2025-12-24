@@ -26,12 +26,8 @@ dependencies {
     implementation(project(":shared"))
 }
 
-// Copy webCommon CSS to server resources
-tasks.register<Copy>("copyWebCommonResources") {
-    from("${project(":web:common").projectDir}/src/commonMain/resources")
-    into("${projectDir}/src/main/resources/common")
-}
-
+// CSS bundles are now generated and copied by web:common:copyBundledCss
+// This runs automatically when building the common module
 tasks.named("processResources") {
-    dependsOn("copyWebCommonResources")
+    dependsOn(":web:common:copyBundledCss")
 }
