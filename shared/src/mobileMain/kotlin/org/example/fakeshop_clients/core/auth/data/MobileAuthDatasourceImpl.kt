@@ -1,14 +1,13 @@
 package org.example.fakeshop_clients.core.auth.data
 
 import org.example.fakeshop_clients.core.auth.data.models.LoginRequest
-import org.example.fakeshop_clients.core.auth.data.models.LogoutResponse
 import org.example.fakeshop_clients.core.auth.data.models.RefreshTokenRequest
 import org.example.fakeshop_clients.core.auth.data.models.SignUpRequest
 import org.example.fakeshop_clients.core.auth.data.models.TokenRefreshResponse
-import org.example.fakeshop_clients.core.auth.data.models.UserInfoResponse
 import org.example.fakeshop_clients.core.data.ApiClient
-import org.example.fakeshop_clients.core.data.get
 import org.example.fakeshop_clients.core.data.post
+import org.example.fakeshop_clients.core.error_handling.NetworkError
+import org.example.fakeshop_clients.core.error_handling.Result
 
 class MobileAuthDatasourceImpl(private val authClient: ApiClient) : MobileAuthDatasource {
     override suspend fun signUp(username: String, password: String): TokenRefreshResponse {
@@ -20,13 +19,20 @@ class MobileAuthDatasourceImpl(private val authClient: ApiClient) : MobileAuthDa
         return response
     }
 
-    override suspend fun login(username: String, password: String): TokenRefreshResponse {
+    override suspend fun login(
+        username: String,
+        password: String
+    ): Result<TokenRefreshResponse, NetworkError> {
         val loginRequest = LoginRequest(username, password)
-        val response = authClient.post<TokenRefreshResponse, LoginRequest>(
-            path = "/api/auth/mobile/login",
-            body = loginRequest
-        )
-        return response
+        try {
+            val response = authClient.post<TokenRefreshResponse, LoginRequest>(
+                path = "/api/auth/mobile/login",
+                body = loginRequest
+            )
+            return Result.Success(response)
+        } catch (e: Exception) {
+            return Result.Error(NetworkError())
+        }
     }
 
     override suspend fun refreshToken(refreshToken: String): TokenRefreshResponse {
