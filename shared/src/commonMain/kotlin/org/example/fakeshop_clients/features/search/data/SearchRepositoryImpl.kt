@@ -1,7 +1,6 @@
 package org.example.fakeshop_clients.features.search.data
 
 import org.example.fakeshop_clients.core.error_handling.Result
-import org.example.fakeshop_clients.core.error_handling.map
 import org.example.fakeshop_clients.features.search.domain.SearchRepository
 import org.example.fakeshop_clients.features.search.domain.models.SearchResult
 
