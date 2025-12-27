@@ -7,7 +7,18 @@ class WebAuthRepository(
     private val webAuthDatasource: WebAuthDatasource
 ) : AuthRepository {
     override suspend fun signUp(username: String, password: String): Boolean {
-        return webAuthDatasource.signUp(username = username, password = password)
+        val signUpResponse = webAuthDatasource.signUp(username = username, password = password)
+
+        return when (signUpResponse) {
+            is Result.Success -> {
+                println("SignUp Success")
+                signUpResponse.data
+            }
+            is Result.Error -> {
+                println("SignUp Error: ${signUpResponse.error}")
+                false
+            }
+        }
     }
 
     override suspend fun login(username: String, password: String): Boolean {

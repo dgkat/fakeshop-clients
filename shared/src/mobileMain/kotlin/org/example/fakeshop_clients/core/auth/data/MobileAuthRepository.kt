@@ -10,11 +10,23 @@ class MobileAuthRepository(
     override suspend fun signUp(username: String, password: String): Boolean {
         val signUpResponse = mobileAuthDatasource.signUp(username = username, password = password)
 
-        tokenStorage.saveTokens(
-            accessToken = signUpResponse.accessToken,
-            refreshToken = signUpResponse.refreshToken
-        )
-        return signUpResponse.accessToken.isNotBlank() && signUpResponse.refreshToken.isNotBlank()
+        return when (signUpResponse) {
+            is Result.Success -> {
+                val accessToken = signUpResponse.data.accessToken
+                val refreshToken = signUpResponse.data.refreshToken
+                tokenStorage.saveTokens(
+                    accessToken = accessToken,
+                    refreshToken = refreshToken
+                )
+                println("SignUp Success")
+                accessToken.isNotBlank() && refreshToken.isNotBlank()
+            }
+            is Result.Error -> {
+                signUpResponse.error
+                println("SignUp Error: ${signUpResponse.error}")
+                false
+            }
+        }
     }
 
     override suspend fun login(username: String, password: String): Boolean {
