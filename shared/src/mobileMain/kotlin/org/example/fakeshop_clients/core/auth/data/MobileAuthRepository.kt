@@ -1,55 +1,35 @@
 package org.example.fakeshop_clients.core.auth.data
 
 import org.example.fakeshop_clients.core.auth.domain.AuthRepository
+import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.error_handling.map
 
 class MobileAuthRepository(
     private val mobileAuthDatasource: MobileAuthDatasource,
     private val tokenStorage: TokenStorage
 ) : AuthRepository {
-    override suspend fun signUp(username: String, password: String): Boolean {
-        val signUpResponse = mobileAuthDatasource.signUp(username = username, password = password)
-
-        return when (signUpResponse) {
-            is Result.Success -> {
-                val accessToken = signUpResponse.data.accessToken
-                val refreshToken = signUpResponse.data.refreshToken
-                tokenStorage.saveTokens(
-                    accessToken = accessToken,
-                    refreshToken = refreshToken
-                )
-                println("SignUp Success")
-                accessToken.isNotBlank() && refreshToken.isNotBlank()
-            }
-            is Result.Error -> {
-                signUpResponse.error
-                println("SignUp Error: ${signUpResponse.error}")
-                false
-            }
+    override suspend fun signUp(username: String, password: String): Result<Unit, NetworkError> {
+        return mobileAuthDatasource.signUp(username = username, password = password).map { response ->
+            val accessToken = response.accessToken
+            val refreshToken = response.refreshToken
+            tokenStorage.saveTokens(
+                accessToken = accessToken,
+                refreshToken = refreshToken
+            )
+            println("SignUp Success")
         }
     }
 
-    override suspend fun login(username: String, password: String): Boolean {
-        val loginResponse = mobileAuthDatasource.login(username = username, password = password)
-
-        when (loginResponse) {
-            is Result.Success -> {
-                val accessToken = loginResponse.data.accessToken
-                val refreshToken = loginResponse.data.refreshToken
-                tokenStorage.saveTokens(
-                    accessToken = accessToken,
-                    refreshToken = refreshToken
-                )
-                println("LoginResult Success")
-                return accessToken.isNotBlank() && refreshToken.isNotBlank()
-            }
-
-            is Result.Error -> {
-                loginResponse.error
-                println("LoginResult Error")
-                return false
-            }
-
+    override suspend fun login(username: String, password: String): Result<Unit, NetworkError> {
+        return mobileAuthDatasource.login(username = username, password = password).map { response ->
+            val accessToken = response.accessToken
+            val refreshToken = response.refreshToken
+            tokenStorage.saveTokens(
+                accessToken = accessToken,
+                refreshToken = refreshToken
+            )
+            println("LoginResult Success")
         }
     }
 }

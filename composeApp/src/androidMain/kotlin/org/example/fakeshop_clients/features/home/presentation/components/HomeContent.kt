@@ -61,8 +61,9 @@ fun HomeContent(
     }
 
     productListState.error?.let {
+        //TODO handle error
         ErrorState(
-            message = it,
+            message = "error",
             onRetry = onRetry,
             modifier = modifier
         )

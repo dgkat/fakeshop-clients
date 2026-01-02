@@ -42,9 +42,10 @@ fun ProfileContent(
                 CircularProgressIndicator()
             }
             profileState.isLoggedIn -> {
+                //TODO handle errors
                 LoggedInContent(
                     isProcessing = profileState.isProcessing,
-                    error = profileState.error,
+                    error = "Logged in error",
                     onEvent = onEvent
                 )
             }
@@ -53,7 +54,7 @@ fun ProfileContent(
                     email = profileState.email,
                     password = profileState.password,
                     isProcessing = profileState.isProcessing,
-                    error = profileState.error,
+                    error = "Logged out error",
                     onEvent = onEvent
                 )
             }

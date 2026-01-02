@@ -5,6 +5,6 @@ data class ProfileState(
     val isLoading: Boolean = true,
     val email: String = "",
     val password: String = "",
-    val error: String? = null,
+    val error: ProfileError? = null,
     val isProcessing: Boolean = false
 )

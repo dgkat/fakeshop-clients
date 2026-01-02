@@ -1,37 +1,33 @@
 package org.example.fakeshop_clients.core.data
 
 import org.example.fakeshop_clients.core.auth.domain.AuthRepository
+import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.error_handling.flatMap
 
 class WebAuthRepository(
     private val webAuthDatasource: WebAuthDatasource
 ) : AuthRepository {
-    override suspend fun signUp(username: String, password: String): Boolean {
-        val signUpResponse = webAuthDatasource.signUp(username = username, password = password)
-
-        return when (signUpResponse) {
-            is Result.Success -> {
+    override suspend fun signUp(username: String, password: String): Result<Unit, NetworkError> {
+        return webAuthDatasource.signUp(username = username, password = password).flatMap { success ->
+            if (success) {
                 println("SignUp Success")
-                signUpResponse.data
-            }
-            is Result.Error -> {
-                println("SignUp Error: ${signUpResponse.error}")
-                false
+                Result.Success(Unit)
+            } else {
+                println("SignUp Error: Invalid credentials")
+                Result.Error(NetworkError.Unknown("Sign up failed"))
             }
         }
     }
 
-    override suspend fun login(username: String, password: String): Boolean {
-        val loginResponse = webAuthDatasource.login(username = username, password = password)
-
-        when (loginResponse) {
-            is Result.Error -> {
-                println("LoginResult Error")
-                return false
-            }
-            is Result.Success -> {
+    override suspend fun login(username: String, password: String): Result<Unit, NetworkError> {
+        return webAuthDatasource.login(username = username, password = password).flatMap { success ->
+            if (success) {
                 println("LoginResult Success")
-                return loginResponse.data
+                Result.Success(Unit)
+            } else {
+                println("LoginResult Error")
+                Result.Error(NetworkError.Unknown("Login failed"))
             }
         }
     }

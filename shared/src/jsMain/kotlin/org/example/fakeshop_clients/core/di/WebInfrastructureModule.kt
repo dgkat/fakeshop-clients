@@ -63,5 +63,5 @@ val webInfrastructureModule = module {
         )
     }
 
-    factory<LogoutUser> { WebLogoutUser(get()) }
+    factory<LogoutUser> { WebLogoutUser(get<SafeAuthenticatedApiClient>()) }
 }

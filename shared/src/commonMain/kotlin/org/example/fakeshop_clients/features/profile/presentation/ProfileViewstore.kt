@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.profile.domain.ProfileService
 
 class ProfileViewStore(
@@ -22,25 +23,28 @@ class ProfileViewStore(
     }
 
     private suspend fun checkLoginStatus() {
-        //TODO update when
         _profileState.update { it.copy(isLoading = true) }
-        try {
-            val isLoggedIn = profileService.checkLoginStatus()
-            _profileState.update {
-                it.copy(
-                    isLoggedIn = isLoggedIn,
-                    isLoading = false,
-                    error = null
-                )
+
+        profileService.checkLoginStatus().fold(
+            onSuccess = { isLoggedIn ->
+                _profileState.update {
+                    it.copy(
+                        isLoggedIn = isLoggedIn,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            },
+            onError = { networkError ->
+                _profileState.update {
+                    it.copy(
+                        isLoggedIn = false,
+                        isLoading = false,
+                        error = ProfileError.Network(networkError)
+                    )
+                }
             }
-        } catch (e: Exception) {
-            _profileState.update {
-                it.copy(
-                    isLoading = false,
-                    error = null
-                )
-            }
-        }
+        )
     }
 
     fun onEvent(event: ProfileEvent) {
@@ -71,75 +75,78 @@ class ProfileViewStore(
         val currentState = _profileState.value
         _profileState.update { it.copy(isProcessing = true, error = null) }
 
-        try {
-            val isLoggedIn = profileService.login(currentState.email, currentState.password)
-
-            _profileState.update {
-                it.copy(
-                    isLoggedIn = isLoggedIn,
-                    isProcessing = false,
-                    email = "",
-                    password = "",
-                    error = null
-                )
+        profileService.login(currentState.email, currentState.password).fold(
+            onSuccess = {
+                _profileState.update {
+                    it.copy(
+                        isLoggedIn = true,
+                        isProcessing = false,
+                        email = "",
+                        password = "",
+                        error = null
+                    )
+                }
+            },
+            onError = { networkError ->
+                _profileState.update {
+                    it.copy(
+                        isProcessing = false,
+                        error = ProfileError.Network(networkError)
+                    )
+                }
             }
-        } catch (e: Exception) {
-            _profileState.update {
-                it.copy(
-                    isLoading = false,
-                    error = e.message ?: "Login failed"
-                )
-            }
-        }
+        )
     }
 
     private suspend fun handleSignUp() {
         val currentState = _profileState.value
         _profileState.update { it.copy(isProcessing = true, error = null) }
 
-        try {
-            val isLoggedIn = profileService.signUp(currentState.email, currentState.password)
-
-            _profileState.update {
-                it.copy(
-                    isLoggedIn = isLoggedIn,
-                    isProcessing = false,
-                    email = "",
-                    password = "",
-                    error = null
-                )
+        profileService.signUp(currentState.email, currentState.password).fold(
+            onSuccess = {
+                _profileState.update {
+                    it.copy(
+                        isLoggedIn = true,
+                        isProcessing = false,
+                        email = "",
+                        password = "",
+                        error = null
+                    )
+                }
+            },
+            onError = { networkError ->
+                _profileState.update {
+                    it.copy(
+                        isProcessing = false,
+                        error = ProfileError.Network(networkError)
+                    )
+                }
             }
-        } catch (e: Exception) {
-            _profileState.update {
-                it.copy(
-                    isLoading = false,
-                    error = e.message ?: "Sign up failed"
-                )
-            }
-        }
+        )
     }
 
     private suspend fun handleLogout() {
         _profileState.update { it.copy(isProcessing = true, error = null) }
 
-        try {
-            val logoutSuccess = profileService.logout()
-
-            _profileState.update {
-                it.copy(
-                    isLoggedIn = false,
-                    isProcessing = false,
-                    error = null
-                )
+        profileService.logout().fold(
+            onSuccess = {
+                _profileState.update {
+                    it.copy(
+                        isLoggedIn = false,
+                        isProcessing = false,
+                        error = null
+                    )
+                }
+            },
+            onError = { networkError ->
+                _profileState.update {
+                    it.copy(
+                        isProcessing = false,
+                        error = ProfileError.Network(networkError)
+                    )
+                }
             }
-        } catch (e: Exception) {
-            _profileState.update {
-                it.copy(
-                    isLoading = false,
-                    error = e.message ?: "Log Out failed"
-                )
-            }
-        }
+        )
     }
 
 }
