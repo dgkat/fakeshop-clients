@@ -21,7 +21,10 @@ class MobileLogoutUser(
             path = "/api/auth/mobile/logout",
             body = logoutRequest
         ).map { _ ->
+
             tokenStorage.clearTokens()
+
+            authClient.clearTokenCache()
         }
     }
 }

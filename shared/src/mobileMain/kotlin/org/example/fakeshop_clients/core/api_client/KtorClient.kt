@@ -2,6 +2,8 @@ package org.example.fakeshop_clients.core.api_client
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.auth.authProvider
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -45,5 +47,9 @@ class KtorClient(val http: HttpClient) : ApiClient {
     override suspend fun <T : Any> delete(path: String, responseType: KClass<T>): T {
         val response = http.delete(path)
         return response.body(TypeInfo(responseType)) as T
+    }
+
+    override fun clearTokenCache() {
+        http.authProvider<BearerAuthProvider>()?.clearToken()
     }
 }

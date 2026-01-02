@@ -7,4 +7,11 @@ package org.example.fakeshop_clients.core.data
 class SafeAuthenticatedApiClient(
     client: ApiClient,
     exceptionMapper: NetworkExceptionMapper
-) : BaseSafeApiClient(client, exceptionMapper)
+) : BaseSafeApiClient(client, exceptionMapper) {
+
+    /**
+     * Clears the internal authentication token cache.
+     * Should be called after logout to ensure cached tokens are invalidated.
+     */
+    fun clearTokenCache() = client.clearTokenCache()
+}
