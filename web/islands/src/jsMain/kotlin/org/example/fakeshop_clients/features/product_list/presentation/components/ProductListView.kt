@@ -46,7 +46,7 @@ val ProductListView = FC<ProductListProps> { props ->
 
             state.error != null -> {
                 ErrorView {
-                    errorMessage = state.error!!
+                    errorMessage = state.error.toString()
                 }
             }
 

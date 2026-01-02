@@ -43,7 +43,7 @@ val ProfileView = FC<ProfileProps> { props ->
             state.isLoggedIn -> {
                 LoggedInView {
                     isProcessing = state.isProcessing
-                    error = state.error
+                    error = state.error.toString()
                     onLogout = {
                         props.viewModel?.onEvent(ProfileEvent.LogoutClicked)
                     }
@@ -55,7 +55,7 @@ val ProfileView = FC<ProfileProps> { props ->
                     email = state.email
                     password = state.password
                     isProcessing = state.isProcessing
-                    error = state.error
+                    error = state.error.toString()
                     onEmailChange = { newEmail ->
                         props.viewModel?.onEvent(ProfileEvent.EmailChanged(newEmail))
                     }
