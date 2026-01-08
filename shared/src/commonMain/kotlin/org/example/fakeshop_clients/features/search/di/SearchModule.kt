@@ -10,7 +10,7 @@ import org.koin.dsl.module
 
 val searchModule = module {
     factory<SearchDatasource> {
-        SearchDatasourceImpl(client = get())
+        SearchDatasourceImpl(authClient = get())
     }
 
     factory<SearchRepository> {

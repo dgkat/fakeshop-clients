@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.home.domain.GetProductsUseCase
 
 class HomeViewStore(
@@ -23,12 +24,14 @@ class HomeViewStore(
         _uiState.value = HomeState.Loading
 
         scope.launch {
-            try {
-                val products = getProductsUseCase()
-                _uiState.value = HomeState.Success(products)
-            } catch (e: Exception) {
-                _uiState.value = HomeState.Error(e.message ?: "Unknown error occurred")
-            }
+            getProductsUseCase().fold(
+                onSuccess = { products ->
+                    _uiState.value = HomeState.Success(products)
+                },
+                onError = { networkError ->
+                    _uiState.value = HomeState.Error(HomeError.Network(networkError))
+                }
+            )
         }
     }
 

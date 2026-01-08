@@ -13,7 +13,7 @@ val profileModule = module {
 
     factory<ProfileDatasource> {
         ProfileDatasourceImpl(
-            client = get()
+            authClient = get()
         )
     }
 

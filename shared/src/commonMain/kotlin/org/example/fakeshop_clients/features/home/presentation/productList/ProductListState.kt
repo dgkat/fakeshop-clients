@@ -1,11 +1,12 @@
 package org.example.fakeshop_clients.features.home.presentation.productList
 
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
+import org.example.fakeshop_clients.features.home.presentation.HomeError
 
 data class ProductListState(
     val categories: List<CategoryRow> = emptyList(),
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: HomeError? = null
 )
 
 data class CategoryRow(

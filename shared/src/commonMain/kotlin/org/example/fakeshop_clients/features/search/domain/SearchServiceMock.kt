@@ -1,5 +1,7 @@
 package org.example.fakeshop_clients.features.search.domain
 
+import org.example.fakeshop_clients.core.error_handling.NetworkError
+import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.features.search.domain.models.SearchResult
 
 class SearchServiceMock:SearchService {
@@ -21,12 +23,12 @@ class SearchServiceMock:SearchService {
         SearchResult("15", "Tablet Stand")
     )
 
-    override suspend fun searchByQuery(query: String): List<SearchResult> {
+    override suspend fun searchByQuery(query: String): Result<List<SearchResult>, NetworkError> {
         val results = mockProducts.filter {
             it.productName.contains(query, ignoreCase = true)
         }
 
-        return results
+        return Result.Success(results)
     }
 
 }

@@ -20,8 +20,12 @@ struct HomeView: View {
                 VStack {
                     Text("Error")
                         .font(.headline)
-                    Text(error)
-                        .foregroundColor(.secondary)
+                    switch onEnum(of: error) {
+                    case .network(let networkError):
+                        Text("Network error: \(networkError.error)")
+                    case .noProducts:
+                        Text("No products available")
+                    }
                 }
             } else {
                 ProductListContent(

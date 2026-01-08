@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.search.domain.SearchService
 
 class SearchViewStore(
@@ -42,11 +43,35 @@ class SearchViewStore(
                 .debounce(300)
                 .filter { it.length >= 2 || it.isEmpty() }
                 .collect { query ->
-                    if (query.isEmpty()) {
-                        _searchState.update { it.copy(results = emptyList()) }
-                    } else {
-                        val searchResults = searchService.searchByQuery(query)
-                        _searchState.update { it.copy(results = searchResults) }
+                    when {
+                        query.isEmpty() -> {
+                            _searchState.update { it.copy(results = emptyList(), error = null) }
+                        }
+                        query.length < 2 -> {
+                            _searchState.update {
+                                it.copy(results = emptyList(), error = SearchError.TooShort)
+                            }
+                        }
+                        else -> {
+                            _searchState.update { it.copy(isLoading = true, error = null) }
+
+                            searchService.searchByQuery(query).fold(
+                                onSuccess = { results ->
+                                    _searchState.update {
+                                        it.copy(results = results, isLoading = false, error = null)
+                                    }
+                                },
+                                onError = { networkError ->
+                                    _searchState.update {
+                                        it.copy(
+                                            results = emptyList(),
+                                            isLoading = false,
+                                            error = SearchError.Network(networkError)
+                                        )
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
         }

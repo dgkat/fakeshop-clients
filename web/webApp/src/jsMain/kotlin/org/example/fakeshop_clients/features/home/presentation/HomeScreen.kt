@@ -66,8 +66,9 @@ val HomeScreenWeb = FC<HomeScreenWebProps> { props ->
                 }
 
                 is HomeState.Error -> {
+                    //TODO handle errors correctly
                     ErrorState {
-                        message = state.message
+                        message = state.error.toString()
                         onRetry = props.viewModel::loadProducts
                     }
                 }

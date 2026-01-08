@@ -5,5 +5,5 @@ import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 sealed class HomeState {
     data object Loading : HomeState()
     data class Success(val products: List<UiBriefProduct>) : HomeState()
-    data class Error(val message: String) : HomeState()
+    data class Error(val error: HomeError) : HomeState()
 }

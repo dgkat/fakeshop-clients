@@ -6,8 +6,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import org.example.fakeshop_clients.features.home.domain.ProductListService
+import org.example.fakeshop_clients.features.home.presentation.HomeError
 
 class ProductListViewStore(
     private val scope: CoroutineScope,
@@ -23,33 +25,33 @@ class ProductListViewStore(
     }
 
     suspend fun loadCategories() {
-        try {
-            _productListState.value = ProductListState(isLoading = true)
-            delay(500)
+        _productListState.value = ProductListState(isLoading = true)
+        delay(500)
 
-            val categories = FakeDataGenerator.getAllCategories()
-            println("productListService accessed, size: ${productListService.getProducts().size}")
+        val categories = FakeDataGenerator.getAllCategories()
 
-            _productListState.value = ProductListState(
-                categories = categories,
-                isLoading = false,
-                error = null
-            )
+        // Test product list service call
+        productListService.getProducts().fold(
+            onSuccess = { products ->
+                println("productListService accessed, size: ${products.size}")
+            },
+            onError = { error ->
+                println("productListService error: $error")
+            }
+        )
 
-            productListService.testApiCalls()
+        _productListState.value = ProductListState(
+            categories = categories,
+            isLoading = false,
+            error = null
+        )
 
-        } catch (e: Exception) {
-            println("Error loading categories: ${e.message}")
-            /*_productListState.value = ProductListState(
-                isLoading = false,
-                error = e.message
-            )*/
-        }
+        productListService.testApiCalls()
     }
 }
 
 object FakeDataGenerator {
-    private val categories = listOf("Electronics", "Clothing", "Books", "Home & Garden")
+    private val categories = listOf("Electronics", "Clothing", "Books", "Home & Garden","5th Cat")
 
     fun getCategoryProducts(category: String): List<UiBriefProduct> {
         return (1..5).map { i ->

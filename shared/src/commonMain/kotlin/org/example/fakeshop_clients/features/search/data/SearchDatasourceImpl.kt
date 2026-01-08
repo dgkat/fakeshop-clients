@@ -1,15 +1,16 @@
 package org.example.fakeshop_clients.features.search.data
 
-import org.example.fakeshop_clients.core.data.ApiClient
+import org.example.fakeshop_clients.core.data.SafeAuthenticatedApiClient
 import org.example.fakeshop_clients.core.data.get
+import org.example.fakeshop_clients.core.error_handling.NetworkError
+import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.features.search.data.models.SearchResponse
 
-class SearchDatasourceImpl(private val client: ApiClient) : SearchDatasource {
+class SearchDatasourceImpl(
+    private val authClient: SafeAuthenticatedApiClient
+) : SearchDatasource {
 
-    override suspend fun searchProducts(query: String): SearchResponse {
-        val searchResponse = client.get<SearchResponse>(
-            path = "/api/search?q=$query"
-        )
-        return searchResponse
+    override suspend fun searchProducts(query: String): Result<SearchResponse, NetworkError> {
+        return authClient.get(path = "/api/search?q=$query")
     }
 }

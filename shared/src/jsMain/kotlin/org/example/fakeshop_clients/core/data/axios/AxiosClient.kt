@@ -9,6 +9,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.WebAuthDatasource
+import org.example.fakeshop_clients.core.error_handling.Result
 import kotlin.js.Promise
 import kotlin.reflect.KClass
 
@@ -78,15 +79,31 @@ class AxiosClient(
 
                     return@use scope.promise {
                         try {
-                            webAuthDatasource.refreshToken()
+                            //TODO clean up try/catch ( already in .refreshToken) and else + Result.Error (duplicate)
+                            val refreshResult = webAuthDatasource.refreshToken()
 
-                            console.log("Token refresh successful")
-
-                            onTokenRefreshed()
-
-                            retryRequest(originalRequest).await()
+                            when (refreshResult) {
+                                is Result.Success -> {
+                                    if (refreshResult.data) {
+                                        console.log("Token refresh successful")
+                                        onTokenRefreshed()
+                                        retryRequest(originalRequest).await()
+                                    } else {
+                                        val error = Exception("Token refresh returned false")
+                                        console.error("Token refresh failed:", error)
+                                        onTokenRefreshFailed(error)
+                                        throw error
+                                    }
+                                }
+                                is Result.Error -> {
+                                    val error = Exception("Token refresh failed: ${refreshResult.error}")
+                                    console.error("Token refresh failed:", error)
+                                    onTokenRefreshFailed(error)
+                                    throw error
+                                }
+                            }
                         } catch (refreshError: Throwable) {
-                            console.error("Token refresh failed:", refreshError)
+                            console.error("Token refresh exception:", refreshError)
                             onTokenRefreshFailed(refreshError)
                             throw refreshError
                         } finally {
