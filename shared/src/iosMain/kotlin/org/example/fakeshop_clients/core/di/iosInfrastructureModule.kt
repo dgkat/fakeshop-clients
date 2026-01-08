@@ -19,7 +19,7 @@ val iosInfrastructureModule = module {
         parsedUrl
     }
     single<TokenStorage> {
-        KeychainTokenStorage()
+        KeychainTokenStorage(dispatcherProvider = get())
     }
     single<HttpClientEngine> {
         Darwin.create()
