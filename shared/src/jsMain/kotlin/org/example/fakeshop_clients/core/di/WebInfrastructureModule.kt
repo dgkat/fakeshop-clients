@@ -2,6 +2,8 @@ package org.example.fakeshop_clients.core.di
 
 import org.example.fakeshop_clients.core.auth.data.LogoutUser
 import org.example.fakeshop_clients.core.auth.domain.AuthRepository
+import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
+import org.example.fakeshop_clients.core.concurrency.WebDispatcherProvider
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.AxiosNetworkExceptionMapper
 import org.example.fakeshop_clients.core.data.NetworkExceptionMapper
@@ -64,4 +66,8 @@ val webInfrastructureModule = module {
     }
 
     factory<LogoutUser> { WebLogoutUser(get<SafeAuthenticatedApiClient>()) }
+
+    single<DispatcherProvider> {
+        WebDispatcherProvider()
+    }
 }

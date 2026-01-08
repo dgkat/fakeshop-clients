@@ -4,6 +4,8 @@ import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.http.Url
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
+import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
+import org.example.fakeshop_clients.core.concurrency.IosDispatcherProvider
 import org.example.fakeshop_clients.core.data.KeychainTokenStorage
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -21,5 +23,9 @@ val iosInfrastructureModule = module {
     }
     single<HttpClientEngine> {
         Darwin.create()
+    }
+
+    single<DispatcherProvider> {
+        IosDispatcherProvider()
     }
 }

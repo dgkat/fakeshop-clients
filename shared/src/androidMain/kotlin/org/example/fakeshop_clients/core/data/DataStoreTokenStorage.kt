@@ -16,13 +16,18 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import android.util.Base64
+import kotlinx.coroutines.withContext
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
+import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = "secure_token_storage"
 )
 
-class DataStoreTokenStorage(private val context: Context) : TokenStorage {
+class DataStoreTokenStorage(
+    private val context: Context,
+    private val dispatcherProvider: DispatcherProvider
+) : TokenStorage {
 
     private val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
 
@@ -33,9 +38,11 @@ class DataStoreTokenStorage(private val context: Context) : TokenStorage {
         cachedAccessToken = accessToken
 
         try {
-            context.dataStore.edit { preferences ->
-                preferences[ACCESS_TOKEN_KEY] = encrypt(accessToken)
-                preferences[REFRESH_TOKEN_KEY] = encrypt(refreshToken)
+            withContext(dispatcherProvider.io) {
+                context.dataStore.edit { preferences ->
+                    preferences[ACCESS_TOKEN_KEY] = encrypt(accessToken)
+                    preferences[REFRESH_TOKEN_KEY] = encrypt(refreshToken)
+                }
             }
         } catch (e: Exception) {
             throw SecurityException("Failed to save tokens securely", e)
@@ -44,11 +51,13 @@ class DataStoreTokenStorage(private val context: Context) : TokenStorage {
 
     override suspend fun getAccessToken(): String? {
         return cachedAccessToken ?: try {
-            context.dataStore.data
-                .map { preferences -> preferences[ACCESS_TOKEN_KEY] }
-                .first()
-                ?.let { decrypt(it) }
-                ?.also { cachedAccessToken = it }
+            withContext(dispatcherProvider.io) {
+                context.dataStore.data
+                    .map { preferences -> preferences[ACCESS_TOKEN_KEY] }
+                    .first()
+                    ?.let { decrypt(it) }
+                    ?.also { cachedAccessToken = it }
+            }
         } catch (_: Exception) {
             null
         }
@@ -56,10 +65,12 @@ class DataStoreTokenStorage(private val context: Context) : TokenStorage {
 
     override suspend fun getRefreshToken(): String? {
         return try {
-            context.dataStore.data
-                .map { preferences -> preferences[REFRESH_TOKEN_KEY] }
-                .first()
-                ?.let { decrypt(it) }
+            withContext(dispatcherProvider.io) {
+                context.dataStore.data
+                    .map { preferences -> preferences[REFRESH_TOKEN_KEY] }
+                    .first()
+                    ?.let { decrypt(it) }
+            }
         } catch (_: Exception) {
             null
         }
@@ -67,9 +78,11 @@ class DataStoreTokenStorage(private val context: Context) : TokenStorage {
 
     override suspend fun clearTokens() {
         cachedAccessToken = null
-        context.dataStore.edit { preferences ->
-            preferences.remove(ACCESS_TOKEN_KEY)
-            preferences.remove(REFRESH_TOKEN_KEY)
+        withContext(dispatcherProvider.io) {
+            context.dataStore.edit { preferences ->
+                preferences.remove(ACCESS_TOKEN_KEY)
+                preferences.remove(REFRESH_TOKEN_KEY)
+            }
         }
     }
 
