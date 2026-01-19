@@ -6,7 +6,9 @@ import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.value
+import kotlinx.coroutines.withContext
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
+import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
 import platform.CoreFoundation.CFDictionaryAddValue
 import platform.CoreFoundation.CFDictionaryCreateMutable
 import platform.CoreFoundation.CFRelease
@@ -37,30 +39,40 @@ import platform.Security.kSecValueData
 import kotlin.concurrent.Volatile
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-class KeychainTokenStorage : TokenStorage {
+class KeychainTokenStorage(
+    private val dispatcherProvider: DispatcherProvider
+) : TokenStorage {
 
     @Volatile
     private var cachedAccessToken: String? = null
 
     override suspend fun saveTokens(accessToken: String, refreshToken: String) {
         cachedAccessToken = accessToken
-        saveToKeychain(ACCESS_TOKEN_KEY, accessToken)
-        saveToKeychain(REFRESH_TOKEN_KEY, refreshToken)
+        withContext(dispatcherProvider.io) {
+            saveToKeychain(ACCESS_TOKEN_KEY, accessToken)
+            saveToKeychain(REFRESH_TOKEN_KEY, refreshToken)
+        }
     }
 
     override suspend fun getAccessToken(): String? {
-        return cachedAccessToken ?: readFromKeychain(ACCESS_TOKEN_KEY)
-            ?.also { cachedAccessToken = it }
+        return cachedAccessToken ?: withContext(dispatcherProvider.io) {
+            readFromKeychain(ACCESS_TOKEN_KEY)
+                ?.also { cachedAccessToken = it }
+        }
     }
 
     override suspend fun getRefreshToken(): String? {
-        return readFromKeychain(REFRESH_TOKEN_KEY)
+        return withContext(dispatcherProvider.io) {
+            readFromKeychain(REFRESH_TOKEN_KEY)
+        }
     }
 
     override suspend fun clearTokens() {
         cachedAccessToken = null
-        deleteFromKeychain(ACCESS_TOKEN_KEY)
-        deleteFromKeychain(REFRESH_TOKEN_KEY)
+        withContext(dispatcherProvider.io) {
+            deleteFromKeychain(ACCESS_TOKEN_KEY)
+            deleteFromKeychain(REFRESH_TOKEN_KEY)
+        }
     }
 
     private fun saveToKeychain(key: String, value: String) {
