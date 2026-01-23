@@ -1,4 +1,4 @@
-package org.example.fakeshop_clients.features.home.presentation
+package org.example.fakeshop_clients.features.home.presentation.productList
 
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 
