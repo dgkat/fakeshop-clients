@@ -17,6 +17,7 @@ val CategoriesView = FC<CategoriesViewProps> { props ->
 
         props.categories.forEach { categoryRow ->
             CategorySection {
+                key = categoryRow.category
                 category = categoryRow
                 onProductClick = props.onProductClick
             }
