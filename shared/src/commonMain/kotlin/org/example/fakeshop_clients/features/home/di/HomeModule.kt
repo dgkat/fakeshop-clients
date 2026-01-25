@@ -1,20 +1,31 @@
 package org.example.fakeshop_clients.features.home.di
 
-import org.example.fakeshop_clients.features.home.domain.GetProductsUseCase
+import org.example.fakeshop_clients.features.home.data.ProductListDatasource
+import org.example.fakeshop_clients.features.home.data.ProductListDatasourceImpl
+import org.example.fakeshop_clients.features.home.data.mappers.RemoteBriefProductMapper
 import org.example.fakeshop_clients.features.home.domain.ProductListService
 import org.example.fakeshop_clients.features.home.domain.ProductListServiceImpl
 import org.koin.dsl.module
 
 val homeModule = module {
 
-    // Domain
-    factory<GetProductsUseCase> {
-        GetProductsUseCase()
+    // Data
+    factory<ProductListDatasource> {
+        ProductListDatasourceImpl(
+            authClient = get()
+        )
     }
+
+    factory {
+        RemoteBriefProductMapper()
+    }
+
+    // Domain
 
     factory<ProductListService> {
         ProductListServiceImpl(
-            authRepository = get(),
+            datasource = get(),
+            mapper = get()
         )
     }
 }

@@ -68,6 +68,7 @@ val CategorySection = FC<CategorySectionProps> { props ->
 
                 props.category.products.forEach { product ->
                     ProductCard {
+                        key = product.id
                         this.product = product
                         onClick = props.onProductClick
                     }
