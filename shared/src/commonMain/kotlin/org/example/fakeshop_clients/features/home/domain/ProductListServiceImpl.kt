@@ -15,7 +15,7 @@ class ProductListServiceImpl(
     private val mapper: RemoteBriefProductMapper
 ) : ProductListService {
 
-    private val categories = listOf("Electronics", "Clothing", "Books", "Home & Garden", "Sports")
+    private val categories = listOf("Electronics", "Clothing", "Books", "Home", "Sports")
 
     override fun getProducts(): Flow<Result<CategoryRow, NetworkError>> = channelFlow {
         val jobs = categories.map { category ->
