@@ -26,12 +26,6 @@ fun ProductDetailScreen(
     productId: String,
     onNavigateBack: () -> Unit,
 ) {
-    /*LaunchedEffect(productId) {
-        productDetailViewModel.loadProduct(productId)
-    }
-
-    val uiState by productDetailViewModel.uiState.collectAsStateWithLifecycle()
-*/
     Scaffold(
         topBar = {
             TopAppBar(

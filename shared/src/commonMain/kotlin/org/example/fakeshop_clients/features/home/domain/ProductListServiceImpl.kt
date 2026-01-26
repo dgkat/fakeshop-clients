@@ -7,12 +7,10 @@ import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.features.home.data.ProductListDatasource
-import org.example.fakeshop_clients.features.home.data.mappers.RemoteBriefProductMapper
-import org.example.fakeshop_clients.features.home.presentation.productList.CategoryRow
+import org.example.fakeshop_clients.features.home.domain.models.CategoryRow
 
 class ProductListServiceImpl(
-    private val datasource: ProductListDatasource,
-    private val mapper: RemoteBriefProductMapper
+    private val repository: ProductListRepository
 ) : ProductListService {
 
     private val categories = listOf("Electronics", "Clothing", "Books", "Home", "Sports")
@@ -20,10 +18,9 @@ class ProductListServiceImpl(
     override fun getProducts(): Flow<Result<CategoryRow, NetworkError>> = channelFlow {
         val jobs = categories.map { category ->
             launch {
-                when (val result = datasource.getProductsByCategory(category, limit = 5)) {
+                when (val result = repository.getProductsByCategory(category, limit = 5)) {
                     is Result.Success -> {
-                        val products = mapper.map(result.data.briefProducts)
-                        send(Result.Success(CategoryRow(category = category, products = products)))
+                        send(Result.Success(CategoryRow(category = category, products = result.data)))
                     }
                     is Result.Error -> {
                         send(Result.Error(result.error))

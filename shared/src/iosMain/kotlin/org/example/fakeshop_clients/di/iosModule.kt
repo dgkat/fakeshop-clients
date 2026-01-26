@@ -17,7 +17,8 @@ val iosModule = module {
     factory { (scope: CoroutineScope) ->
         ProductListViewStore(
             scope = scope,
-            productListService = get()
+            productListService = get(),
+            mapper = get()
         )
     }
 

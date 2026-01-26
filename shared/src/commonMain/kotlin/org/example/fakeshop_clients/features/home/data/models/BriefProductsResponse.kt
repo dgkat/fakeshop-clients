@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BriefProductsResponse(
-    val briefProducts: List<RemoteBriefProduct>
+    val briefProducts: List<BriefProductResponse>
 )
 

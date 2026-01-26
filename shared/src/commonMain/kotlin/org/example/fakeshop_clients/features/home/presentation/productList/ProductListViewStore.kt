@@ -7,10 +7,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.features.home.domain.ProductListService
+import org.example.fakeshop_clients.features.home.domain.mappers.DomainToPresentationBriefProductMapper
 
 class ProductListViewStore(
     private val scope: CoroutineScope,
-    private val productListService: ProductListService
+    private val productListService: ProductListService,
+    private val mapper: DomainToPresentationBriefProductMapper
 ) {
     private val _productListState = MutableStateFlow(ProductListState(isLoading = true))
     val productListState: StateFlow<ProductListState> = _productListState.asStateFlow()
@@ -29,7 +31,12 @@ class ProductListViewStore(
         productListService.getProducts().collect { result ->
             when (result) {
                 is Result.Success -> {
-                    accumulatedCategories.add(result.data)
+                    val domainCategoryRow = result.data
+                    val uiCategoryRow = CategoryRow(
+                        category = domainCategoryRow.category,
+                        products = mapper.map(domainCategoryRow.products)
+                    )
+                    accumulatedCategories.add(uiCategoryRow)
                     _productListState.value = ProductListState(
                         categories = accumulatedCategories.toList(),
                         isLoading = true,
