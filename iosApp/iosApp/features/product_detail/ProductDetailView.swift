@@ -87,7 +87,7 @@ struct ProductContentView: View {
 
     var body: some View {
         ScrollableVStack(onScroll: onScrollOffsetChange) {
-            VStack(alignment: .leading, spacing: 0) {
+            LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
                 // Image Section
                 ImageSection(
                     briefProduct: briefProduct,
@@ -136,17 +136,20 @@ struct SingleProductImage: View {
     let imageUrl: String
 
     var body: some View {
+        let screenWidth = UIScreen.main.bounds.width
+
         AsyncImage(url: URL(string: imageUrl)) { image in
             image
                 .resizable()
                 .aspectRatio(contentMode: .fill)
+                .frame(width: screenWidth, height: screenWidth)
         } placeholder: {
             Rectangle()
                 .fill(Color(.systemGray5))
                 .overlay(ProgressView())
+                .frame(width: screenWidth, height: screenWidth)
         }
-        .frame(maxWidth: .infinity)
-        .aspectRatio(1, contentMode: .fit)
+        .frame(width: screenWidth, height: screenWidth)
         .clipped()
     }
 }
@@ -157,6 +160,8 @@ struct ImageGallery: View {
     @State private var currentPage = 0
 
     var body: some View {
+        let screenWidth = UIScreen.main.bounds.width
+
         VStack(spacing: 8) {
             TabView(selection: $currentPage) {
                 ForEach(Array(imageUrls.enumerated()), id: \.offset) { index, imageUrl in
@@ -164,20 +169,20 @@ struct ImageGallery: View {
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fill)
+                            .frame(width: screenWidth, height: screenWidth)
                     } placeholder: {
                         Rectangle()
                             .fill(Color(.systemGray5))
                             .overlay(ProgressView())
+                            .frame(width: screenWidth, height: screenWidth)
                     }
-                    .frame(maxWidth: .infinity)
-                    .aspectRatio(1, contentMode: .fit)
+                    .frame(width: screenWidth, height: screenWidth)
                     .clipped()
                     .tag(index)
                 }
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .frame(maxWidth: .infinity)
-            .aspectRatio(1, contentMode: .fit)
+            .frame(width: screenWidth, height: screenWidth)
 
             // Page Indicator
             if imageUrls.count > 1 {
@@ -259,7 +264,7 @@ struct DetailedProductInfo: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            if let description = product.description as String?, !description.isEmpty {
+            if let description = product.description_ as String?, !description.isEmpty {
                 ProductSection(title: "Description", content: description)
             }
 

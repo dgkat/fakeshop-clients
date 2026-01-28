@@ -23,6 +23,11 @@ struct ScrollableVStack<Content: View>: UIViewControllerRepresentable {
     
     func updateUIViewController(_ uiViewController: UIScrollViewController<Content>, context: Context) {
         uiViewController.hostingController.rootView = content
+
+        // Recalculate content size when content changes
+        DispatchQueue.main.async {
+            uiViewController.updateContentSize()
+        }
     }
 }
 
@@ -74,15 +79,30 @@ class UIScrollViewController<Content: View>: UIViewController, UIScrollViewDeleg
         addChild(hostingController)
         scrollView.addSubview(hostingController.view)
         hostingController.didMove(toParent: self)
-        
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            hostingController.view.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            hostingController.view.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            hostingController.view.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
-        ])
+
+        // Use manual frame-based layout
+        hostingController.view.frame = CGRect(x: 0, y: 0, width: scrollView.bounds.width, height: 0)
+        updateContentSize()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        // Update width if bounds changed
+        if hostingController.view.frame.width != scrollView.bounds.width {
+            updateContentSize()
+        }
+    }
+
+    func updateContentSize() {
+        let targetSize = CGSize(
+            width: scrollView.bounds.width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
+
+        let contentSize = hostingController.view.sizeThatFits(targetSize)
+        hostingController.view.frame = CGRect(x: 0, y: 0, width: scrollView.bounds.width, height: contentSize.height)
+        scrollView.contentSize = CGSize(width: scrollView.bounds.width, height: contentSize.height)
     }
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {

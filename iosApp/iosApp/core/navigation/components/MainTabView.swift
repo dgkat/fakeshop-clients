@@ -142,5 +142,27 @@ struct MainTabView: View {
                 }
             }
         }
+        .onChange(of: homePath) { oldValue, newValue in
+            handleNavigationChange(oldPath: oldValue, newPath: newValue, tab: .home)
+        }
+        .onChange(of: favoritesPath) { oldValue, newValue in
+            handleNavigationChange(oldPath: oldValue, newPath: newValue, tab: .favorites)
+        }
+        .onChange(of: notificationsPath) { oldValue, newValue in
+            handleNavigationChange(oldPath: oldValue, newPath: newValue, tab: .notifications)
+        }
+        .onChange(of: profilePath) { oldValue, newValue in
+            handleNavigationChange(oldPath: oldValue, newPath: newValue, tab: .profile)
+        }
+    }
+
+    private func handleNavigationChange(oldPath: NavigationPath, newPath: NavigationPath, tab: Tab) {
+        // Only reset scroll offset when navigating to a screen with a visible search bar
+        let hasVisibleSearchBar = tab.searchBarBehavior != .hidden
+
+        // Reset on any navigation (push or pop) if search bar should be visible
+        if hasVisibleSearchBar && newPath.count != oldPath.count {
+            scrollOffset = 0
+        }
     }
 }
