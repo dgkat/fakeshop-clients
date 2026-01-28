@@ -32,7 +32,12 @@ class ProductDetailViewStore(
 
     private fun loadProduct(productId: String) {
         currentProductId = productId
-        _state.update { it.copy(isLoadingBrief = true, isLoadingDetailed = true, error = null) }
+        _state.update {
+            it.copy(
+                briefState = BriefProductState.Loading,
+                detailedState = DetailedProductState.Loading
+            )
+        }
 
         scope.launch {
             loadBriefProduct(productId)
@@ -45,16 +50,18 @@ class ProductDetailViewStore(
             onSuccess = { briefProduct ->
                 _state.update {
                     it.copy(
-                        briefProduct = briefProductMapper.map(briefProduct),
-                        isLoadingBrief = false
+                        briefState = BriefProductState.Success(
+                            product = briefProductMapper.map(briefProduct)
+                        )
                     )
                 }
             },
             onError = { networkError ->
                 _state.update {
                     it.copy(
-                        isLoadingBrief = false,
-                        error = ProductDetailError.Network(networkError)
+                        briefState = BriefProductState.Error(
+                            error = ProductDetailError.Network(networkError)
+                        )
                     )
                 }
             }
@@ -66,16 +73,18 @@ class ProductDetailViewStore(
             onSuccess = { detailedProduct ->
                 _state.update {
                     it.copy(
-                        detailedProduct = detailedProductMapper.map(detailedProduct),
-                        isLoadingDetailed = false
+                        detailedState = DetailedProductState.Success(
+                            product = detailedProductMapper.map(detailedProduct)
+                        )
                     )
                 }
             },
             onError = { networkError ->
                 _state.update {
                     it.copy(
-                        isLoadingDetailed = false,
-                        error = ProductDetailError.Network(networkError)
+                        detailedState = DetailedProductState.Error(
+                            error = ProductDetailError.Network(networkError)
+                        )
                     )
                 }
             }

@@ -124,7 +124,8 @@ fun MainNavigation() {
                         backStackEntry.arguments?.getString("productId") ?: return@composable
                     ProductDetailScreen(
                         productId = productId,
-                        onNavigateBack = { navController.navigateUp() }
+                        contentPadding = contentPadding,
+                        onScrollOffsetChange = { scrollOffset = it }
                     )
                 }
             }
