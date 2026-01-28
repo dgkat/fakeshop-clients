@@ -10,7 +10,7 @@ import SwiftUI
 import ComposeApp
 
 struct ProductListContent: View {
-    let categories: [CategoryRow]
+    let categories: [UiCategoryRow]
     let onProductClick: (String) -> Void
     let onScrollOffsetChange: (CGFloat) -> Void
     

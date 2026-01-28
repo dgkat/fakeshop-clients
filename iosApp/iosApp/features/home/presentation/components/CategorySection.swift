@@ -10,7 +10,7 @@ import SwiftUI
 import ComposeApp
 
 struct CategorySection: View {
-    let categoryRow: CategoryRow
+    let categoryRow: UiCategoryRow
     let onProductClick: (String) -> Void
     
     var body: some View {

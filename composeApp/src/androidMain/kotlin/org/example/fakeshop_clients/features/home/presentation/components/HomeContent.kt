@@ -30,7 +30,7 @@ import coil.compose.AsyncImage
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import org.example.fakeshop_clients.features.home.presentation.ErrorState
 import org.example.fakeshop_clients.features.home.presentation.LoadingState
-import org.example.fakeshop_clients.features.home.presentation.productList.CategoryRow
+import org.example.fakeshop_clients.features.home.presentation.productList.UiCategoryRow
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListState
 import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarScrollState
 
@@ -72,7 +72,7 @@ fun HomeContent(
 
 @Composable
 private fun ProductListContent(
-    categories: List<CategoryRow>,
+    categories: List<UiCategoryRow>,
     onProductClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
@@ -104,7 +104,7 @@ private fun ProductListContent(
 
 @Composable
 private fun CategorySection(
-    categoryRow: CategoryRow,
+    categoryRow: UiCategoryRow,
     onProductClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {

@@ -5,6 +5,8 @@ import org.example.fakeshop_clients.core.auth.di.mobileInfrastructureModule
 import org.example.fakeshop_clients.core.di.iosInfrastructureModule
 import org.example.fakeshop_clients.features.home.di.homeModule
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListViewStore
+import org.example.fakeshop_clients.features.productDetail.di.productDetailModule
+import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailViewStore
 import org.example.fakeshop_clients.features.search.di.searchModule
 import org.example.fakeshop_clients.features.search.presentation.SearchViewStore
 import org.koin.core.component.KoinComponent
@@ -28,11 +30,25 @@ val iosModule = module {
             searchService = get()
         )
     }
+
+    factory { (scope: CoroutineScope) ->
+        ProductDetailViewStore(
+            scope = scope,
+            productDetailService = get(),
+            briefProductMapper = get(),
+            detailedProductMapper = get()
+        )
+    }
 }
 
 fun initKoinIos() = startKoin {
     modules(
-        iosInfrastructureModule, mobileInfrastructureModule, homeModule, searchModule, iosModule
+        iosInfrastructureModule,
+        mobileInfrastructureModule,
+        homeModule,
+        searchModule,
+        productDetailModule,
+        iosModule
     )
 }
 
@@ -42,6 +58,10 @@ class IOSKoinHelper : KoinComponent {
     }
 
     fun getSearchViewStore(scope: CoroutineScope): SearchViewStore {
+        return get { parametersOf(scope) }
+    }
+
+    fun getProductDetailViewStore(scope: CoroutineScope): ProductDetailViewStore {
         return get { parametersOf(scope) }
     }
 }

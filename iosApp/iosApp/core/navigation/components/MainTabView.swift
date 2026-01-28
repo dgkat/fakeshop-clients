@@ -54,7 +54,12 @@ struct MainTabView: View {
                         }
                     )
                     .navigationDestination(for: String.self) { productId in
-                        ProductDetailView(productId: productId)
+                        ProductDetailView(
+                            productId: productId,
+                            onScrollOffsetChange: { offset in
+                                scrollOffset = offset
+                            }
+                        )
                     }
                 }
                 .tabItem {
@@ -69,7 +74,12 @@ struct MainTabView: View {
 //                        }
                     )
                     .navigationDestination(for: String.self) { productId in
-                        ProductDetailView(productId: productId)
+                        ProductDetailView(
+                            productId: productId,
+                            onScrollOffsetChange: { offset in
+                                scrollOffset = offset
+                            }
+                        )
                     }
                 }
                 .tabItem {
@@ -80,7 +90,12 @@ struct MainTabView: View {
                 NavigationStack(path: $notificationsPath) {
                     NotificationsView()
                         .navigationDestination(for: String.self) { productId in
-                            ProductDetailView(productId: productId)
+                            ProductDetailView(
+                                productId: productId,
+                                onScrollOffsetChange: { offset in
+                                    scrollOffset = offset
+                                }
+                            )
                         }
                 }
                 .tabItem {
@@ -93,7 +108,12 @@ struct MainTabView: View {
                         .navigationBarTitleDisplayMode(.inline)
                         .navigationTitle("Profile")
                         .navigationDestination(for: String.self) { productId in
-                            ProductDetailView(productId: productId)
+                            ProductDetailView(
+                                productId: productId,
+                                onScrollOffsetChange: { offset in
+                                    scrollOffset = offset
+                                }
+                            )
                         }
                 }
                 .tabItem {

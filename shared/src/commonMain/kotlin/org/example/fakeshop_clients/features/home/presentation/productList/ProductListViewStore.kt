@@ -26,13 +26,13 @@ class ProductListViewStore(
     suspend fun loadCategories() {
         _productListState.value = ProductListState(isLoading = true)
 
-        val accumulatedCategories = mutableListOf<CategoryRow>()
+        val accumulatedCategories = mutableListOf<UiCategoryRow>()
 
         productListService.getProducts().collect { result ->
             when (result) {
                 is Result.Success -> {
                     val domainCategoryRow = result.data
-                    val uiCategoryRow = CategoryRow(
+                    val uiCategoryRow = UiCategoryRow(
                         category = domainCategoryRow.category,
                         products = mapper.map(domainCategoryRow.products)
                     )
