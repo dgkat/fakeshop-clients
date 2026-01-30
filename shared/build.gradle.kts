@@ -92,6 +92,12 @@ kotlin {
 
         jvmMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
+
+            // Ktor client for SSR
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.cio)
+            implementation(libs.ktor.client.content)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
 
         jsMain.dependencies {

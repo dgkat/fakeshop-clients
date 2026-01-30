@@ -1,7 +1,5 @@
 package org.example.fakeshop_clients.features.productDetailPage.presentation
 
-import ProductRepository
-import org.example.fakeshop_clients.features.productDetailPage.presentation.pages.productDetailPage
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.html.respondHtml
 import io.ktor.server.response.respondText
@@ -13,9 +11,14 @@ import kotlinx.html.body
 import kotlinx.html.button
 import kotlinx.html.id
 import kotlinx.html.span
-import org.example.fakeshop_clients.features.productDetailPage.domain.models.FullProduct
+import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.features.core.models.Cookies
+import org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailService
+import org.example.fakeshop_clients.features.productDetailPage.presentation.pages.productDetailPage
+import org.koin.ktor.ext.inject
 
 fun Route.productRoutes() {
+    val productDetailService by inject<ProductDetailService>()
 
     // Product detail page
     get("/product/{id}") {
@@ -24,18 +27,30 @@ fun Route.productRoutes() {
             status = HttpStatusCode.BadRequest
         )
 
-        val product = ProductRepository.getProductById(productId)
-
-        if (product == null) {
-            call.respondText(
-                "Product not found",
-                status = HttpStatusCode.NotFound
-            )
-            return@get
+        val cookies = mutableMapOf<String, String>()
+        call.request.cookies.rawCookies.forEach { (name, _) ->
+            call.request.cookies[name]?.let { value ->
+                cookies[name] = value
+            }
         }
 
-        call.respondHtml(HttpStatusCode.OK) {
-            productDetailPage(product)
+        val extractedCookies = Cookies(cookies)
+
+        val fullProduct = productDetailService.getFullProductById(productId, extractedCookies)
+
+        when (fullProduct) {
+            is Result.Error -> {
+                call.respondText(
+                    "Failed to load product details: ${fullProduct.error}",
+                    status = HttpStatusCode.InternalServerError
+                )
+            }
+
+            is Result.Success -> {
+                call.respondHtml(HttpStatusCode.OK) {
+                    productDetailPage(fullProduct.data)
+                }
+            }
         }
     }
 
@@ -46,39 +61,43 @@ fun Route.productRoutes() {
             status = HttpStatusCode.BadRequest
         )
 
-        val updatedProduct = ProductRepository.toggleLike(productId)
-
-        if (updatedProduct == null) {
-            call.respondText(
-                "Product not found",
-                status = HttpStatusCode.NotFound
-            )
-            return@post
+        val cookies = mutableMapOf<String, String>()
+        call.request.cookies.rawCookies.forEach { (name, _) ->
+            call.request.cookies[name]?.let { value ->
+                cookies[name] = value
+            }
         }
+
+        val extractedCookies = Cookies(cookies)
+
+        val updatedProduct = productDetailService.toggleLike(productId, extractedCookies)
 
         // Return just the updated button HTML (HTMX will swap it)
         call.respondHtml(HttpStatusCode.OK) {
             body {
-                likeButton(updatedProduct)
+                likeButton(
+                    productId = productId,
+                    isLiked = true
+                )
             }
         }
     }
 }
 
-fun FlowContent.likeButton(product: FullProduct) {
-    button(classes = "btn btn-like ${if (product.isLiked) "liked" else ""}") {
+fun FlowContent.likeButton(productId: String, isLiked: Boolean) {
+    button(classes = "btn btn-like ${if (isLiked) "liked" else ""}") {
         id = "like-button"
 
         // HTMX attributes
-        attributes["hx-post"] = "/api/products/${product.id}/like"
+        attributes["hx-post"] = "/api/products/${productId}/like"
         attributes["hx-swap"] = "outerHTML"
         attributes["hx-target"] = "#like-button"
 
         span(classes = "like-icon") {
-            if (product.isLiked) +"❤️" else +"🤍"
+            if (isLiked) +"❤️" else +"🤍"
         }
         span(classes = "like-text") {
-            +if (product.isLiked) "Liked" else "Like"
+            +if (isLiked) "Liked" else "Like"
         }
     }
 }
