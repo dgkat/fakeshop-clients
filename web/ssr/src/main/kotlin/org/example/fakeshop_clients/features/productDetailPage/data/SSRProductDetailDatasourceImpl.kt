@@ -4,7 +4,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.cookie
 import io.ktor.client.request.get
+import io.ktor.client.request.headers
 import io.ktor.client.request.post
+import io.ktor.http.HttpHeaders
 import io.ktor.util.reflect.TypeInfo
 import org.example.fakeshop_clients.core.data.KtorNetworkExceptionMapper
 import org.example.fakeshop_clients.core.error_handling.NetworkError
@@ -25,6 +27,14 @@ class SSRProductDetailDatasourceImpl(
     ): Result<BriefProductResponse, NetworkError> {
         return try {
             val response = httpClient.get("/api/products/brief/$id") {
+                val accessToken = cookies.data["accessToken"]
+                if (accessToken != null) {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer $accessToken")
+                    }
+                }
+
+                // Re-forward all cookies
                 cookies.data.forEach { (name, value) ->
                     cookie(name, value)
                 }
@@ -41,6 +51,13 @@ class SSRProductDetailDatasourceImpl(
     ): Result<DetailedProductResponse, NetworkError> {
         return try {
             val response = httpClient.get("/api/products/detailed/$id") {
+                val accessToken = cookies.data["accessToken"]
+                if (accessToken != null) {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer $accessToken")
+                    }
+                }
+
                 cookies.data.forEach { (name, value) ->
                     cookie(name, value)
                 }
@@ -57,6 +74,11 @@ class SSRProductDetailDatasourceImpl(
     ): Result<Unit, NetworkError> {
         return try {
             val response = httpClient.post("/api/products/like/$productId") {
+                val accessToken = cookies.data["accessToken"]
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $accessToken")
+                }
+
                 cookies.data.forEach { (name, value) ->
                     cookie(name, value)
                 }
