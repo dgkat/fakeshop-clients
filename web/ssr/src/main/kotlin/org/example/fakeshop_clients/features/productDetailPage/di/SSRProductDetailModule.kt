@@ -15,7 +15,7 @@ val ssrProductDetailModule = module {
     // Data
     single<ProductDetailDatasource> {
         SSRProductDetailDatasourceImpl(
-            httpClient = get(named("publicHttpClient"))
+            safeApiClient = get()
         )
     }
 

@@ -14,6 +14,7 @@ import org.example.fakeshop_clients.core.concurrency.JvmDispatcherProvider
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.KtorNetworkExceptionMapper
 import org.example.fakeshop_clients.core.data.NetworkExceptionMapper
+import org.example.fakeshop_clients.core.data.SSRSafeApiClient
 import org.example.fakeshop_clients.core.data.SafeAuthenticatedApiClient
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -58,6 +59,14 @@ val jvmInfrastructureModule = module {
     single {
         SafeAuthenticatedApiClient(
             client = get<ApiClient>(named("publicApiClient")),
+            exceptionMapper = get()
+        )
+    }
+
+    // SSR-specific safe API client (accepts cookies per-request)
+    single {
+        SSRSafeApiClient(
+            httpClient = get(named("publicHttpClient")),
             exceptionMapper = get()
         )
     }
