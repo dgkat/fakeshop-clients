@@ -16,6 +16,8 @@ import org.example.fakeshop_clients.core.data.KtorNetworkExceptionMapper
 import org.example.fakeshop_clients.core.data.NetworkExceptionMapper
 import org.example.fakeshop_clients.core.data.SSRSafeApiClient
 import org.example.fakeshop_clients.core.data.SafeAuthenticatedApiClient
+import org.example.fakeshop_clients.core.network.JvmUrlProvider
+import org.example.fakeshop_clients.core.network.UrlProvider
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -24,6 +26,8 @@ import org.koin.dsl.module
  * Provides HTTP client, API client wrappers, and dispatcher provider.
  */
 val jvmInfrastructureModule = module {
+
+    single<UrlProvider> { JvmUrlProvider() }
 
     single<NetworkExceptionMapper> { KtorNetworkExceptionMapper() }
 

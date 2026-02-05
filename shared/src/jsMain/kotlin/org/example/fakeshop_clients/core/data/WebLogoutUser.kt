@@ -5,11 +5,15 @@ import org.example.fakeshop_clients.core.auth.data.models.LogoutResponse
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.map
+import org.example.fakeshop_clients.core.network.UrlProvider
 
-class WebLogoutUser(private val authClient: SafeAuthenticatedApiClient) : LogoutUser {
+class WebLogoutUser(
+    private val authClient: SafeAuthenticatedApiClient,
+    private val baseUrl: UrlProvider
+) : LogoutUser {
     override suspend fun invoke(): Result<Unit, NetworkError> {
         return authClient.post<LogoutResponse, Unit>(
-            path = "/api/auth/web/logout",
+            path = "${baseUrl()}/auth/logout",
             body = Unit
         ).map { _ ->
             Unit

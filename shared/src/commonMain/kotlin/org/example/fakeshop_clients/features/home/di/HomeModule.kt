@@ -19,7 +19,8 @@ val homeModule = module {
 
     factory<ProductListDatasource> {
         ProductListDatasourceImpl(
-            authClient = get()
+            authClient = get(),
+            baseUrl = get()
         )
     }
 
