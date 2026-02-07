@@ -35,7 +35,7 @@ class WebAuthDatasourceImpl(
         ).map { it.success }
     }
 
-    override suspend fun refreshToken(): Result<Boolean, NetworkError> {
+    override suspend fun refreshSession(): Result<Boolean, NetworkError> {
         return publicClient.post<WebAuthResponse, Unit>(
             path = "${baseUrl()}/auth/refresh",
             body = Unit

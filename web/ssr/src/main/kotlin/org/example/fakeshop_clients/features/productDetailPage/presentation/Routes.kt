@@ -55,7 +55,7 @@ fun Route.productRoutes() {
     }
 
     // HTMX endpoint - Toggle like
-    post("/api/products/{id}/like") {
+    post("/product/like/{id}") {
         val productId = call.parameters["id"] ?: return@post call.respondText(
             "Product ID is required",
             status = HttpStatusCode.BadRequest
@@ -70,15 +70,26 @@ fun Route.productRoutes() {
 
         val extractedCookies = Cookies(cookies)
 
-        val updatedProduct = productDetailService.toggleLike(productId, extractedCookies)
+        val toggleResult = productDetailService.toggleLike(productId, extractedCookies)
 
-        // Return just the updated button HTML (HTMX will swap it)
-        call.respondHtml(HttpStatusCode.OK) {
-            body {
-                likeButton(
-                    productId = productId,
-                    isLiked = true
+        when (toggleResult) {
+            is Result.Error -> {
+                call.respondText(
+                    "Failed to toggle like: ${toggleResult.error}",
+                    status = HttpStatusCode.InternalServerError
                 )
+            }
+
+            is Result.Success -> {
+
+                call.respondHtml(HttpStatusCode.OK) {
+                    body {
+                        likeButton(
+                            productId = productId,
+                            isLiked = true
+                        )
+                    }
+                }
             }
         }
     }
@@ -89,7 +100,7 @@ fun FlowContent.likeButton(productId: String, isLiked: Boolean) {
         id = "like-button"
 
         // HTMX attributes
-        attributes["hx-post"] = "/api/products/${productId}/like"
+        attributes["hx-post"] = "/product/like/$productId"
         attributes["hx-swap"] = "outerHTML"
         attributes["hx-target"] = "#like-button"
 

@@ -5,11 +5,9 @@ import io.ktor.client.call.body
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.cookie
 import io.ktor.client.request.get
-import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.util.reflect.TypeInfo
 import org.example.fakeshop_clients.core.error_handling.NetworkError
@@ -78,20 +76,14 @@ class SSRSafeApiClient(
     }
 
     /**
-     * Configures cookies and authorization header for a request.
-     * Extracts accessToken from cookies and sets it in Authorization header.
-     * Forwards all cookies to the backend API.
+     * Configures cookies for SSR requests to backend API.
+     * Forwards all cookies (including session ID) from the user's browser to the backend.
+     * The backend validates the session cookie for authentication.
      */
     @PublishedApi
     internal fun HttpRequestBuilder.configureCookiesAndAuth(cookies: Cookies) {
-        val accessToken = cookies.data["accessToken"]
-        if (accessToken != null) {
-            headers {
-                append(HttpHeaders.Authorization, "Bearer $accessToken")
-            }
-        }
-
-        // Forward all cookies
+        // Forward all cookies from the user's browser to the backend
+        // This includes the session ID cookie that the backend uses for authentication
         cookies.data.forEach { (name, value) ->
             cookie(name, value)
         }

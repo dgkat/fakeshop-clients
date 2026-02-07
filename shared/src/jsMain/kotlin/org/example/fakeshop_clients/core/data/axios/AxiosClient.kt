@@ -57,7 +57,7 @@ class AxiosClient(
 
                 if (status == 401 && originalRequest._retry != true) {
                     if (isRefreshing) {
-                        console.log("Token refresh in progress, queuing request...")
+                        console.log("Session refresh in progress, queuing request...")
 
                         return@use Promise { resolve, reject ->
                             refreshSubscribers.add { refreshError ->
@@ -75,36 +75,36 @@ class AxiosClient(
                     originalRequest._retry = true
                     isRefreshing = true
 
-                    console.log("Token expired, attempting refresh...")
+                    console.log("Session expired, attempting refresh...")
 
                     return@use scope.promise {
                         try {
-                            //TODO clean up try/catch ( already in .refreshToken) and else + Result.Error (duplicate)
-                            val refreshResult = webAuthDatasource.refreshToken()
+                            //TODO clean up try/catch ( already in .refreshSession) and else + Result.Error (duplicate)
+                            val refreshResult = webAuthDatasource.refreshSession()
 
                             when (refreshResult) {
                                 is Result.Success -> {
                                     if (refreshResult.data) {
-                                        console.log("Token refresh successful")
-                                        onTokenRefreshed()
+                                        console.log("Session refresh successful")
+                                        onSessionRefreshed()
                                         retryRequest(originalRequest).await()
                                     } else {
-                                        val error = Exception("Token refresh returned false")
-                                        console.error("Token refresh failed:", error)
-                                        onTokenRefreshFailed(error)
+                                        val error = Exception("Session refresh returned false")
+                                        console.error("Session refresh failed:", error)
+                                        onSessionRefreshFailed(error)
                                         throw error
                                     }
                                 }
                                 is Result.Error -> {
-                                    val error = Exception("Token refresh failed: ${refreshResult.error}")
-                                    console.error("Token refresh failed:", error)
-                                    onTokenRefreshFailed(error)
+                                    val error = Exception("Session refresh failed: ${refreshResult.error}")
+                                    console.error("Session refresh failed:", error)
+                                    onSessionRefreshFailed(error)
                                     throw error
                                 }
                             }
                         } catch (refreshError: Throwable) {
-                            console.error("Token refresh exception:", refreshError)
-                            onTokenRefreshFailed(refreshError)
+                            console.error("Session refresh exception:", refreshError)
+                            onSessionRefreshFailed(refreshError)
                             throw refreshError
                         } finally {
                             isRefreshing = false
@@ -128,12 +128,12 @@ class AxiosClient(
         }
     }
 
-    private fun onTokenRefreshed() {
+    private fun onSessionRefreshed() {
         refreshSubscribers.forEach { callback -> callback(null) }
         refreshSubscribers.clear()
     }
 
-    private fun onTokenRefreshFailed(error: Throwable) {
+    private fun onSessionRefreshFailed(error: Throwable) {
         refreshSubscribers.forEach { callback -> callback(error) }
         refreshSubscribers.clear()
     }

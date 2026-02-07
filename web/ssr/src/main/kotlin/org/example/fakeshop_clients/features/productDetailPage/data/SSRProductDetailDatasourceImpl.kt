@@ -38,7 +38,7 @@ class SSRProductDetailDatasourceImpl(
         cookies: Cookies
     ): Result<Unit, NetworkError> {
         return safeApiClient.post(
-            path = "${baseUrl()}/products/like/$productId",
+            path = "${baseUrl()}/products/$productId/like",
             cookies = cookies
         )
     }
