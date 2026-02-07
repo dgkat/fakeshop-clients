@@ -12,6 +12,7 @@ import kotlinx.html.button
 import kotlinx.html.id
 import kotlinx.html.span
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.extensions.extractCookies
 import org.example.fakeshop_clients.features.core.models.Cookies
 import org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailService
 import org.example.fakeshop_clients.features.productDetailPage.presentation.pages.productDetailPage
@@ -27,16 +28,9 @@ fun Route.productRoutes() {
             status = HttpStatusCode.BadRequest
         )
 
-        val cookies = mutableMapOf<String, String>()
-        call.request.cookies.rawCookies.forEach { (name, _) ->
-            call.request.cookies[name]?.let { value ->
-                cookies[name] = value
-            }
-        }
+        val cookies = call.extractCookies()
 
-        val extractedCookies = Cookies(cookies)
-
-        val fullProduct = productDetailService.getFullProductById(productId, extractedCookies)
+        val fullProduct = productDetailService.getFullProductById(productId, cookies)
 
         when (fullProduct) {
             is Result.Error -> {
@@ -61,16 +55,9 @@ fun Route.productRoutes() {
             status = HttpStatusCode.BadRequest
         )
 
-        val cookies = mutableMapOf<String, String>()
-        call.request.cookies.rawCookies.forEach { (name, _) ->
-            call.request.cookies[name]?.let { value ->
-                cookies[name] = value
-            }
-        }
+        val cookies = call.extractCookies()
 
-        val extractedCookies = Cookies(cookies)
-
-        val toggleResult = productDetailService.toggleLike(productId, extractedCookies)
+        val toggleResult = productDetailService.toggleLike(productId, cookies)
 
         when (toggleResult) {
             is Result.Error -> {
