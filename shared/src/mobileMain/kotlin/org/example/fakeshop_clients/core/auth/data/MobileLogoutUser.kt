@@ -7,10 +7,12 @@ import org.example.fakeshop_clients.core.data.post
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.map
+import org.example.fakeshop_clients.core.network.UrlProvider
 
 class MobileLogoutUser(
     private val authClient: SafeAuthenticatedApiClient,
-    private val tokenStorage: TokenStorage
+    private val tokenStorage: TokenStorage,
+    private val baseUrl: UrlProvider
 ) : LogoutUser {
     override suspend operator fun invoke(): Result<Unit, NetworkError> {
         val refreshToken = tokenStorage.getRefreshToken()
@@ -18,7 +20,7 @@ class MobileLogoutUser(
 
         val logoutRequest = LogoutRequest(refreshToken)
         return authClient.post<LogoutResponse, LogoutRequest>(
-            path = "/api/auth/mobile/logout",
+            path = "${baseUrl()}/auth/logout",
             body = logoutRequest
         ).map { _ ->
 

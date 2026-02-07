@@ -6,9 +6,11 @@ import org.example.fakeshop_clients.core.data.models.WebAuthResponse
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.map
+import org.example.fakeshop_clients.core.network.UrlProvider
 
 class WebAuthDatasourceImpl(
-    private val publicClient: WebSafePublicApiClient
+    private val publicClient: WebSafePublicApiClient,
+    private val baseUrl: UrlProvider
 ) : WebAuthDatasource {
 
     override suspend fun signUp(
@@ -17,7 +19,7 @@ class WebAuthDatasourceImpl(
     ): Result<Boolean, NetworkError> {
         val signUpRequest = SignUpRequest(username, password)
         return publicClient.post<WebAuthResponse, SignUpRequest>(
-            path = "/api/auth/web/signup",
+            path = "${baseUrl()}/auth/signup",
             body = signUpRequest
         ).map { it.success }
     }
@@ -28,14 +30,14 @@ class WebAuthDatasourceImpl(
     ): Result<Boolean, NetworkError> {
         val loginRequest = LoginRequest(username, password)
         return publicClient.post<WebAuthResponse, LoginRequest>(
-            path = "/api/auth/web/login",
+            path = "${baseUrl()}/auth/login",
             body = loginRequest
         ).map { it.success }
     }
 
-    override suspend fun refreshToken(): Result<Boolean, NetworkError> {
+    override suspend fun refreshSession(): Result<Boolean, NetworkError> {
         return publicClient.post<WebAuthResponse, Unit>(
-            path = "/api/auth/web/refresh",
+            path = "${baseUrl()}/auth/refresh",
             body = Unit
         ).map { it.success }
     }

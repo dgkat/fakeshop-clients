@@ -12,6 +12,7 @@ import kotlinx.html.button
 import kotlinx.html.id
 import kotlinx.html.span
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.extensions.extractCookies
 import org.example.fakeshop_clients.features.core.models.Cookies
 import org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailService
 import org.example.fakeshop_clients.features.productDetailPage.presentation.pages.productDetailPage
@@ -27,16 +28,9 @@ fun Route.productRoutes() {
             status = HttpStatusCode.BadRequest
         )
 
-        val cookies = mutableMapOf<String, String>()
-        call.request.cookies.rawCookies.forEach { (name, _) ->
-            call.request.cookies[name]?.let { value ->
-                cookies[name] = value
-            }
-        }
+        val cookies = call.extractCookies()
 
-        val extractedCookies = Cookies(cookies)
-
-        val fullProduct = productDetailService.getFullProductById(productId, extractedCookies)
+        val fullProduct = productDetailService.getFullProductById(productId, cookies)
 
         when (fullProduct) {
             is Result.Error -> {
@@ -55,30 +49,34 @@ fun Route.productRoutes() {
     }
 
     // HTMX endpoint - Toggle like
-    post("/api/products/{id}/like") {
+    post("/product/like/{id}") {
         val productId = call.parameters["id"] ?: return@post call.respondText(
             "Product ID is required",
             status = HttpStatusCode.BadRequest
         )
 
-        val cookies = mutableMapOf<String, String>()
-        call.request.cookies.rawCookies.forEach { (name, _) ->
-            call.request.cookies[name]?.let { value ->
-                cookies[name] = value
-            }
-        }
+        val cookies = call.extractCookies()
 
-        val extractedCookies = Cookies(cookies)
+        val toggleResult = productDetailService.toggleLike(productId, cookies)
 
-        val updatedProduct = productDetailService.toggleLike(productId, extractedCookies)
-
-        // Return just the updated button HTML (HTMX will swap it)
-        call.respondHtml(HttpStatusCode.OK) {
-            body {
-                likeButton(
-                    productId = productId,
-                    isLiked = true
+        when (toggleResult) {
+            is Result.Error -> {
+                call.respondText(
+                    "Failed to toggle like: ${toggleResult.error}",
+                    status = HttpStatusCode.InternalServerError
                 )
+            }
+
+            is Result.Success -> {
+
+                call.respondHtml(HttpStatusCode.OK) {
+                    body {
+                        likeButton(
+                            productId = productId,
+                            isLiked = true
+                        )
+                    }
+                }
             }
         }
     }
@@ -89,7 +87,7 @@ fun FlowContent.likeButton(productId: String, isLiked: Boolean) {
         id = "like-button"
 
         // HTMX attributes
-        attributes["hx-post"] = "/api/products/${productId}/like"
+        attributes["hx-post"] = "/product/like/$productId"
         attributes["hx-swap"] = "outerHTML"
         attributes["hx-target"] = "#like-button"
 

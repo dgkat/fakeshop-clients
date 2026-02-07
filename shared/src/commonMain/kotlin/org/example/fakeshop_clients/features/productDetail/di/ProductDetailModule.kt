@@ -20,7 +20,8 @@ val productDetailModule = module {
 
     factory<ProductDetailDatasource> {
         ProductDetailDatasourceImpl(
-            authClient = get()
+            authClient = get(),
+            baseUrl = get()
         )
     }
 
