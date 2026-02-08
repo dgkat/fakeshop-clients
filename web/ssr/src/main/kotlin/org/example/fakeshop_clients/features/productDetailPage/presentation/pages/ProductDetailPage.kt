@@ -90,15 +90,8 @@ fun HTML.productDetailPage(product: FullProduct) {
 
                 // ===== SEARCH ISLAND CONTAINER =====
                 div {
-                    id = "search-island"
-                    attributes["data-island"] = "search"
+                    id = "search-island-root"
                     classes = setOf("island-container", "header-center")
-
-                    // React will hydrate here
-                    div {
-                        id = "search-island-root"
-                        attributes["data-hydrate"] = "true"
-                    }
                 }
 
                 // Desktop navigation

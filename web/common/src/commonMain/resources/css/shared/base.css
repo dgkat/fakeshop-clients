@@ -22,6 +22,7 @@ body {
     color: var(--color-on-background);
     line-height: var(--line-height-normal);
     min-height: 100vh;
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 /* ===== Container ===== */
