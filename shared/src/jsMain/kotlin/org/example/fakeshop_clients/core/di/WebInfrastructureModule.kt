@@ -16,11 +16,15 @@ import org.example.fakeshop_clients.core.data.WebSafePublicApiClient
 import org.example.fakeshop_clients.core.data.axios.AxiosClient
 import org.example.fakeshop_clients.core.data.fetchClient.PublicApiClient
 import org.example.fakeshop_clients.core.data.fetchClient.PublicFetchClient
+import org.example.fakeshop_clients.core.network.UrlProvider
+import org.example.fakeshop_clients.core.network.WebUrlProvider
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val webInfrastructureModule = module {
     val baseUrl = "http://localhost:8080"
+
+    single<UrlProvider> { WebUrlProvider() }
 
     single<NetworkExceptionMapper> { AxiosNetworkExceptionMapper() }
 
@@ -56,7 +60,10 @@ val webInfrastructureModule = module {
     }
 
     single<WebAuthDatasource> {
-        WebAuthDatasourceImpl(get<WebSafePublicApiClient>())
+        WebAuthDatasourceImpl(
+            publicClient = get<WebSafePublicApiClient>(),
+            baseUrl = get()
+        )
     }
 
     single<AuthRepository> {
@@ -65,7 +72,12 @@ val webInfrastructureModule = module {
         )
     }
 
-    factory<LogoutUser> { WebLogoutUser(get<SafeAuthenticatedApiClient>()) }
+    factory<LogoutUser> {
+        WebLogoutUser(
+            authClient = get<SafeAuthenticatedApiClient>(),
+            baseUrl = get()
+        )
+    }
 
     single<DispatcherProvider> {
         WebDispatcherProvider()

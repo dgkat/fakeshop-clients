@@ -1,6 +1,6 @@
 package org.example.fakeshop_clients.features.product_list.presentation.components
 
-import org.example.fakeshop_clients.features.home.presentation.productList.CategoryRow
+import org.example.fakeshop_clients.features.home.presentation.productList.UiCategoryRow
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
@@ -11,7 +11,7 @@ import react.useState
 import web.cssom.ClassName
 
 external interface CategorySectionProps : Props {
-    var category: CategoryRow
+    var category: UiCategoryRow
     var onProductClick: (String) -> Unit
 }
 

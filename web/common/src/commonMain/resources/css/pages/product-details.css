@@ -9,23 +9,31 @@
     border-radius: var(--radius-lg);
     padding: var(--spacing-2xl);
     box-shadow: var(--shadow-md);
+    max-width: 100%;
+    overflow: hidden; /* Prevent children from overflowing */
 }
 
 .product-image-section {
     width: 100%;
+    max-width: 100%;
+    overflow: hidden;
 }
 
-/*.product-image {
+.product-image {
     width: 100%;
     height: auto;
+    max-width: 100%;
     border-radius: var(--radius-md);
     object-fit: cover;
-}*/
+    display: block; /* Remove inline spacing */
+}
 
 .product-info-section {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+    max-width: 100%;
+    overflow-wrap: break-word; /* Prevent long text from overflowing */
 }
 
 .product-title {
@@ -101,6 +109,7 @@
         grid-template-columns: 1fr;
         gap: var(--spacing-xl);
         padding: var(--spacing-xl);
+        margin-bottom: 0; /* Ensure no extra margin pushing content down */
     }
 
     .product-title {
@@ -113,6 +122,21 @@
 
     .product-actions {
         flex-direction: column;
+    }
+}
+
+/* Mobile: Ensure bottom nav is always visible on product detail page */
+@media (max-width: 767px) {
+    body[data-page="product-detail"] .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: var(--z-index-sticky);
+    }
+
+    body[data-page="product-detail"] .main-content {
+        padding-bottom: 80px; /* Space for bottom nav */
     }
 }
 

@@ -10,7 +10,8 @@ val productListModule = module {
     factory {
         ProductListViewStore(
             scope = get(qualifier = named("appScope")),
-            productListService = get()
+            productListService = get(),
+            mapper = get()
         )
     }
 

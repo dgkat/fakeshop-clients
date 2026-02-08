@@ -8,9 +8,11 @@ import org.example.fakeshop_clients.core.data.SafePublicApiClient
 import org.example.fakeshop_clients.core.data.post
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.network.UrlProvider
 
 class MobileAuthDatasourceImpl(
-    private val publicClient: SafePublicApiClient
+    private val publicClient: SafePublicApiClient,
+    private val baseUrl: UrlProvider
 ) : MobileAuthDatasource {
 
     override suspend fun signUp(
@@ -19,7 +21,7 @@ class MobileAuthDatasourceImpl(
     ): Result<TokenRefreshResponse, NetworkError> {
         val signUpRequest = SignUpRequest(username, password)
         return publicClient.post(
-            path = "/api/auth/mobile/signup",
+            path = "${baseUrl()}/auth/signup",
             body = signUpRequest
         )
     }
@@ -30,7 +32,7 @@ class MobileAuthDatasourceImpl(
     ): Result<TokenRefreshResponse, NetworkError> {
         val loginRequest = LoginRequest(username, password)
         return publicClient.post(
-            path = "/api/auth/mobile/login",
+            path = "${baseUrl()}/auth/login",
             body = loginRequest
         )
     }
@@ -40,7 +42,7 @@ class MobileAuthDatasourceImpl(
     ): Result<TokenRefreshResponse, NetworkError> {
         val refreshRequest = RefreshTokenRequest(refreshToken)
         return publicClient.post(
-            path = "/api/auth/mobile/refresh",
+            path = "${baseUrl()}/auth/refresh",
             body = refreshRequest
         )
     }

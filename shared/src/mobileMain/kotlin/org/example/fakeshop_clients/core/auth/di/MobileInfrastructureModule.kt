@@ -27,10 +27,14 @@ import org.example.fakeshop_clients.core.data.SafeAuthenticatedApiClient
 import org.example.fakeshop_clients.core.data.SafePublicApiClient
 import org.example.fakeshop_clients.core.data.post
 import org.example.fakeshop_clients.core.error_handling.fold
+import org.example.fakeshop_clients.core.network.MobileUrlProvider
+import org.example.fakeshop_clients.core.network.UrlProvider
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val mobileInfrastructureModule = module {
+
+    single<UrlProvider> { MobileUrlProvider() }
 
     single<NetworkExceptionMapper> { KtorNetworkExceptionMapper() }
 
@@ -115,7 +119,10 @@ val mobileInfrastructureModule = module {
     }
 
     single<MobileAuthDatasource> {
-        MobileAuthDatasourceImpl(get<SafePublicApiClient>())
+        MobileAuthDatasourceImpl(
+            publicClient = get<SafePublicApiClient>(),
+            baseUrl = get()
+        )
     }
 
     single<AuthRepository> {
@@ -125,11 +132,18 @@ val mobileInfrastructureModule = module {
         )
     }
 
-    factory<LogoutUser> { MobileLogoutUser(get(), get()) }
+    factory<LogoutUser> {
+        MobileLogoutUser(
+            authClient = get(),
+            tokenStorage = get(),
+            baseUrl = get()
+        )
+    }
 }
 
 // Helper function for token refresh
 // TODO move to separate file
+// TODO: Update to use UrlProvider when refactoring refresh token mechanism
 private suspend fun refreshTokensSafely(
     tokenStorage: TokenStorage,
     publicApiClient: SafePublicApiClient,
@@ -140,7 +154,7 @@ private suspend fun refreshTokensSafely(
         ?: return null
 
     return publicApiClient.post<TokenRefreshResponse, RefreshTokenRequest>(
-        path = "/api/auth/mobile/refresh",
+        path = "/api/mobile/auth/refresh",
         body = RefreshTokenRequest(refreshToken)
     ).fold(
         onSuccess = { response ->

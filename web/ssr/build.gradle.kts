@@ -15,11 +15,22 @@ application {
 }
 
 dependencies {
+    // Ktor Server
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
     implementation(libs.ktor.server.html.builder)
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.kotlinx.html)
+
+    // Ktor Client (for making API calls to backend)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content)
+    implementation(libs.ktor.serialization.kotlinx.json)
+
+    // Koin for dependency injection
+    implementation(libs.koin.core)
+    implementation(libs.koin.ktor)
 
     //Shared modules
     implementation(project(":web:common"))

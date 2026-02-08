@@ -60,8 +60,14 @@ fun HTML.productDetailPage(product: FullProduct) {
         )
 
         // CSS Bundles (split bundle approach for optimal caching)
-        link(rel = "stylesheet", href = "/static/css/bundles/common.css")         // Cached across all pages
-        link(rel = "stylesheet", href = "/static/css/bundles/product-detail.css") // Product detail specific
+        link(
+            rel = "stylesheet",
+            href = "/static/css/bundles/common.css"
+        )         // Cached across all pages
+        link(
+            rel = "stylesheet",
+            href = "/static/css/bundles/product-detail.css"
+        ) // Product detail specific
     }
 
     body {
@@ -84,15 +90,8 @@ fun HTML.productDetailPage(product: FullProduct) {
 
                 // ===== SEARCH ISLAND CONTAINER =====
                 div {
-                    id = "search-island"
-                    attributes["data-island"] = "search"
+                    id = "search-island-root"
                     classes = setOf("island-container", "header-center")
-
-                    // React will hydrate here
-                    div {
-                        id = "search-island-root"
-                        attributes["data-hydrate"] = "true"
-                    }
                 }
 
                 // Desktop navigation
@@ -120,52 +119,22 @@ fun HTML.productDetailPage(product: FullProduct) {
                             +product.name
                         }
 
-                        // Rating
-                        div(classes = "product-rating") {
-                            span(classes = "stars") {
-                                repeat(5) { index ->
-                                    if (index < product.rating.toInt()) {
-                                        +"★"
-                                    } else {
-                                        +"☆"
-                                    }
-                                }
-                            }
-                            span(classes = "rating-text") {
-                                +"${product.rating} (${product.reviews} reviews)"
-                            }
-                        }
-
                         p(classes = "product-price") {
                             +"$${String.format("%.2f", product.price)}"
                         }
 
-                        // Stock status
-                        div(classes = if (product.inStock) "in-stock" else "out-of-stock") {
-                            +if (product.inStock) "In Stock" else "Out of Stock"
-                        }
 
                         // Description
-                        p(classes = "product-description") {
-                            +product.description
+                        product.description?.let {
+                            p(classes = "product-description") {
+                                +it
+                            }
                         }
 
                         // Actions
                         div(classes = "product-actions") {
                             // Like button with HTMX
-                            likeButton(product)
-
-                            // Add to cart button
-                            if (product.inStock) {
-                                button(classes = "btn btn-primary") {
-                                    +"Add to Cart"
-                                }
-                            } else {
-                                button(classes = "btn btn-disabled") {
-                                    attributes["disabled"] = "true"
-                                    +"Out of Stock"
-                                }
-                            }
+                            likeButton(productId = product.id, isLiked = product.isLiked)
                         }
                     }
                 }

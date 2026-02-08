@@ -3,7 +3,7 @@ package org.example.fakeshop_clients.features.home.data.models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RemoteBriefProduct(
+data class BriefProductResponse(
     val id: String,
     val name: String,
     val price: Double,

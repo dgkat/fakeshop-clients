@@ -20,7 +20,7 @@ val ProductCard = FC<ProductCardProps> { props ->
         onClick = {
             props.onClick(props.product.id)
             window.location.href =
-                "http://localhost:8081/product/${props.product.id}"
+                "http://localhost:9090/product/${props.product.id}"
         }
 
         // Product Image

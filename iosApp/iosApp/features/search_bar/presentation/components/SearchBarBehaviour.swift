@@ -25,6 +25,6 @@ extension Tab {
 
 extension SearchBarBehavior {
     static func forProductDetail() -> SearchBarBehavior {
-        return .static
+        return .scrollReactive
     }
 }
