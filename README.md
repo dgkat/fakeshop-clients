@@ -67,6 +67,34 @@ And for yarnlock related issues
 To build and run the development version of the iOS app, use the run configuration from the run widget
 in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
 
+### Shared Resource Generation
+
+Design tokens (colors, typography, spacing) and strings are defined once in the `shared` module and generated into platform-native formats via Gradle tasks.
+
+**Colors** — source of truth: [`DesignTokens.kt`](./shared/src/commonMain/kotlin/org/example/fakeshop_clients/core/design/DesignTokens.kt)
+
+| Platform | Task | Output |
+|----------|------|--------|
+| Android | Direct Kotlin reference — no generation needed | `Color(Colors.Light.Primary)` |
+| iOS | `./gradlew generateIosColors` | `iosApp/iosApp/Theme/FakeShopColors.swift` |
+| Web | `./gradlew :web:common:generateThemeCss` | `web/common/.../css/shared/theme.css` |
+
+**Strings** — source of truth: [`shared/.../resources/strings/en.json`](./shared/src/commonMain/resources/strings/en.json)
+
+| Platform | Task | Output |
+|----------|------|--------|
+| Android | `./gradlew generateAndroidStrings` | `composeApp/.../res/values/strings.xml` |
+| iOS | `./gradlew generateIosStrings` | `iosApp/iosApp/<locale>.lproj/Localizable.strings` |
+| Web | `./gradlew generateWebStrings` | `web/common/.../resources/strings/` |
+| Kotlin (shared) | `./gradlew generateStringKeys` | `shared/build/generated/strings/.../Strings.kt` |
+
+Generate everything at once:
+```shell
+./gradlew generateAndroidStrings generateIosStrings generateIosColors generateWebStrings generateStringKeys :web:common:generateThemeCss
+```
+
+See [`docs/shared-resources-guide.md`](./docs/shared-resources-guide.md) for full details.
+
 ---
 
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…

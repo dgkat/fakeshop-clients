@@ -68,7 +68,7 @@ struct SearchResultsView: View {
                 }
             }
         }
-        .background(Color(.systemBackground))
+        .background(FakeShopColors.surface)
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
         .padding(.horizontal, 16)

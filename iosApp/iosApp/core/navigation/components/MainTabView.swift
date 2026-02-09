@@ -20,7 +20,7 @@ struct MainTabView: View {
     init() {
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor.systemBackground
+        appearance.backgroundColor = UIColor(FakeShopColors.surface)
         
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
@@ -121,7 +121,7 @@ struct MainTabView: View {
                 }
                 .tag(Tab.profile)
             }
-            .tint(.blue)
+            .tint(FakeShopColors.primary)
         }
         .onChange(of: selectedTab) { oldValue, newValue in
             // Reset scroll offset when changing tabs

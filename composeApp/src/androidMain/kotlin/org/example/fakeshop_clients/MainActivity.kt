@@ -17,10 +17,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            FakeShopTheme {
+            FakeShopTheme(dynamicColor = false) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.surface
                 ) {
                     MainNavigation()
                 }

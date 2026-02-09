@@ -11,7 +11,7 @@ struct FavoritesView: View {
         VStack(spacing: 16) {
             Image(systemName: "heart.fill")
                 .font(.system(size: 64))
-                .foregroundColor(.blue)
+                .foregroundColor(FakeShopColors.primary)
             
             Text("Favorites")
                 .font(.largeTitle)

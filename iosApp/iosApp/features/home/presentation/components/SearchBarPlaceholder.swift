@@ -24,7 +24,7 @@ struct SearchBarPlaceholder: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity)
-            .background(Color(.systemGray6))
+            .background(FakeShopColors.surfaceVariant)
             .cornerRadius(10)
         }
         .frame(height: 40)

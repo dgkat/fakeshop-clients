@@ -1,49 +1,43 @@
 /* ==========================================
    THEME.CSS - Design Tokens & CSS Variables
-   Shared between React App and SSR Pages
+   AUTO-GENERATED from DesignTokens.kt
+   Do not edit manually - run: ./gradlew :web:common:generateThemeCss
    ========================================== */
 
 :root {
     /* ===== Color Palette ===== */
-    /* Primary Colors */
     --color-primary: #6750A4;
     --color-primary-dark: #4F378B;
     --color-primary-light: #D0BCFF;
     --color-on-primary: #FFFFFF;
     --color-primary-container: #EADDFF;
     --color-on-primary-container: #21005D;
-
-    /* Secondary Colors */
     --color-secondary: #625B71;
     --color-secondary-dark: #4A4458;
     --color-secondary-light: #CCC2DC;
     --color-on-secondary: #FFFFFF;
     --color-secondary-container: #E8DEF8;
     --color-on-secondary-container: #1D192B;
-
-    /* Surface Colors */
-    --color-surface: #FFFFFF;
+    --color-surface: #FFFF00;
     --color-surface-variant: #E7E0EC;
     --color-on-surface: #1C1B1F;
     --color-on-surface-variant: #49454F;
-
-    /* Background */
     --color-background: #FFFBFE;
     --color-on-background: #1C1B1F;
-
-    /* Error */
     --color-error: #B3261E;
     --color-on-error: #FFFFFF;
     --color-error-container: #F9DEDC;
     --color-on-error-container: #410E0B;
-
-    /* Success */
     --color-success: #2E7D32;
     --color-success-container: #E8F5E9;
-
-    /* Outline */
+    --color-warning: #FFB300;
+    --color-warning-container: #FFF3E0;
+    --color-favorite: #FF4444;
+    --color-favorite-container: #FFE8E8;
     --color-outline: #79747E;
     --color-outline-variant: #CAC4D0;
+    --color-disabled-background: #E0E0E0;
+    --color-disabled-content: #9E9E9E;
 
     /* ===== Typography ===== */
     --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
@@ -52,19 +46,15 @@
     --font-size-display-large: 57px;
     --font-size-display-medium: 45px;
     --font-size-display-small: 36px;
-
     --font-size-headline-large: 32px;
     --font-size-headline-medium: 28px;
     --font-size-headline-small: 24px;
-
     --font-size-title-large: 22px;
     --font-size-title-medium: 16px;
     --font-size-title-small: 14px;
-
     --font-size-body-large: 16px;
     --font-size-body-medium: 14px;
     --font-size-body-small: 12px;
-
     --font-size-label-large: 14px;
     --font-size-label-medium: 12px;
     --font-size-label-small: 11px;
@@ -86,8 +76,8 @@
     --spacing-md: 12px;
     --spacing-lg: 16px;
     --spacing-xl: 24px;
-    --spacing-2xl: 32px;
-    --spacing-3xl: 48px;
+    --spacing-xxl: 32px;
+    --spacing-xxxl: 48px;
 
     /* ===== Border Radius ===== */
     --radius-xs: 4px;
@@ -97,18 +87,19 @@
     --radius-xl: 24px;
     --radius-full: 9999px;
 
-    /* ===== Shadows ===== */
+    /* ===== Web-Only Tokens ===== */
+    /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
-    /* ===== Transitions ===== */
+    /* Transitions */
     --transition-fast: 150ms ease-in-out;
     --transition-base: 250ms ease-in-out;
     --transition-slow: 350ms ease-in-out;
 
-    /* ===== Z-Index ===== */
+    /* Z-Index */
     --z-index-dropdown: 1000;
     --z-index-sticky: 1020;
     --z-index-fixed: 1030;
@@ -117,7 +108,7 @@
     --z-index-popover: 1060;
     --z-index-tooltip: 1070;
 
-    /* ===== Breakpoints (for reference in JS) ===== */
+    /* Breakpoints (for reference in JS) */
     --breakpoint-mobile: 480px;
     --breakpoint-tablet: 768px;
     --breakpoint-desktop: 1024px;
@@ -133,24 +124,32 @@
         --color-on-primary: #381E72;
         --color-primary-container: #4F378B;
         --color-on-primary-container: #EADDFF;
-
         --color-secondary: #CCC2DC;
         --color-secondary-dark: #E8DEF8;
         --color-secondary-light: #4A4458;
         --color-on-secondary: #332D41;
         --color-secondary-container: #4A4458;
         --color-on-secondary-container: #E8DEF8;
-
         --color-surface: #1C1B1F;
         --color-surface-variant: #49454F;
         --color-on-surface: #E6E1E5;
         --color-on-surface-variant: #CAC4D0;
-
         --color-background: #1C1B1F;
         --color-on-background: #E6E1E5;
-
+        --color-error: #CF6679;
+        --color-on-error: #000000;
+        --color-error-container: #93000A;
+        --color-on-error-container: #F9DEDC;
+        --color-success: #81C784;
+        --color-success-container: #1B5E20;
+        --color-warning: #FFD54F;
+        --color-warning-container: #5D4037;
+        --color-favorite: #FF6B6B;
+        --color-favorite-container: #5C1A1A;
         --color-outline: #938F99;
         --color-outline-variant: #49454F;
+        --color-disabled-background: #424242;
+        --color-disabled-content: #757575;
 
         --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
         --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
@@ -208,3 +207,4 @@
     line-height: var(--line-height-normal);
     letter-spacing: 0.5px;
 }
+

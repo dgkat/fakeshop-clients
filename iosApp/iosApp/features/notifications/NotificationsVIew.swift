@@ -11,7 +11,7 @@ struct NotificationsView: View {
         VStack(spacing: 16) {
             Image(systemName: "bell.fill")
                 .font(.system(size: 64))
-                .foregroundColor(.blue)
+                .foregroundColor(FakeShopColors.primary)
             
             Text("Notifications")
                 .font(.largeTitle)

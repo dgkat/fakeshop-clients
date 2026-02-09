@@ -34,3 +34,15 @@ web/ssr/src/main/resources/static/css/bundles/
 # Copied web common resources (duplicates of web/common module)
 web/ssr/src/main/resources/common/
 web/webApp/src/jsMain/resources/common/
+
+# Generated web strings (copied by generateWebStrings)
+web/common/src/commonMain/resources/strings/
+
+# Generated Kotlin string accessor
+shared/build/generated/strings/
+
+# Generated iOS localization files
+iosApp/iosApp/*.lproj/
+
+# Generated iOS colors (from generateIosColors)
+iosApp/iosApp/Theme/FakeShopColors.swift

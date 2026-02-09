@@ -1,0 +1,47 @@
+{
+  "app_name": "E-Shop",
+
+  "tab_home": "Home",
+  "tab_favorites": "Favorites",
+  "tab_notifications": "Notifications",
+  "tab_profile": "Profile",
+
+  "search_placeholder": "Searcha productsaaa...",
+  "search": "Search",
+  "clear_search": "Clear search",
+  "no_results": "No results found",
+
+  "loading": "Loading...",
+  "loading_products": "Loading products...",
+  "loading_details": "Loading details...",
+  "retry": "Retry",
+  "error_generic": "Oops! Something went wrong",
+  "error_network": "Network error occurred",
+  "error_product_not_found": "Product not found",
+  "error_product_details": "Could not load additional details",
+  "no_products": "No products available",
+  "error": "Error",
+
+  "description": "Description",
+  "specifications": "Specifications",
+  "product_image": "Product image",
+  "thumbnail": "Thumbnail",
+
+  "favorites_empty": "Your favorite products will appear here",
+  "notifications_empty": "Stay tuned for updates",
+  "profile_subtitle": "Manage your account",
+
+  "welcome": "Welcome",
+  "email": "Email",
+  "password": "Password",
+  "login": "Log In",
+  "sign_up": "Sign Up",
+  "logout": "Logout",
+  "processing": "Processing...",
+  "logged_in": "You are logged in",
+  "logging_out": "Logging out...",
+
+  "back": "Back",
+  "home_page_title": "E-Shop Home",
+  "footer_copyright": "2024 E-Shop. Built with Kotlin Multiplatform"
+}

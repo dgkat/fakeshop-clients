@@ -11,7 +11,7 @@ struct ProfileView: View {
         VStack(spacing: 16) {
             Image(systemName: "person.fill")
                 .font(.system(size: 64))
-                .foregroundColor(.blue)
+                .foregroundColor(FakeShopColors.primary)
             
             Text("Profile")
                 .font(.largeTitle)
