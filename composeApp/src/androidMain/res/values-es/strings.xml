@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AUTO-GENERATED from strings/es.json - do not edit manually -->
+<resources>
+    <string name="app_name">E-Shop</string>
+    <string name="tab_home">Inicio</string>
+    <string name="tab_favorites">Favoritos</string>
+    <string name="tab_notifications">Notificaciones</string>
+    <string name="tab_profile">Perfil</string>
+    <string name="search_placeholder">Buscar productos...</string>
+    <string name="search">Buscar</string>
+    <string name="clear_search">Borrar búsqueda</string>
+    <string name="no_results">No se encontraron resultados</string>
+    <string name="loading">Cargando...</string>
+    <string name="loading_products">Cargando productos...</string>
+    <string name="loading_details">Cargando detalles...</string>
+    <string name="retry">Reintentar</string>
+    <string name="error_generic">¡Ups! Algo salió mal</string>
+    <string name="error_network">Error de conexión</string>
+    <string name="error_product_not_found">Producto no encontrado</string>
+    <string name="error_product_details">No se pudieron cargar los detalles adicionales</string>
+    <string name="no_products">No hay productos disponibles</string>
+    <string name="error">Error</string>
+    <string name="description">Descripción</string>
+    <string name="specifications">Especificaciones</string>
+    <string name="product_image">Imagen del producto</string>
+    <string name="thumbnail">Miniatura</string>
+    <string name="favorites_empty">Tus productos favoritos aparecerán aquí</string>
+    <string name="notifications_empty">Mantente atento a las novedades</string>
+    <string name="profile_subtitle">Administra tu cuenta</string>
+    <string name="welcome">Bienvenido</string>
+    <string name="email">Correo electrónico</string>
+    <string name="password">Contraseña</string>
+    <string name="login">Iniciar sesión</string>
+    <string name="sign_up">Registrarse</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="processing">Procesando...</string>
+    <string name="logged_in">Has iniciado sesión</string>
+    <string name="logging_out">Cerrando sesión...</string>
+    <string name="back">Atrás</string>
+    <string name="home_page_title">E-Shop Inicio</string>
+    <string name="footer_copyright">2024 E-Shop. Construido con Kotlin Multiplatform</string>
+    <string name="language">Idioma</string>
+    <string name="language_english">Inglés</string>
+    <string name="language_spanish">Español</string>
+</resources>

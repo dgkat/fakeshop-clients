@@ -29,7 +29,8 @@ import org.example.fakeshop_clients.features.profile.presentation.ProfileState
 fun ProfileContent(
     profileState: ProfileState,
     onEvent: (ProfileEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    languageSection: @Composable (() -> Unit)? = null
 ) {
     Box(
         modifier = modifier
@@ -46,7 +47,8 @@ fun ProfileContent(
                 LoggedInContent(
                     isProcessing = profileState.isProcessing,
                     error = "Logged in error",
-                    onEvent = onEvent
+                    onEvent = onEvent,
+                    languageSection = languageSection
                 )
             }
             else -> {
@@ -55,7 +57,8 @@ fun ProfileContent(
                     password = profileState.password,
                     isProcessing = profileState.isProcessing,
                     error = "Logged out error",
-                    onEvent = onEvent
+                    onEvent = onEvent,
+                    languageSection = languageSection
                 )
             }
         }
@@ -66,7 +69,8 @@ fun ProfileContent(
 fun LoggedInContent(
     isProcessing: Boolean,
     error: String?,
-    onEvent: (ProfileEvent) -> Unit
+    onEvent: (ProfileEvent) -> Unit,
+    languageSection: @Composable (() -> Unit)? = null
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -99,6 +103,8 @@ fun LoggedInContent(
                 Text("Logout")
             }
         }
+
+        languageSection?.invoke()
     }
 }
 
@@ -108,7 +114,8 @@ fun LoggedOutContent(
     password: String,
     isProcessing: Boolean,
     error: String?,
-    onEvent: (ProfileEvent) -> Unit
+    onEvent: (ProfileEvent) -> Unit,
+    languageSection: @Composable (() -> Unit)? = null
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -182,5 +189,7 @@ fun LoggedOutContent(
                 Text("Sign Up")
             }
         }
+
+        languageSection?.invoke()
     }
 }

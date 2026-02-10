@@ -6,7 +6,7 @@
     <string name="tab_favorites">Favorites</string>
     <string name="tab_notifications">Notifications</string>
     <string name="tab_profile">Profile</string>
-    <string name="search_placeholder">Searcha productsaaa...</string>
+    <string name="search_placeholder">Search products...</string>
     <string name="search">Search</string>
     <string name="clear_search">Clear search</string>
     <string name="no_results">No results found</string>
@@ -39,4 +39,7 @@
     <string name="back">Back</string>
     <string name="home_page_title">E-Shop Home</string>
     <string name="footer_copyright">2024 E-Shop. Built with Kotlin Multiplatform</string>
+    <string name="language">Language</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Spanish</string>
 </resources>

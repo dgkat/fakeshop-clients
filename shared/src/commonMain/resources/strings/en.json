@@ -6,7 +6,7 @@
   "tab_notifications": "Notifications",
   "tab_profile": "Profile",
 
-  "search_placeholder": "Searcha productsaaa...",
+  "search_placeholder": "Search products...",
   "search": "Search",
   "clear_search": "Clear search",
   "no_results": "No results found",
@@ -43,5 +43,9 @@
 
   "back": "Back",
   "home_page_title": "E-Shop Home",
-  "footer_copyright": "2024 E-Shop. Built with Kotlin Multiplatform"
+  "footer_copyright": "2024 E-Shop. Built with Kotlin Multiplatform",
+
+  "language": "Language",
+  "language_english": "English",
+  "language_spanish": "Spanish"
 }
