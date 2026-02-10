@@ -13,14 +13,14 @@ struct NotificationsView: View {
                 .font(.system(size: 64))
                 .foregroundColor(FakeShopColors.primary)
             
-            Text("Notifications")
+            Text(String(localized: "tab_notifications"))
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            
-            Text("Stay tuned for updates")
+
+            Text(String(localized: "notifications_empty"))
                 .font(.body)
                 .foregroundColor(.secondary)
         }
-        .navigationTitle("Notifications")
+        .navigationTitle(String(localized: "tab_notifications"))
     }
 }

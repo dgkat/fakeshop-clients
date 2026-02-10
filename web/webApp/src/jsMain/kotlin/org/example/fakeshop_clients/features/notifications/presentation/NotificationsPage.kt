@@ -6,6 +6,7 @@ import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.p
 import react.dom.html.ReactHTML.span
+import org.example.fakeshop_clients.core.strings.Strings
 import web.cssom.ClassName
 
 val NotificationsPage = FC<Props> {
@@ -16,7 +17,7 @@ val NotificationsPage = FC<Props> {
             className = ClassName("placeholder-icon")
             +"🔔"
         }
-        h2 { +"Notifications" }
-        p { +"Stay tuned for update" }
+        h2 { +Strings.TAB_NOTIFICATIONS }
+        p { +Strings.NOTIFICATIONS_EMPTY }
     }
 }

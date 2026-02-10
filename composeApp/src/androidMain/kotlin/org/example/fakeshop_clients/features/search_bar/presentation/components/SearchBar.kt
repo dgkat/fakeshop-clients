@@ -36,7 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.example.fakeshop_clients.R
 import org.example.fakeshop_clients.features.search.domain.models.SearchResult
 import org.example.fakeshop_clients.features.search.presentation.SearchBarBehavior
 import org.example.fakeshop_clients.features.search.presentation.SearchState
@@ -137,11 +139,11 @@ private fun SearchBarContent(
         TextField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = { Text("Search products...") },
+            placeholder = { Text(stringResource(R.string.search_placeholder)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Search"
+                    contentDescription = stringResource(R.string.search)
                 )
             },
             trailingIcon = {
@@ -149,7 +151,7 @@ private fun SearchBarContent(
                     IconButton(onClick = onClearQuery) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear search"
+                            contentDescription = stringResource(R.string.clear_search)
                         )
                     }
                 }
@@ -201,7 +203,7 @@ private fun SearchResultsDropdown(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No results found",
+                        text = stringResource(R.string.no_results),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

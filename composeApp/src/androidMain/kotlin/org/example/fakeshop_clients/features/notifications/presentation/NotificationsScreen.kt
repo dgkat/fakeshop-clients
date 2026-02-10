@@ -13,7 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.example.fakeshop_clients.R
 
 @Composable
 fun NotificationsScreen() {
@@ -32,11 +34,11 @@ fun NotificationsScreen() {
                 tint = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Notifications",
+                text = stringResource(R.string.tab_notifications),
                 style = MaterialTheme.typography.headlineMedium
             )
             Text(
-                text = "Stay tuned for updates",
+                text = stringResource(R.string.notifications_empty),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -17,7 +17,7 @@ struct SearchBarView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
             
-            TextField("Search products...", text: Binding(
+            TextField(String(localized: "search_placeholder"), text: Binding(
                 get: { query },
                 set: { onQueryChange($0) }
             ))

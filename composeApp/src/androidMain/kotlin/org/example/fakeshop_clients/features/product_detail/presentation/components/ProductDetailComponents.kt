@@ -37,7 +37,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.example.fakeshop_clients.R
 import coil.compose.AsyncImage
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import org.example.fakeshop_clients.core.presentation.models.UiDetailedProduct
@@ -71,13 +73,13 @@ fun ErrorContent(
         ) {
             Text(
                 text = when (error) {
-                    is ProductDetailError.Network -> "Network error occurred"
-                    ProductDetailError.ProductNotFound -> "Product not found"
+                    is ProductDetailError.Network -> stringResource(R.string.error_network)
+                    ProductDetailError.ProductNotFound -> stringResource(R.string.error_product_not_found)
                 },
                 style = MaterialTheme.typography.bodyLarge
             )
             Button(onClick = onRetry) {
-                Text("Retry")
+                Text(stringResource(R.string.retry))
             }
         }
     }
@@ -214,7 +216,7 @@ private fun DetailedProductLoadingIndicator(modifier: Modifier = Modifier) {
     ) {
         CircularProgressIndicator(modifier = Modifier.size(20.dp))
         Text(
-            text = "Loading details...",
+            text = stringResource(R.string.loading_details),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -238,7 +240,7 @@ private fun DetailedProductErrorIndicator(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Could not load additional details",
+                text = stringResource(R.string.error_product_details),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
@@ -259,7 +261,7 @@ private fun DetailedProductInfo(
         detailedProduct.description?.let { description ->
             HorizontalDivider()
             ProductSection(
-                title = "Description",
+                title = stringResource(R.string.description),
                 content = description
             )
         }
@@ -268,7 +270,7 @@ private fun DetailedProductInfo(
         detailedProduct.specs?.let { specs ->
             HorizontalDivider()
             ProductSection(
-                title = "Specifications",
+                title = stringResource(R.string.specifications),
                 content = specs
             )
         }
@@ -316,7 +318,7 @@ private fun ImageGallery(
             ) { page ->
                 AsyncImage(
                     model = imageUrls[page],
-                    contentDescription = "Product image ${page + 1}",
+                    contentDescription = stringResource(R.string.product_image),
                     modifier = Modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.surfaceVariant),
@@ -390,7 +392,7 @@ private fun ThumbnailRow(
             ) {
                 AsyncImage(
                     model = imageUrl,
-                    contentDescription = "Thumbnail",
+                    contentDescription = stringResource(R.string.thumbnail),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )

@@ -6,6 +6,7 @@ import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.input
 import react.dom.html.ReactHTML.p
+import org.example.fakeshop_clients.core.strings.Strings
 import web.cssom.ClassName
 import web.html.InputType
 import web.html.email
@@ -28,7 +29,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
 
         h2 {
             className = ClassName("profile-title")
-            +"Welcome"
+            +Strings.WELCOME
         }
 
         div {
@@ -37,7 +38,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
             input {
                 className = ClassName("form-input")
                 type = InputType.email
-                placeholder = "Email"
+                placeholder = Strings.EMAIL
                 value = props.email
                 disabled = props.isProcessing
                 onChange = { event ->
@@ -48,7 +49,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
             input {
                 className = ClassName("form-input")
                 type = InputType.password
-                placeholder = "Password"
+                placeholder = Strings.PASSWORD
                 value = props.password
                 disabled = props.isProcessing
                 onChange = { event ->
@@ -74,9 +75,9 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
                     }
 
                     if (props.isProcessing) {
-                        +"Processing..."
+                        +Strings.PROCESSING
                     } else {
-                        +"Log In"
+                        +Strings.LOGIN
                     }
                 }
 
@@ -87,7 +88,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
                         props.onSignUp()
                     }
 
-                    +"Sign Up"
+                    +Strings.SIGN_UP
                 }
             }
         }

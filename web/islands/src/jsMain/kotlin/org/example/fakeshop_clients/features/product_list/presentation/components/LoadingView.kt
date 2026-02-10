@@ -5,6 +5,7 @@ import react.Props
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.p
+import org.example.fakeshop_clients.core.strings.Strings
 import web.cssom.ClassName
 
 external interface LoadingViewProps : Props {
@@ -14,7 +15,7 @@ external interface LoadingViewProps : Props {
 val LoadingView = FC<LoadingViewProps> { props ->
     div {
         className = ClassName("loading-view")
-        p { +"Loading products..." }
+        p { +Strings.LOADING_PRODUCTS }
         button {
             className = ClassName("btn btn-primary")
             onClick = {

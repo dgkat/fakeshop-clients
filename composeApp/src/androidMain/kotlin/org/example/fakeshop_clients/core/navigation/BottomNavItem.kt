@@ -10,34 +10,35 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.example.fakeshop_clients.R
 
 enum class BottomNavItem(
     val route: String,
-    val title: String,
+    val titleResId: Int,
     val icon: ImageVector,
     val selectedIcon: ImageVector = icon
 ) {
     HOME(
         route = Route.Home.route,
-        title = "Home",
+        titleResId = R.string.tab_home,
         icon = Icons.Outlined.Home,
         selectedIcon = Icons.Filled.Home
     ),
     FAVORITES(
         route = Route.Favorites.route,
-        title = "Favorites",
+        titleResId = R.string.tab_favorites,
         icon = Icons.Outlined.FavoriteBorder,
         selectedIcon = Icons.Filled.Favorite
     ),
     NOTIFICATIONS(
         route = Route.Notifications.route,
-        title = "Notifications",
+        titleResId = R.string.tab_notifications,
         icon = Icons.Outlined.Notifications,
         selectedIcon = Icons.Filled.Notifications
     ),
     PROFILE(
         route = Route.Profile.route,
-        title = "Profile",
+        titleResId = R.string.tab_profile,
         icon = Icons.Outlined.Person,
         selectedIcon = Icons.Filled.Person
     )

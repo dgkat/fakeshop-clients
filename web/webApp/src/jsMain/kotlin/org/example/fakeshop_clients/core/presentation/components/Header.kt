@@ -15,6 +15,7 @@ import react.dom.html.ReactHTML.header
 import react.useEffect
 import react.useRef
 import react.useState
+import org.example.fakeshop_clients.core.strings.Strings
 import web.cssom.ClassName
 import web.html.HTMLElement
 
@@ -55,7 +56,7 @@ val Header = FC<HeaderProps> { props ->
                 className = ClassName("logo")
                 a {
                     href = "/"
-                    +"E-Shop"
+                    +Strings.APP_NAME
                 }
             }
 

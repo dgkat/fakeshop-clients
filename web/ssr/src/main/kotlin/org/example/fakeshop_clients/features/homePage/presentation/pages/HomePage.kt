@@ -14,6 +14,7 @@ import kotlinx.html.meta
 import kotlinx.html.p
 import kotlinx.html.script
 import kotlinx.html.title
+import org.example.fakeshop_clients.core.strings.Strings
 import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
 import org.example.fakeshop_clients.features.core.navigation.mobile.bottomNavigation
 
@@ -21,7 +22,7 @@ fun HTML.homePage() {
     head {
         meta(charset = "UTF-8")
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
-        title { +"E-Shop Home" }
+        title { +Strings.HOME_PAGE_TITLE }
 
         // ===== PRELOAD ISLAND BUNDLES =====
         link(rel = "preload", href = "/static/js/islands-bundle.js") {
@@ -62,7 +63,7 @@ fun HTML.homePage() {
         header(classes = "header") {
             attributes["data-scroll-behavior"] = "scroll-reactive"
             div(classes = "container header-content") {
-                h1(classes = "logo") { +"E-Shop" }
+                h1(classes = "logo") { +Strings.APP_NAME }
 
                 // ===== SEARCH ISLAND CONTAINER =====
                 div {
@@ -89,7 +90,7 @@ fun HTML.homePage() {
         // Footer
         footer(classes = "footer") {
             div(classes = "container") {
-                p { +"© 2024 E-Shop. Built with Kotlin Multiplatform + Islands Architecture" }
+                p { +"© ${Strings.FOOTER_COPYRIGHT}" }
             }
         }
 

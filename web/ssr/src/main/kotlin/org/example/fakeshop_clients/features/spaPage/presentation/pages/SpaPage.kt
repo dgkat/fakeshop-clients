@@ -9,12 +9,13 @@ import kotlinx.html.link
 import kotlinx.html.meta
 import kotlinx.html.script
 import kotlinx.html.title
+import org.example.fakeshop_clients.core.strings.Strings
 
 fun HTML.spaPage() {
     head {
         meta(charset = "UTF-8")
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
-        title { +"E-Shop" }
+        title { +Strings.APP_NAME }
 
         // React
         script(src = "https://unpkg.com/react@18/umd/react.development.js") {}

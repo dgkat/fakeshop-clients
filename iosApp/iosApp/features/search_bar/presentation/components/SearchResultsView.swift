@@ -29,7 +29,7 @@ struct SearchResultsView: View {
                 ProgressView()
                     .padding(32)
             } else if results.isEmpty {
-                Text("No results found")
+                Text(String(localized: "no_results"))
                     .foregroundColor(.secondary)
                     .padding(32)
             } else {

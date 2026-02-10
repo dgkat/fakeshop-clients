@@ -8,6 +8,7 @@ import react.dom.html.ReactHTML.nav
 import react.dom.html.ReactHTML.span
 import react.router.dom.Link
 import react.router.useLocation
+import org.example.fakeshop_clients.core.strings.Strings
 import web.cssom.ClassName
 
 // Bottom Navigation
@@ -27,7 +28,7 @@ val BottomNav = FC<Props> {
             }
             span {
                 className = ClassName("nav-label")
-                +"Home"
+                +Strings.TAB_HOME
             }
         }
         Link {
@@ -39,7 +40,7 @@ val BottomNav = FC<Props> {
             }
             span {
                 className = ClassName("nav-label")
-                +"Favorites"
+                +Strings.TAB_FAVORITES
             }
         }
         Link {
@@ -51,7 +52,7 @@ val BottomNav = FC<Props> {
             }
             span {
                 className = ClassName("nav-label")
-                +"Notifications"
+                +Strings.TAB_NOTIFICATIONS
             }
         }
         Link {
@@ -63,7 +64,7 @@ val BottomNav = FC<Props> {
             }
             span {
                 className = ClassName("nav-label")
-                +"Profile"
+                +Strings.TAB_PROFILE
             }
         }
     }

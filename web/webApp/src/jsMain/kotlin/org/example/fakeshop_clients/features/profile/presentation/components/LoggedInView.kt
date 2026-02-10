@@ -6,6 +6,7 @@ import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.p
+import org.example.fakeshop_clients.core.strings.Strings
 import web.cssom.ClassName
 
 external interface LoggedInViewProps : Props {
@@ -20,7 +21,7 @@ val LoggedInView = FC<LoggedInViewProps> { props ->
 
         h2 {
             className = ClassName("profile-title")
-            +"You are logged in"
+            +Strings.LOGGED_IN
         }
 
         props.error?.let { errorMessage ->
@@ -38,9 +39,9 @@ val LoggedInView = FC<LoggedInViewProps> { props ->
             }
 
             if (props.isProcessing) {
-                +"Logging out..."
+                +Strings.LOGGING_OUT
             } else {
-                +"Logout"
+                +Strings.LOGOUT
             }
         }
     }

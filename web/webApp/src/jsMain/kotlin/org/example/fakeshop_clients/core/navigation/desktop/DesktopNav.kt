@@ -7,6 +7,7 @@ import react.dom.html.ReactHTML.a
 import react.dom.html.ReactHTML.nav
 import react.router.dom.Link
 import react.router.useLocation
+import org.example.fakeshop_clients.core.strings.Strings
 import web.cssom.ClassName
 
 val DesktopNav = FC<Props> {
@@ -19,22 +20,22 @@ val DesktopNav = FC<Props> {
         a {
             href = "/"
             className = ClassName(if (isHome) "nav-link active" else "nav-link")
-            +"Home"
+            +Strings.TAB_HOME
         }
         Link {
             to = "/favorites"
             className = ClassName(if (location.pathname == "/favorites") "nav-link active" else "nav-link")
-            +"Favorites"
+            +Strings.TAB_FAVORITES
         }
         Link {
             to = "/notifications"
             className = ClassName(if (location.pathname == "/notifications") "nav-link active" else "nav-link")
-            +"Notifications"
+            +Strings.TAB_NOTIFICATIONS
         }
         Link {
             to = "/profile"
             className = ClassName(if (location.pathname == "/profile") "nav-link active" else "nav-link")
-            +"Profile"
+            +Strings.TAB_PROFILE
         }
     }
 }

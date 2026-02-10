@@ -17,7 +17,7 @@ struct SearchBarPlaceholder: View {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.secondary)
-                Text("Search products...")
+                Text(String(localized: "search_placeholder"))
                     .foregroundColor(.secondary)
                 Spacer()
             }

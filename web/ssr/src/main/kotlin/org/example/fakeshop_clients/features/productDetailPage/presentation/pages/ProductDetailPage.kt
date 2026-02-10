@@ -20,6 +20,7 @@ import kotlinx.html.p
 import kotlinx.html.script
 import kotlinx.html.span
 import kotlinx.html.title
+import org.example.fakeshop_clients.core.strings.Strings
 import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
 import org.example.fakeshop_clients.features.core.navigation.mobile.bottomNavigation
 import org.example.fakeshop_clients.features.productDetailPage.domain.models.FullProduct
@@ -79,12 +80,12 @@ fun HTML.productDetailPage(product: FullProduct) {
 
                 button(classes = "back-button") {
                     onClick = "window.history.back()"
-                    +"← Back"
+                    +"← ${Strings.BACK}"
                 }
 
                 h1(classes = "logo") {
                     a(href = "/") {
-                        +"E-Shop"
+                        +Strings.APP_NAME
                     }
                 }
 
@@ -144,7 +145,7 @@ fun HTML.productDetailPage(product: FullProduct) {
         // Footer
         footer(classes = "footer") {
             div(classes = "container") {
-                p { +"© 2024 E-Shop. Built with Kotlin Multiplatform + HTMX" }
+                p { +"© ${Strings.FOOTER_COPYRIGHT}" }
             }
         }
 
