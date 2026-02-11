@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import org.example.fakeshop_clients.core.navigation.BottomNavItem
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BottomNavigationBar(
@@ -27,12 +28,12 @@ fun BottomNavigationBar(
                 icon = {
                     Icon(
                         imageVector = if (isSelected) item.selectedIcon else item.icon,
-                        contentDescription = item.title
+                        contentDescription = stringResource(item.titleRes)
                     )
                 },
                 label = {
                     Text(
-                        text = item.title,
+                        text = stringResource(item.titleRes),
                         style = MaterialTheme.typography.labelSmall
                     )
                 },

@@ -41,4 +41,7 @@ dependencies {
 // This runs automatically when building the common module
 tasks.named("processResources") {
     dependsOn(":web:common:copyBundledCss")
+    dependsOn(":shared:generateWebStrings")
+    dependsOn(":web:webApp:copySpaResources")
+    dependsOn(":web:islands:copyIslandResources")
 }

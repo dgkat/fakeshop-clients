@@ -1,0 +1,51 @@
+{
+  "app_name": "E-Shop",
+
+  "tab_home": "Inicio",
+  "tab_favorites": "Favoritos",
+  "tab_notifications": "Notificaciones",
+  "tab_profile": "Perfil",
+
+  "search_placeholder": "Buscar productos...",
+  "search": "Buscar",
+  "clear_search": "Borrar búsqueda",
+  "no_results": "No se encontraron resultados",
+
+  "loading": "Cargando...",
+  "loading_products": "Cargando productos...",
+  "loading_details": "Cargando detalles...",
+  "retry": "Reintentar",
+  "error_generic": "¡Ups! Algo salió mal",
+  "error_network": "Error de conexión",
+  "error_product_not_found": "Producto no encontrado",
+  "error_product_details": "No se pudieron cargar los detalles adicionales",
+  "no_products": "No hay productos disponibles",
+  "error": "Error",
+
+  "description": "Descripción",
+  "specifications": "Especificaciones",
+  "product_image": "Imagen del producto",
+  "thumbnail": "Miniatura",
+
+  "favorites_empty": "Tus productos favoritos aparecerán aquí",
+  "notifications_empty": "Mantente atento a las novedades",
+  "profile_subtitle": "Administra tu cuenta",
+
+  "welcome": "Bienvenido",
+  "email": "Correo electrónico",
+  "password": "Contraseña",
+  "login": "Iniciar sesión",
+  "sign_up": "Registrarse",
+  "logout": "Cerrar sesión",
+  "processing": "Procesando...",
+  "logged_in": "Has iniciado sesión",
+  "logging_out": "Cerrando sesión...",
+
+  "back": "Atrás",
+  "home_page_title": "E-Shop Inicio",
+  "footer_copyright": "2024 E-Shop. Construido con Kotlin Multiplatform",
+
+  "language": "Idioma",
+  "language_english": "Inglés",
+  "language_spanish": "Español"
+}

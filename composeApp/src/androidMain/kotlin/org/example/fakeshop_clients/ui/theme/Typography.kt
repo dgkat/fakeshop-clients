@@ -1,58 +1,60 @@
 package org.example.fakeshop_clients.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import org.example.fakeshop_clients.core.design.DesignTokens.Typography as Typo
 
 val Typography = Typography(
-    displayLarge = androidx.compose.ui.text.TextStyle(
+    displayLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = 57.sp,
-        lineHeight = 64.sp,
+        fontSize = Typo.DisplayLarge.sp,
+        lineHeight = Typo.DisplayLargeLineHeight.sp,
         letterSpacing = 0.sp
     ),
-    headlineMedium = androidx.compose.ui.text.TextStyle(
+    headlineMedium = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = 28.sp,
-        lineHeight = 36.sp,
+        fontSize = Typo.HeadlineMedium.sp,
+        lineHeight = Typo.HeadlineMediumLineHeight.sp,
         letterSpacing = 0.sp
     ),
-    titleLarge = androidx.compose.ui.text.TextStyle(
+    titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
+        fontSize = Typo.TitleLarge.sp,
+        lineHeight = Typo.TitleLargeLineHeight.sp,
         letterSpacing = 0.sp
     ),
-    titleMedium = androidx.compose.ui.text.TextStyle(
+    titleMedium = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.15.sp
+        fontWeight = FontWeight(Typo.WeightMedium),
+        fontSize = Typo.TitleMedium.sp,
+        lineHeight = Typo.TitleMediumLineHeight.sp,
+        letterSpacing = Typo.TitleMediumLetterSpacing.sp
     ),
-    bodyLarge = androidx.compose.ui.text.TextStyle(
+    bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
+        fontSize = Typo.BodyLarge.sp,
+        lineHeight = Typo.BodyLargeLineHeight.sp,
+        letterSpacing = Typo.BodyLargeLetterSpacing.sp
     ),
-    bodyMedium = androidx.compose.ui.text.TextStyle(
+    bodyMedium = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.25.sp
+        fontSize = Typo.BodyMedium.sp,
+        lineHeight = Typo.BodyMediumLineHeight.sp,
+        letterSpacing = Typo.BodyMediumLetterSpacing.sp
     ),
-    labelSmall = androidx.compose.ui.text.TextStyle(
+    labelSmall = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        fontWeight = FontWeight(Typo.WeightMedium),
+        fontSize = Typo.LabelSmall.sp,
+        lineHeight = Typo.LabelSmallLineHeight.sp,
+        letterSpacing = Typo.LabelSmallLetterSpacing.sp
     )
 )

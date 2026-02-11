@@ -17,14 +17,14 @@ struct SearchBarPlaceholder: View {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.secondary)
-                Text("Search products...")
+                Text(String(localized: "search_placeholder"))
                     .foregroundColor(.secondary)
                 Spacer()
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity)
-            .background(Color(.systemGray6))
+            .background(FakeShopColors.surfaceVariant)
             .cornerRadius(10)
         }
         .frame(height: 40)

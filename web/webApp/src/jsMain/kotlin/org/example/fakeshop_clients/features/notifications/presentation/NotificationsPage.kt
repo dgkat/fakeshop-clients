@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.features.notifications.presentation
 
+import org.example.fakeshop_clients.core.i18n.getString
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
@@ -16,7 +17,7 @@ val NotificationsPage = FC<Props> {
             className = ClassName("placeholder-icon")
             +"🔔"
         }
-        h2 { +"Notifications" }
-        p { +"Stay tuned for update" }
+        h2 { +getString("tab_notifications") }
+        p { +getString("notifications_empty") }
     }
 }

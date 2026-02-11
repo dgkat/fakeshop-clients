@@ -27,12 +27,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import fakeshop_clients.composeapp.generated.resources.Res
+import fakeshop_clients.composeapp.generated.resources.error
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import org.example.fakeshop_clients.features.home.presentation.ErrorState
 import org.example.fakeshop_clients.features.home.presentation.LoadingState
 import org.example.fakeshop_clients.features.home.presentation.productList.UiCategoryRow
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListState
 import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarScrollState
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HomeContent(
@@ -63,7 +66,7 @@ fun HomeContent(
     productListState.error?.let {
         //TODO handle error
         ErrorState(
-            message = "error",
+            message = stringResource(Res.string.error),
             onRetry = onRetry,
             modifier = modifier
         )

@@ -51,7 +51,7 @@
 }
 
 .stars {
-    color: #FFB300;
+    color: var(--color-warning);
     font-size: 20px;
     letter-spacing: 2px;
 }
@@ -83,20 +83,20 @@
 }
 
 .btn-like {
-    background-color: white;
+    background-color: var(--color-surface);
     color: var(--color-on-surface);
-    border: 2px solid #E0E0E0;
+    border: 2px solid var(--color-outline-variant);
 }
 
 .btn-like:hover {
     border-color: var(--color-primary);
-    background-color: #F5F5F5;
+    background-color: var(--color-surface-variant);
 }
 
 .btn-like.liked {
-    background-color: #FFE8E8;
-    border-color: #FF4444;
-    color: #FF4444;
+    background-color: var(--color-favorite-container);
+    border-color: var(--color-favorite);
+    color: var(--color-favorite);
 }
 
 .like-icon {

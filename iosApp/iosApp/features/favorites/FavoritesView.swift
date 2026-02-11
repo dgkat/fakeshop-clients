@@ -11,16 +11,16 @@ struct FavoritesView: View {
         VStack(spacing: 16) {
             Image(systemName: "heart.fill")
                 .font(.system(size: 64))
-                .foregroundColor(.blue)
+                .foregroundColor(FakeShopColors.primary)
             
-            Text("Favorites")
+            Text(String(localized: "tab_favorites"))
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            
-            Text("Your favorite products will appear here")
+
+            Text(String(localized: "favorites_empty"))
                 .font(.body)
                 .foregroundColor(.secondary)
         }
-        .navigationTitle("Favorites")
+        .navigationTitle(String(localized: "tab_favorites"))
     }
 }

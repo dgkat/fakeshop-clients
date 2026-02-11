@@ -65,7 +65,7 @@ struct ProductCard: View {
                         .aspectRatio(contentMode: .fill)
                 } placeholder: {
                     Rectangle()
-                        .fill(Color(.systemGray5))
+                        .fill(FakeShopColors.surfaceVariant)
                         .overlay(
                             ProgressView()
                         )
@@ -85,13 +85,13 @@ struct ProductCard: View {
                     Text(String(format: "$%.2f", product.price))
                         .font(.title3)
                         .fontWeight(.bold)
-                        .foregroundColor(.blue)
+                        .foregroundColor(FakeShopColors.primary)
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .frame(width: 160)
-            .background(Color(.systemBackground))
+            .background(FakeShopColors.surface)
             .cornerRadius(12)
             .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         }

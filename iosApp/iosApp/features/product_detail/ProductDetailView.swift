@@ -58,11 +58,11 @@ struct ErrorView: View {
                 .foregroundColor(.secondary)
 
             Button(action: onRetry) {
-                Text("Retry")
+                Text(String(localized: "retry"))
                     .fontWeight(.medium)
-                    .foregroundColor(.white)
+                    .foregroundColor(FakeShopColors.onPrimary)
                     .frame(width: 120, height: 44)
-                    .background(Color.blue)
+                    .background(FakeShopColors.primary)
                     .cornerRadius(12)
             }
         }
@@ -72,9 +72,9 @@ struct ErrorView: View {
     private var errorMessage: String {
         switch onEnum(of: error) {
         case .network:
-            return "Network error occurred"
+            return String(localized: "error_network")
         case .productNotFound:
-            return "Product not found"
+            return String(localized: "error_product_not_found")
         }
     }
 }
@@ -145,7 +145,7 @@ struct SingleProductImage: View {
                 .frame(width: screenWidth, height: screenWidth)
         } placeholder: {
             Rectangle()
-                .fill(Color(.systemGray5))
+                .fill(FakeShopColors.surfaceVariant)
                 .overlay(ProgressView())
                 .frame(width: screenWidth, height: screenWidth)
         }
@@ -172,7 +172,7 @@ struct ImageGallery: View {
                             .frame(width: screenWidth, height: screenWidth)
                     } placeholder: {
                         Rectangle()
-                            .fill(Color(.systemGray5))
+                            .fill(FakeShopColors.surfaceVariant)
                             .overlay(ProgressView())
                             .frame(width: screenWidth, height: screenWidth)
                     }
@@ -189,7 +189,7 @@ struct ImageGallery: View {
                 HStack(spacing: 8) {
                     ForEach(0..<imageUrls.count, id: \.self) { index in
                         Circle()
-                            .fill(index == currentPage ? Color.blue : Color.gray.opacity(0.3))
+                            .fill(index == currentPage ? FakeShopColors.primary : FakeShopColors.outline.opacity(0.3))
                             .frame(width: 8, height: 8)
                     }
                 }
@@ -208,7 +208,7 @@ struct BriefProductInfo: View {
             Text(product.category)
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundColor(.blue)
+                .foregroundColor(FakeShopColors.primary)
 
             Text(product.name)
                 .font(.title2)
@@ -217,7 +217,7 @@ struct BriefProductInfo: View {
             Text(String(format: "$%.2f", product.price))
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.blue)
+                .foregroundColor(FakeShopColors.primary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, 16)
@@ -234,7 +234,7 @@ struct DetailedProductSection: View {
             HStack(spacing: 8) {
                 ProgressView()
                     .scaleEffect(0.8)
-                Text("Loading details...")
+                Text(String(localized: "loading_details"))
                     .font(.body)
                     .foregroundColor(.secondary)
             }
@@ -245,14 +245,14 @@ struct DetailedProductSection: View {
         case .error:
             HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle")
-                    .foregroundColor(.orange)
-                Text("Could not load additional details")
+                    .foregroundColor(FakeShopColors.warning)
+                Text(String(localized: "error_product_details"))
                     .font(.body)
                     .foregroundColor(.secondary)
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
-            .background(Color.orange.opacity(0.1))
+            .background(FakeShopColors.warningContainer)
             .cornerRadius(8)
         }
     }
@@ -265,11 +265,11 @@ struct DetailedProductInfo: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if let description = product.description_ as String?, !description.isEmpty {
-                ProductSection(title: "Description", content: description)
+                ProductSection(title: String(localized: "description"), content: description)
             }
 
             if let specs = product.specs as String?, !specs.isEmpty {
-                ProductSection(title: "Specifications", content: specs)
+                ProductSection(title: String(localized: "specifications"), content: specs)
             }
         }
     }

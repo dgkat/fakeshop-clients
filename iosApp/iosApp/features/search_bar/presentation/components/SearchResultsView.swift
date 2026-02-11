@@ -29,7 +29,7 @@ struct SearchResultsView: View {
                 ProgressView()
                     .padding(32)
             } else if results.isEmpty {
-                Text("No results found")
+                Text(String(localized: "no_results"))
                     .foregroundColor(.secondary)
                     .padding(32)
             } else {
@@ -68,7 +68,7 @@ struct SearchResultsView: View {
                 }
             }
         }
-        .background(Color(.systemBackground))
+        .background(FakeShopColors.surface)
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
         .padding(.horizontal, 16)

@@ -37,9 +37,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import fakeshop_clients.composeapp.generated.resources.Res
+import fakeshop_clients.composeapp.generated.resources.clear_search
+import fakeshop_clients.composeapp.generated.resources.no_results
+import fakeshop_clients.composeapp.generated.resources.search
+import fakeshop_clients.composeapp.generated.resources.search_placeholder
 import org.example.fakeshop_clients.features.search.domain.models.SearchResult
 import org.example.fakeshop_clients.features.search.presentation.SearchBarBehavior
 import org.example.fakeshop_clients.features.search.presentation.SearchState
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SearchBarOverlay(
@@ -137,11 +143,11 @@ private fun SearchBarContent(
         TextField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = { Text("Search products...") },
+            placeholder = { Text(stringResource(Res.string.search_placeholder)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Search"
+                    contentDescription = stringResource(Res.string.search)
                 )
             },
             trailingIcon = {
@@ -149,7 +155,7 @@ private fun SearchBarContent(
                     IconButton(onClick = onClearQuery) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear search"
+                            contentDescription = stringResource(Res.string.clear_search)
                         )
                     }
                 }
@@ -201,7 +207,7 @@ private fun SearchResultsDropdown(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No results found",
+                        text = stringResource(Res.string.no_results),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

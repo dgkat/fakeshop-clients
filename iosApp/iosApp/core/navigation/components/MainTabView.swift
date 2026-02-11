@@ -20,7 +20,7 @@ struct MainTabView: View {
     init() {
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor.systemBackground
+        appearance.backgroundColor = UIColor(FakeShopColors.surface)
         
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
@@ -63,7 +63,7 @@ struct MainTabView: View {
                     }
                 }
                 .tabItem {
-                    Label(Tab.home.rawValue, systemImage: selectedTab == .home ? Tab.home.iconFilled : Tab.home.icon)
+                    Label(Tab.home.title, systemImage: selectedTab == .home ? Tab.home.iconFilled : Tab.home.icon)
                 }
                 .tag(Tab.home)
                 
@@ -83,7 +83,7 @@ struct MainTabView: View {
                     }
                 }
                 .tabItem {
-                    Label(Tab.favorites.rawValue, systemImage: selectedTab == .favorites ? Tab.favorites.iconFilled : Tab.favorites.icon)
+                    Label(Tab.favorites.title, systemImage: selectedTab == .favorites ? Tab.favorites.iconFilled : Tab.favorites.icon)
                 }
                 .tag(Tab.favorites)
                 
@@ -99,14 +99,14 @@ struct MainTabView: View {
                         }
                 }
                 .tabItem {
-                    Label(Tab.notifications.rawValue, systemImage: selectedTab == .notifications ? Tab.notifications.iconFilled : Tab.notifications.icon)
+                    Label(Tab.notifications.title, systemImage: selectedTab == .notifications ? Tab.notifications.iconFilled : Tab.notifications.icon)
                 }
                 .tag(Tab.notifications)
                 
                 NavigationStack(path: $profilePath) {
                     ComposeProfileView()
                         .navigationBarTitleDisplayMode(.inline)
-                        .navigationTitle("Profile")
+                        .navigationTitle(Tab.profile.title)
                         .navigationDestination(for: String.self) { productId in
                             ProductDetailView(
                                 productId: productId,
@@ -117,11 +117,11 @@ struct MainTabView: View {
                         }
                 }
                 .tabItem {
-                    Label(Tab.profile.rawValue, systemImage: selectedTab == .profile ? Tab.profile.iconFilled : Tab.profile.icon)
+                    Label(Tab.profile.title, systemImage: selectedTab == .profile ? Tab.profile.iconFilled : Tab.profile.icon)
                 }
                 .tag(Tab.profile)
             }
-            .tint(.blue)
+            .tint(FakeShopColors.primary)
         }
         .onChange(of: selectedTab) { oldValue, newValue in
             // Reset scroll offset when changing tabs

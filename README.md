@@ -16,8 +16,12 @@ This is a Kotlin Multiplatform project targeting Android, iOS, Web.
   The most important subfolder is [commonMain](./shared/src/commonMain/kotlin). If preferred, you
   can add code to the platform-specific folders here too.
 
-* [/webApp](./webApp) contains web React application. It uses the Kotlin/JS library produced
-  by the [shared](./shared) module.
+* [/web](./web) contains the web application modules:
+  - [/web/ssr](./web/ssr) — Ktor server for server-side rendering (main entry point)
+  - [/web/islands](./web/islands) — Interactive React components hydrated on SSR pages
+  - [/web/webApp](./web/webApp) — Full SPA React application (favorites, profile, notifications)
+  - [/web/common](./web/common) — Shared web resources (CSS, design tokens)
+  - [/web/searchCommon](./web/searchCommon) — Shared search components used by both islands and SPA
 
 ### Build and Run Android Application
 
@@ -35,29 +39,39 @@ in your IDE’s toolbar or build it directly from the terminal:
 ### Build and Run Web Application
 
 To build and run the development version of the web app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
+in your IDE's toolbar or run it directly from the terminal:
 1. Install [Node.js](https://nodejs.org/en/download) (which includes `npm`)
 
 2. Build and run the web application
 
+**One command (recommended)** — cleans, generates strings, builds JS bundles, and starts the SSR server:
+```shell
+./gradlew :web:common:runWeb
+```
+
+**Step by step** — useful when you only need to rebuild specific parts:
 - Islands bundle (will build and copy to ssr)
    ```shell
    ./gradlew :web:islands:copyIslandsBundle
    ```
-- Spa(webApp) bundle (will build and copy to ssr)
+- SPA (webApp) bundle (will build and copy to ssr)
    ```shell
    ./gradlew :web:webApp:copySpaBundle
    ```
-- SSR (Includes islands and spa)
+- SSR server (serves both islands and SPA)
    ```shell
    ./gradlew :web:ssr:run
    ```
 
-For cache related issues
+The web app supports i18n with locale-based URL routing (`/en/...`, `/es/...`). Visiting `/` auto-detects the locale from the browser's `Accept-Language` header.
+
+**Troubleshooting**
+
+For cache related issues:
    ```shell
   ./gradlew :clean
    ```
-And for yarnlock related issues
+For yarn.lock related issues:
    ```shell
   ./gradlew :kotlinUpgradeYarnLock
    ```
@@ -66,6 +80,34 @@ And for yarnlock related issues
 
 To build and run the development version of the iOS app, use the run configuration from the run widget
 in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+
+### Shared Resource Generation
+
+Design tokens (colors, typography, spacing) and strings are defined once in the `shared` module and generated into platform-native formats via Gradle tasks.
+
+**Colors** — source of truth: [`DesignTokens.kt`](./shared/src/commonMain/kotlin/org/example/fakeshop_clients/core/design/DesignTokens.kt)
+
+| Platform | Task | Output |
+|----------|------|--------|
+| Android | Direct Kotlin reference — no generation needed | `Color(Colors.Light.Primary)` |
+| iOS | `./gradlew generateIosColors` | `iosApp/iosApp/Theme/FakeShopColors.swift` |
+| Web | `./gradlew :web:common:generateThemeCss` | `web/common/.../css/shared/theme.css` |
+
+**Strings** — source of truth: [`shared/.../resources/strings/en.json`](./shared/src/commonMain/resources/strings/en.json) and `es.json`
+
+| Platform | Task | Output |
+|----------|------|--------|
+| Android + iOS (Compose) | `./gradlew generateComposeStrings` | `composeApp/.../composeResources/values/strings.xml` |
+| iOS | `./gradlew generateIosStrings` | `iosApp/iosApp/<locale>.lproj/Localizable.strings` |
+| Web (SSR + client) | `./gradlew generateWebStrings` | `web/common/.../resources/strings/` + `web/ssr/.../static/strings/` |
+| Kotlin (shared) | `./gradlew generateStringKeys` | `shared/build/generated/strings/.../Strings.kt` |
+
+Generate everything at once:
+```shell
+./gradlew generateComposeStrings generateIosStrings generateIosColors generateWebStrings generateStringKeys :web:common:generateThemeCss
+```
+
+See [`docs/shared-resources-guide.md`](./docs/shared-resources-guide.md) for full details.
 
 ---
 

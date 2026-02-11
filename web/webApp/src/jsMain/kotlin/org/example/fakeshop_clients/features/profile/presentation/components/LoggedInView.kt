@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.features.profile.presentation.components
 
+import org.example.fakeshop_clients.core.i18n.getString
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.button
@@ -20,7 +21,7 @@ val LoggedInView = FC<LoggedInViewProps> { props ->
 
         h2 {
             className = ClassName("profile-title")
-            +"You are logged in"
+            +getString("logged_in")
         }
 
         props.error?.let { errorMessage ->
@@ -38,9 +39,9 @@ val LoggedInView = FC<LoggedInViewProps> { props ->
             }
 
             if (props.isProcessing) {
-                +"Logging out..."
+                +getString("logging_out")
             } else {
-                +"Logout"
+                +getString("logout")
             }
         }
     }

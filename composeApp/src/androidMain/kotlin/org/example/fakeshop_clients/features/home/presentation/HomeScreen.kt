@@ -17,8 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fakeshop_clients.composeapp.generated.resources.Res
+import fakeshop_clients.composeapp.generated.resources.error_generic
+import fakeshop_clients.composeapp.generated.resources.loading_products
+import fakeshop_clients.composeapp.generated.resources.retry
 import org.example.fakeshop_clients.features.home.presentation.components.HomeContent
 import org.example.fakeshop_clients.features.search_bar.presentation.components.rememberSearchBarScrollState
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -56,7 +61,7 @@ fun LoadingState(modifier: Modifier = Modifier) {
         ) {
             CircularProgressIndicator()
             Text(
-                text = "Loading products...",
+                text = stringResource(Res.string.loading_products),
                 style = MaterialTheme.typography.bodyLarge
             )
         }
@@ -83,7 +88,7 @@ fun ErrorState(
                 style = MaterialTheme.typography.displayLarge
             )
             Text(
-                text = "Oops! Something went wrong",
+                text = stringResource(Res.string.error_generic),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -96,7 +101,7 @@ fun ErrorState(
                 onClick = onRetry,
                 modifier = Modifier.padding(top = 8.dp)
             ) {
-                Text("Retry")
+                Text(stringResource(Res.string.retry))
             }
         }
     }

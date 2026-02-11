@@ -3,6 +3,7 @@ import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import org.example.fakeshop_clients.core.WebKoinManager
+import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
 import org.example.fakeshop_clients.features.search.presentation.SearchViewStore
 import org.example.fakeshop_clients.features.search.presentation.components.SearchBar
@@ -46,8 +47,9 @@ fun setupSearchIsland() {
                 this.viewModel = viewModel
                 this.behavior = behavior
                 this.onNavigateToProduct = { productId ->
+                    val locale = I18n.locale
                     console.log("[setupSearchIsland] Navigating to product: $productId")
-                    window.location.href = "/product/$productId"
+                    window.location.href = "/$locale/product/$productId"
                 }
             }
         )

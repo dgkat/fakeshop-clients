@@ -11,16 +11,16 @@ struct NotificationsView: View {
         VStack(spacing: 16) {
             Image(systemName: "bell.fill")
                 .font(.system(size: 64))
-                .foregroundColor(.blue)
+                .foregroundColor(FakeShopColors.primary)
             
-            Text("Notifications")
+            Text(String(localized: "tab_notifications"))
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            
-            Text("Stay tuned for updates")
+
+            Text(String(localized: "notifications_empty"))
                 .font(.body)
                 .foregroundColor(.secondary)
         }
-        .navigationTitle("Notifications")
+        .navigationTitle(String(localized: "tab_notifications"))
     }
 }

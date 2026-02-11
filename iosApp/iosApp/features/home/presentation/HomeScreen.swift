@@ -18,13 +18,13 @@ struct HomeView: View {
                     .progressViewStyle(CircularProgressViewStyle())
             } else if let error = productListViewModel.state.error {
                 VStack {
-                    Text("Error")
+                    Text(String(localized: "error"))
                         .font(.headline)
                     switch onEnum(of: error) {
                     case .network(let networkError):
                         Text("Network error: \(networkError.error)")
                     case .noProducts:
-                        Text("No products available")
+                        Text(String(localized: "no_products"))
                     }
                 }
             } else {

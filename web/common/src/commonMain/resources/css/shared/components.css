@@ -59,8 +59,8 @@
 }
 
 .btn-disabled {
-    background-color: #E0E0E0;
-    color: #9E9E9E;
+    background-color: var(--color-disabled-background);
+    color: var(--color-disabled-content);
     cursor: not-allowed;
 }
 

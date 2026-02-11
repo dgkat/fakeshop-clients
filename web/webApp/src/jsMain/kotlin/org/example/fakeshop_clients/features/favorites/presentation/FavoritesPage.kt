@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.features.favorites.presentation
 
+import org.example.fakeshop_clients.core.i18n.getString
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
@@ -16,7 +17,7 @@ val FavoritesPage = FC<Props> {
             className = ClassName("placeholder-icon")
             +"❤️"
         }
-        h2 { +"Your Favorites" }
-        p { +"Your favorite products will appear here" }
+        h2 { +getString("tab_favorites") }
+        p { +getString("favorites_empty") }
     }
 }

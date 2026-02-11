@@ -1,6 +1,8 @@
 package org.example.fakeshop_clients.core.presentation.components
 
 import kotlinx.browser.window
+import org.example.fakeshop_clients.core.i18n.I18n
+import org.example.fakeshop_clients.core.i18n.getString
 import org.example.fakeshop_clients.core.navigation.desktop.DesktopNav
 import org.example.fakeshop_clients.features.search.presentation.SearchBarBehavior
 import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
@@ -27,6 +29,7 @@ external interface HeaderProps : Props {
 
 val Header = FC<HeaderProps> { props ->
     val headerRef = useRef<HTMLElement>(null)
+    val locale = I18n.locale
 
     // Check if we're on desktop (>= 768px)
     val isDesktop by useState { window.matchMedia("(min-width: 768px)").matches }
@@ -54,8 +57,8 @@ val Header = FC<HeaderProps> { props ->
             h1 {
                 className = ClassName("logo")
                 a {
-                    href = "/"
-                    +"E-Shop"
+                    href = "/$locale/"
+                    +getString("app_name")
                 }
             }
 

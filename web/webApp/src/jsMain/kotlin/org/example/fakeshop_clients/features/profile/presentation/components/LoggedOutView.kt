@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.features.profile.presentation.components
 
+import org.example.fakeshop_clients.core.i18n.getString
 import react.*
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
@@ -28,7 +29,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
 
         h2 {
             className = ClassName("profile-title")
-            +"Welcome"
+            +getString("welcome")
         }
 
         div {
@@ -37,7 +38,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
             input {
                 className = ClassName("form-input")
                 type = InputType.email
-                placeholder = "Email"
+                placeholder = getString("email")
                 value = props.email
                 disabled = props.isProcessing
                 onChange = { event ->
@@ -48,7 +49,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
             input {
                 className = ClassName("form-input")
                 type = InputType.password
-                placeholder = "Password"
+                placeholder = getString("password")
                 value = props.password
                 disabled = props.isProcessing
                 onChange = { event ->
@@ -74,9 +75,9 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
                     }
 
                     if (props.isProcessing) {
-                        +"Processing..."
+                        +getString("processing")
                     } else {
-                        +"Log In"
+                        +getString("login")
                     }
                 }
 
@@ -87,7 +88,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
                         props.onSignUp()
                     }
 
-                    +"Sign Up"
+                    +getString("sign_up")
                 }
             }
         }

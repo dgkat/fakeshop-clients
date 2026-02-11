@@ -9,19 +9,33 @@ import kotlinx.html.h1
 import kotlinx.html.head
 import kotlinx.html.header
 import kotlinx.html.id
+import kotlinx.html.lang
 import kotlinx.html.link
 import kotlinx.html.meta
 import kotlinx.html.p
 import kotlinx.html.script
 import kotlinx.html.title
+import kotlinx.html.unsafe
+import org.example.fakeshop_clients.core.i18n.WebStrings
 import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
 import org.example.fakeshop_clients.features.core.navigation.mobile.bottomNavigation
 
-fun HTML.homePage() {
+fun HTML.homePage(locale: String, strings: Map<String, String>, stringsJson: String) {
+    lang = locale
     head {
         meta(charset = "UTF-8")
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
-        title { +"E-Shop Home" }
+        title { +(strings["home_page_title"] ?: "E-Shop Home") }
+
+        // SEO: hreflang alternate links
+        WebStrings.SUPPORTED_LOCALES.forEach { loc ->
+            link(rel = "alternate", href = "/$loc/") {
+                attributes["hreflang"] = loc
+            }
+        }
+        link(rel = "alternate", href = "/en/") {
+            attributes["hreflang"] = "x-default"
+        }
 
         // ===== PRELOAD ISLAND BUNDLES =====
         link(rel = "preload", href = "/static/js/islands-bundle.js") {
@@ -54,6 +68,13 @@ fun HTML.homePage() {
         // CSS Bundles (split bundle approach for optimal caching)
         link(rel = "stylesheet", href = "/static/css/bundles/common.css")  // Cached across all pages
         link(rel = "stylesheet", href = "/static/css/bundles/home.css")    // Home page specific
+
+        // Inject locale and strings for client-side use (islands)
+        script {
+            unsafe {
+                +"""window.__LOCALE__ = "${locale}"; window.__STRINGS__ = ${stringsJson};"""
+            }
+        }
     }
 
     body {
@@ -62,7 +83,7 @@ fun HTML.homePage() {
         header(classes = "header") {
             attributes["data-scroll-behavior"] = "scroll-reactive"
             div(classes = "container header-content") {
-                h1(classes = "logo") { +"E-Shop" }
+                h1(classes = "logo") { +(strings["app_name"] ?: "E-Shop") }
 
                 // ===== SEARCH ISLAND CONTAINER =====
                 div {
@@ -71,7 +92,7 @@ fun HTML.homePage() {
                 }
 
                 // Desktop navigation
-                desktopNavigation(activeTab = "home")
+                desktopNavigation(activeTab = "home", locale = locale, strings = strings)
             }
         }
 
@@ -89,12 +110,12 @@ fun HTML.homePage() {
         // Footer
         footer(classes = "footer") {
             div(classes = "container") {
-                p { +"© 2024 E-Shop. Built with Kotlin Multiplatform + Islands Architecture" }
+                p { +"© ${strings["footer_copyright"] ?: "2024 E-Shop. Built with Kotlin Multiplatform"}" }
             }
         }
 
         // Bottom Navigation (Mobile only)
-        bottomNavigation(activeTab = "home")
+        bottomNavigation(activeTab = "home", locale = locale, strings = strings)
 
         // ===== LOAD ISLAND BUNDLES =====
         script(src = "/static/js/islands-bundle.js") {

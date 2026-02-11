@@ -11,16 +11,16 @@ struct ProfileView: View {
         VStack(spacing: 16) {
             Image(systemName: "person.fill")
                 .font(.system(size: 64))
-                .foregroundColor(.blue)
+                .foregroundColor(FakeShopColors.primary)
             
-            Text("Profile")
+            Text(String(localized: "tab_profile"))
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            
-            Text("Manage your account")
+
+            Text(String(localized: "profile_subtitle"))
                 .font(.body)
                 .foregroundColor(.secondary)
         }
-        .navigationTitle("Profile")
+        .navigationTitle(String(localized: "tab_profile"))
     }
 }

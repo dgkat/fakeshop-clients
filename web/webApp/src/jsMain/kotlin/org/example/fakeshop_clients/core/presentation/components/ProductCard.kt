@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.core.presentation.components
 
+import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import react.FC
 import react.Props
@@ -18,8 +19,8 @@ val ProductCard = FC<ProductCardProps> { props ->
         className = ClassName("product-card")
         onClick = {
             props.onClick(props.product.id)
-            kotlinx.browser.window.location.href =
-                "http://localhost:9090/product/${props.product.id}"
+            val locale = I18n.locale
+            kotlinx.browser.window.location.href = "/$locale/product/${props.product.id}"
         }
 
         // Product Image

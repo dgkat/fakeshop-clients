@@ -22,14 +22,24 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import fakeshop_clients.composeapp.generated.resources.Res
+import fakeshop_clients.composeapp.generated.resources.email
+import fakeshop_clients.composeapp.generated.resources.logged_in
+import fakeshop_clients.composeapp.generated.resources.login
+import fakeshop_clients.composeapp.generated.resources.logout
+import fakeshop_clients.composeapp.generated.resources.password
+import fakeshop_clients.composeapp.generated.resources.sign_up
+import fakeshop_clients.composeapp.generated.resources.welcome
 import org.example.fakeshop_clients.features.profile.presentation.ProfileEvent
 import org.example.fakeshop_clients.features.profile.presentation.ProfileState
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ProfileContent(
     profileState: ProfileState,
     onEvent: (ProfileEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    languageSection: @Composable (() -> Unit)? = null
 ) {
     Box(
         modifier = modifier
@@ -46,7 +56,8 @@ fun ProfileContent(
                 LoggedInContent(
                     isProcessing = profileState.isProcessing,
                     error = "Logged in error",
-                    onEvent = onEvent
+                    onEvent = onEvent,
+                    languageSection = languageSection
                 )
             }
             else -> {
@@ -55,7 +66,8 @@ fun ProfileContent(
                     password = profileState.password,
                     isProcessing = profileState.isProcessing,
                     error = "Logged out error",
-                    onEvent = onEvent
+                    onEvent = onEvent,
+                    languageSection = languageSection
                 )
             }
         }
@@ -66,14 +78,15 @@ fun ProfileContent(
 fun LoggedInContent(
     isProcessing: Boolean,
     error: String?,
-    onEvent: (ProfileEvent) -> Unit
+    onEvent: (ProfileEvent) -> Unit,
+    languageSection: @Composable (() -> Unit)? = null
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "You are logged in",
+            text = stringResource(Res.string.logged_in),
             style = MaterialTheme.typography.headlineSmall
         )
 
@@ -96,9 +109,11 @@ fun LoggedInContent(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text("Logout")
+                Text(stringResource(Res.string.logout))
             }
         }
+
+        languageSection?.invoke()
     }
 }
 
@@ -108,7 +123,8 @@ fun LoggedOutContent(
     password: String,
     isProcessing: Boolean,
     error: String?,
-    onEvent: (ProfileEvent) -> Unit
+    onEvent: (ProfileEvent) -> Unit,
+    languageSection: @Composable (() -> Unit)? = null
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -116,14 +132,14 @@ fun LoggedOutContent(
         modifier = Modifier.fillMaxWidth(0.8f)
     ) {
         Text(
-            text = "Welcome",
+            text = stringResource(Res.string.welcome),
             style = MaterialTheme.typography.headlineSmall
         )
 
         OutlinedTextField(
             value = email,
             onValueChange = { onEvent(ProfileEvent.EmailChanged(it)) },
-            label = { Text("Email") },
+            label = { Text(stringResource(Res.string.email)) },
             enabled = !isProcessing,
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
@@ -136,7 +152,7 @@ fun LoggedOutContent(
         OutlinedTextField(
             value = password,
             onValueChange = { onEvent(ProfileEvent.PasswordChanged(it)) },
-            label = { Text("Password") },
+            label = { Text(stringResource(Res.string.password)) },
             enabled = !isProcessing,
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
@@ -170,7 +186,7 @@ fun LoggedOutContent(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Log In")
+                    Text(stringResource(Res.string.login))
                 }
             }
 
@@ -179,8 +195,10 @@ fun LoggedOutContent(
                 enabled = !isProcessing,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Sign Up")
+                Text(stringResource(Res.string.sign_up))
             }
         }
+
+        languageSection?.invoke()
     }
 }

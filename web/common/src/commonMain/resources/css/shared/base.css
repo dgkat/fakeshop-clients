@@ -216,7 +216,7 @@ body {
 
 /* ===== Footer ===== */
 .footer {
-    background-color: #F5F5F5;
+    background-color: var(--color-surface-variant);
     padding: var(--spacing-xl) 0;
     text-align: center;
     color: var(--color-on-surface-variant);

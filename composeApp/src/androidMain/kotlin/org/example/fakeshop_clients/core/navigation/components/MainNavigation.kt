@@ -24,6 +24,7 @@ import org.example.fakeshop_clients.features.home.presentation.HomeScreen
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsScreen
 import org.example.fakeshop_clients.features.product_detail.presentation.ProductDetailScreen
 import org.example.fakeshop_clients.features.profile.presentation.ProfileScreen
+import org.example.fakeshop_clients.features.profile.presentation.components.LanguagePickerSection
 import org.example.fakeshop_clients.features.search.presentation.SearchBarBehavior
 import org.example.fakeshop_clients.features.search.presentation.SearchEvent
 import org.example.fakeshop_clients.features.search_bar.presentation.SearchViewModel
@@ -111,7 +112,9 @@ fun MainNavigation() {
                 }
 
                 composable(Route.Profile.route) {
-                    ProfileScreen()
+                    ProfileScreen(
+                        languageSection = { LanguagePickerSection() }
+                    )
                 }
 
                 composable(

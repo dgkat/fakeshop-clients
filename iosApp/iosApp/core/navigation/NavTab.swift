@@ -12,7 +12,16 @@ enum Tab: String, CaseIterable {
     case favorites = "Favorites"
     case notifications = "Notifications"
     case profile = "Profile"
-    
+
+    var title: String {
+        switch self {
+        case .home: return String(localized: "tab_home")
+        case .favorites: return String(localized: "tab_favorites")
+        case .notifications: return String(localized: "tab_notifications")
+        case .profile: return String(localized: "tab_profile")
+        }
+    }
+
     var icon: String {
         switch self {
         case .home: return "house"
