@@ -315,17 +315,24 @@ val generateWebStrings by tasks.registering {
 
     val stringsDir = layout.projectDirectory.dir("src/commonMain/resources/strings").asFile
     val webOutputDir = layout.projectDirectory.dir("../web/common/src/commonMain/resources/strings").asFile
+    val ssrStaticDir = layout.projectDirectory.dir("../web/ssr/src/main/resources/static/strings").asFile
 
     inputs.dir(stringsDir)
     outputs.dir(webOutputDir)
+    outputs.dir(ssrStaticDir)
 
     doLast {
         webOutputDir.mkdirs()
+        ssrStaticDir.mkdirs()
 
         stringsDir.listFiles { f -> f.extension == "json" }?.forEach { jsonFile ->
             val outputFile = File(webOutputDir, jsonFile.name)
             jsonFile.copyTo(outputFile, overwrite = true)
             logger.lifecycle("Copied web strings: ${jsonFile.name}")
+
+            val ssrOutputFile = File(ssrStaticDir, jsonFile.name)
+            jsonFile.copyTo(ssrOutputFile, overwrite = true)
+            logger.lifecycle("Copied SSR static strings: ${jsonFile.name}")
         }
     }
 }

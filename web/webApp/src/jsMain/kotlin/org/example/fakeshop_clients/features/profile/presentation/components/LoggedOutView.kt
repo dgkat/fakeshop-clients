@@ -1,12 +1,12 @@
 package org.example.fakeshop_clients.features.profile.presentation.components
 
+import org.example.fakeshop_clients.core.i18n.getString
 import react.*
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.input
 import react.dom.html.ReactHTML.p
-import org.example.fakeshop_clients.core.strings.Strings
 import web.cssom.ClassName
 import web.html.InputType
 import web.html.email
@@ -29,7 +29,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
 
         h2 {
             className = ClassName("profile-title")
-            +Strings.WELCOME
+            +getString("welcome")
         }
 
         div {
@@ -38,7 +38,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
             input {
                 className = ClassName("form-input")
                 type = InputType.email
-                placeholder = Strings.EMAIL
+                placeholder = getString("email")
                 value = props.email
                 disabled = props.isProcessing
                 onChange = { event ->
@@ -49,7 +49,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
             input {
                 className = ClassName("form-input")
                 type = InputType.password
-                placeholder = Strings.PASSWORD
+                placeholder = getString("password")
                 value = props.password
                 disabled = props.isProcessing
                 onChange = { event ->
@@ -75,9 +75,9 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
                     }
 
                     if (props.isProcessing) {
-                        +Strings.PROCESSING
+                        +getString("processing")
                     } else {
-                        +Strings.LOGIN
+                        +getString("login")
                     }
                 }
 
@@ -88,7 +88,7 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
                         props.onSignUp()
                     }
 
-                    +Strings.SIGN_UP
+                    +getString("sign_up")
                 }
             }
         }

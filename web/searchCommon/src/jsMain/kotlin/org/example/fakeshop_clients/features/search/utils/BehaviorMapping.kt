@@ -21,14 +21,15 @@ object BehaviorMapping {
     /**
      * Determines search bar behavior based on route pathname (for SPA).
      * Pathname is obtained from React Router's useLocation().pathname.
+     * Handles locale-prefixed routes like /en/favorites, /es/profile etc.
      */
     fun getSearchBarBehaviorFromRoute(pathname: String): SearchBarBehavior {
         return when {
-            pathname == "/" || pathname.startsWith("/home") -> SearchBarBehavior.SCROLL_REACTIVE
-            pathname.startsWith("/favorites") -> SearchBarBehavior.SCROLL_REACTIVE
-            pathname.startsWith("/product/") -> SearchBarBehavior.SCROLL_REACTIVE
-            pathname.startsWith("/notifications") -> SearchBarBehavior.HIDDEN
-            pathname.startsWith("/profile") -> SearchBarBehavior.STATIC
+            pathname.contains("/favorites") -> SearchBarBehavior.SCROLL_REACTIVE
+            pathname.contains("/product/") -> SearchBarBehavior.SCROLL_REACTIVE
+            pathname.contains("/notifications") -> SearchBarBehavior.HIDDEN
+            pathname.contains("/profile") -> SearchBarBehavior.STATIC
+            pathname == "/" || pathname.matches(Regex("^/[a-z]{2}/?$")) -> SearchBarBehavior.SCROLL_REACTIVE
             else -> SearchBarBehavior.STATIC
         }
     }

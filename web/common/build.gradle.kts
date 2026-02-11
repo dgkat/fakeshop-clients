@@ -347,4 +347,26 @@ tasks.register<Copy>("copyBundledCss") {
 // Run bundling automatically when processing JVM resources
 tasks.named("jvmProcessResources") {
     dependsOn("copyBundledCss")
+    dependsOn(":shared:generateWebStrings")
+}
+
+// ============================================
+// Run full web app with one command
+// ============================================
+
+tasks.register("runWeb") {
+    group = "application"
+    description = "Clean, generate strings, build JS bundles, and run the web SSR server"
+
+    dependsOn(":clean")
+    dependsOn(":shared:generateWebStrings")
+    dependsOn(":web:islands:copyIslandsBundle")
+    dependsOn(":web:webApp:copySpaBundle")
+    dependsOn(":web:ssr:run")
+
+    // Ensure correct execution order
+    tasks.findByPath(":shared:generateWebStrings")?.mustRunAfter(":clean")
+    tasks.findByPath(":web:islands:copyIslandsBundle")?.mustRunAfter(":shared:generateWebStrings")
+    tasks.findByPath(":web:webApp:copySpaBundle")?.mustRunAfter(":shared:generateWebStrings")
+    tasks.findByPath(":web:ssr:run")?.mustRunAfter(":web:islands:copyIslandsBundle", ":web:webApp:copySpaBundle")
 }

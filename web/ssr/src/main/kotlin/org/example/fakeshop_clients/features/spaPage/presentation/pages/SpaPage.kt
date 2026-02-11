@@ -5,17 +5,30 @@ import kotlinx.html.body
 import kotlinx.html.div
 import kotlinx.html.head
 import kotlinx.html.id
+import kotlinx.html.lang
 import kotlinx.html.link
 import kotlinx.html.meta
 import kotlinx.html.script
 import kotlinx.html.title
-import org.example.fakeshop_clients.core.strings.Strings
+import kotlinx.html.unsafe
+import org.example.fakeshop_clients.core.i18n.WebStrings
 
-fun HTML.spaPage() {
+fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: String) {
+    lang = locale
     head {
         meta(charset = "UTF-8")
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
-        title { +Strings.APP_NAME }
+        title { +(strings["app_name"] ?: "E-Shop") }
+
+        // SEO: hreflang alternate links
+        WebStrings.SUPPORTED_LOCALES.forEach { loc ->
+            link(rel = "alternate", href = "/$loc/favorites") {
+                attributes["hreflang"] = loc
+            }
+        }
+        link(rel = "alternate", href = "/en/favorites") {
+            attributes["hreflang"] = "x-default"
+        }
 
         // React
         script(src = "https://unpkg.com/react@18/umd/react.development.js") {}
@@ -37,6 +50,13 @@ fun HTML.spaPage() {
         // CSS Bundles (split bundle approach for optimal caching)
         link(rel = "stylesheet", href = "/static/css/bundles/common.css")  // Cached across all pages
         link(rel = "stylesheet", href = "/static/css/bundles/spa.css")     // SPA specific
+
+        // Inject locale and strings for client-side use (SPA)
+        script {
+            unsafe {
+                +"""window.__LOCALE__ = "${locale}"; window.__STRINGS__ = ${stringsJson};"""
+            }
+        }
     }
 
     body {

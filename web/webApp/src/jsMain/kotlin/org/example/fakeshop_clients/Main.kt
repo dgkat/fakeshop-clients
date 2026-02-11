@@ -3,6 +3,7 @@ package org.example.fakeshop_clients
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.example.fakeshop_clients.core.di.webCoreModule
+import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.core.navigation.mobile.BottomNav
 import org.example.fakeshop_clients.core.presentation.components.Header
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesPage
@@ -56,10 +57,12 @@ private fun createRoute(
 }
 
 val SpaApp = FC<Props> {
+    val locale = I18n.locale
+
     val router = createBrowserRouter(
         arrayOf(
             createRoute(
-                path = "/",
+                path = "/$locale",
                 element = SpaLayout.create(),
                 children = arrayOf(
                     createRoute("favorites", FavoritesPage.create()),
@@ -80,6 +83,7 @@ val SpaLayout = FC<Props> {
     val viewModel = useMemo { getKoin().get<SearchViewModel>() }
     val navigate = useNavigate()
     val location = useLocation()
+    val locale = I18n.locale
 
     // Determine search bar behavior based on current route
     val searchBehavior = useMemo(location.pathname) {
@@ -89,9 +93,9 @@ val SpaLayout = FC<Props> {
     // Determine header scroll behavior based on current route
     val headerBehavior = useMemo(location.pathname) {
         when {
-            location.pathname.startsWith("/favorites") -> "scroll-reactive"
-            location.pathname.startsWith("/profile") -> "static"
-            location.pathname.startsWith("/notifications") -> "scroll-reactive"
+            location.pathname.contains("/favorites") -> "scroll-reactive"
+            location.pathname.contains("/profile") -> "static"
+            location.pathname.contains("/notifications") -> "scroll-reactive"
             else -> "scroll-reactive"
         }
     }
@@ -103,7 +107,7 @@ val SpaLayout = FC<Props> {
             this.viewModel = viewModel
             this.behavior = searchBehavior
             this.onNavigateToProduct = { productId ->
-                navigate("/product/$productId")
+                window.location.href = "/$locale/product/$productId"
             }
         }
     }
@@ -114,7 +118,7 @@ val SpaLayout = FC<Props> {
         this.searchViewModel = viewModel
         this.searchBehavior = searchBehavior
         this.onNavigateToProduct = { productId ->
-            navigate("/product/$productId")
+            window.location.href = "/$locale/product/$productId"
         }
     }
 

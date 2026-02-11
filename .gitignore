@@ -37,6 +37,7 @@ web/webApp/src/jsMain/resources/common/
 
 # Generated web strings (copied by generateWebStrings)
 web/common/src/commonMain/resources/strings/
+web/ssr/src/main/resources/static/strings/
 
 # Generated Kotlin string accessor
 shared/build/generated/strings/

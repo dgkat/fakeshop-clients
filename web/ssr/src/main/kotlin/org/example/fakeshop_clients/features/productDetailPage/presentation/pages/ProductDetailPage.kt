@@ -12,6 +12,7 @@ import kotlinx.html.head
 import kotlinx.html.header
 import kotlinx.html.id
 import kotlinx.html.img
+import kotlinx.html.lang
 import kotlinx.html.link
 import kotlinx.html.main
 import kotlinx.html.meta
@@ -20,17 +21,34 @@ import kotlinx.html.p
 import kotlinx.html.script
 import kotlinx.html.span
 import kotlinx.html.title
-import org.example.fakeshop_clients.core.strings.Strings
+import kotlinx.html.unsafe
+import org.example.fakeshop_clients.core.i18n.WebStrings
 import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
 import org.example.fakeshop_clients.features.core.navigation.mobile.bottomNavigation
 import org.example.fakeshop_clients.features.productDetailPage.domain.models.FullProduct
 import org.example.fakeshop_clients.features.productDetailPage.presentation.likeButton
 
-fun HTML.productDetailPage(product: FullProduct) {
+fun HTML.productDetailPage(
+    product: FullProduct,
+    locale: String,
+    strings: Map<String, String>,
+    stringsJson: String
+) {
+    lang = locale
     head {
         meta(charset = "UTF-8")
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
         title { +product.name }
+
+        // SEO: hreflang alternate links
+        WebStrings.SUPPORTED_LOCALES.forEach { loc ->
+            link(rel = "alternate", href = "/$loc/product/${product.id}") {
+                attributes["hreflang"] = loc
+            }
+        }
+        link(rel = "alternate", href = "/en/product/${product.id}") {
+            attributes["hreflang"] = "x-default"
+        }
 
         // ===== PRELOAD ISLAND BUNDLE =====
         link(rel = "preload", href = "/static/js/islands-bundle.js") {
@@ -69,6 +87,13 @@ fun HTML.productDetailPage(product: FullProduct) {
             rel = "stylesheet",
             href = "/static/css/bundles/product-detail.css"
         ) // Product detail specific
+
+        // Inject locale and strings for client-side use (islands)
+        script {
+            unsafe {
+                +"""window.__LOCALE__ = "${locale}"; window.__STRINGS__ = ${stringsJson};"""
+            }
+        }
     }
 
     body {
@@ -80,12 +105,12 @@ fun HTML.productDetailPage(product: FullProduct) {
 
                 button(classes = "back-button") {
                     onClick = "window.history.back()"
-                    +"← ${Strings.BACK}"
+                    +"← ${strings["back"] ?: "Back"}"
                 }
 
                 h1(classes = "logo") {
-                    a(href = "/") {
-                        +Strings.APP_NAME
+                    a(href = "/$locale/") {
+                        +(strings["app_name"] ?: "E-Shop")
                     }
                 }
 
@@ -96,7 +121,12 @@ fun HTML.productDetailPage(product: FullProduct) {
                 }
 
                 // Desktop navigation
-                desktopNavigation(activeTab = null)
+                desktopNavigation(
+                    activeTab = null,
+                    locale = locale,
+                    strings = strings,
+                    currentPath = "/$locale/product/${product.id}"
+                )
             }
         }
 
@@ -145,12 +175,12 @@ fun HTML.productDetailPage(product: FullProduct) {
         // Footer
         footer(classes = "footer") {
             div(classes = "container") {
-                p { +"© ${Strings.FOOTER_COPYRIGHT}" }
+                p { +"© ${strings["footer_copyright"] ?: "2024 E-Shop. Built with Kotlin Multiplatform"}" }
             }
         }
 
         // Bottom Navigation
-        bottomNavigation(activeTab = null)
+        bottomNavigation(activeTab = null, locale = locale, strings = strings)
 
         // ===== LOAD ISLAND BUNDLE =====
         script(src = "/static/js/islands-bundle.js") {

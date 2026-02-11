@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.features.search.presentation.components
 
+import org.example.fakeshop_clients.core.i18n.getString
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.button
@@ -32,7 +33,7 @@ val SearchBarInput = FC<SearchBarInputProps> { props ->
         input {
             type = InputType.text
             value = props.query
-            placeholder = "Search products..."
+            placeholder = getString("search_placeholder")
             className = ClassName("search-input")
             onChange = { event ->
                 props.onQueryChange(event.target.value)

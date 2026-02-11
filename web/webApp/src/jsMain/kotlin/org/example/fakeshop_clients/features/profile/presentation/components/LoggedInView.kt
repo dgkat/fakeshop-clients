@@ -1,12 +1,12 @@
 package org.example.fakeshop_clients.features.profile.presentation.components
 
+import org.example.fakeshop_clients.core.i18n.getString
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.p
-import org.example.fakeshop_clients.core.strings.Strings
 import web.cssom.ClassName
 
 external interface LoggedInViewProps : Props {
@@ -21,7 +21,7 @@ val LoggedInView = FC<LoggedInViewProps> { props ->
 
         h2 {
             className = ClassName("profile-title")
-            +Strings.LOGGED_IN
+            +getString("logged_in")
         }
 
         props.error?.let { errorMessage ->
@@ -39,9 +39,9 @@ val LoggedInView = FC<LoggedInViewProps> { props ->
             }
 
             if (props.isProcessing) {
-                +Strings.LOGGING_OUT
+                +getString("logging_out")
             } else {
-                +Strings.LOGOUT
+                +getString("logout")
             }
         }
     }

@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.features.search.presentation.components
 
+import org.example.fakeshop_clients.core.i18n.getString
 import org.example.fakeshop_clients.features.search.domain.models.SearchResult
 import react.FC
 import react.Props
@@ -21,13 +22,13 @@ val SearchResultsOverlay = FC<SearchResultsOverlayProps> { props ->
             props.isLoading -> {
                 div {
                     className = ClassName("search-loading")
-                    p { +"Loading..." }
+                    p { +getString("loading") }
                 }
             }
             props.results.isEmpty() -> {
                 div {
                     className = ClassName("search-empty")
-                    p { +"No results found" }
+                    p { +getString("no_results") }
                 }
             }
             else -> {
