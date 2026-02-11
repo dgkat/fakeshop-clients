@@ -17,19 +17,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
-import org.example.fakeshop_clients.R
+import fakeshop_clients.composeapp.generated.resources.Res
+import fakeshop_clients.composeapp.generated.resources.language
+import fakeshop_clients.composeapp.generated.resources.language_english
+import fakeshop_clients.composeapp.generated.resources.language_spanish
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 private data class LanguageOption(
     val tag: String,
-    val labelResId: Int
+    val labelRes: StringResource
 )
 
 private val languages = listOf(
-    LanguageOption("en", R.string.language_english),
-    LanguageOption("es", R.string.language_spanish)
+    LanguageOption("en", Res.string.language_english),
+    LanguageOption("es", Res.string.language_spanish)
 )
 
 @Composable
@@ -49,7 +53,7 @@ fun LanguagePickerSection() {
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         Text(
-            text = stringResource(R.string.language),
+            text = stringResource(Res.string.language),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -60,7 +64,7 @@ fun LanguagePickerSection() {
                 .clickable { expanded = true }
         ) {
             Text(
-                text = stringResource(currentLanguage.labelResId),
+                text = stringResource(currentLanguage.labelRes),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(16.dp)
             )
@@ -71,7 +75,7 @@ fun LanguagePickerSection() {
             ) {
                 languages.forEach { language ->
                     DropdownMenuItem(
-                        text = { Text(stringResource(language.labelResId)) },
+                        text = { Text(stringResource(language.labelRes)) },
                         onClick = {
                             expanded = false
                             if (language.tag != currentTag) {

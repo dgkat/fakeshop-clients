@@ -13,9 +13,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import org.example.fakeshop_clients.R
+import fakeshop_clients.composeapp.generated.resources.Res
+import fakeshop_clients.composeapp.generated.resources.favorites_empty
+import fakeshop_clients.composeapp.generated.resources.tab_favorites
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FavoritesScreen() {
@@ -34,11 +36,11 @@ fun FavoritesScreen() {
                 tint = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = stringResource(R.string.tab_favorites),
+                text = stringResource(Res.string.tab_favorites),
                 style = MaterialTheme.typography.headlineMedium
             )
             Text(
-                text = stringResource(R.string.favorites_empty),
+                text = stringResource(Res.string.favorites_empty),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

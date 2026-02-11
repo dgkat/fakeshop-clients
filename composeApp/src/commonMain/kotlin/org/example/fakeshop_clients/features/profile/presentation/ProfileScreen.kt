@@ -9,7 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fakeshop_clients.composeapp.generated.resources.Res
+import fakeshop_clients.composeapp.generated.resources.tab_profile
 import org.example.fakeshop_clients.features.profile.presentation.components.ProfileContent
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,7 +26,7 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Profile") }
+                title = { Text(stringResource(Res.string.tab_profile)) }
             )
         }
     ) { paddingValues ->

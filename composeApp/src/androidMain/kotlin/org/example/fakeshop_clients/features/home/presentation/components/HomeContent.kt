@@ -20,8 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import org.example.fakeshop_clients.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
@@ -29,12 +27,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import fakeshop_clients.composeapp.generated.resources.Res
+import fakeshop_clients.composeapp.generated.resources.error
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import org.example.fakeshop_clients.features.home.presentation.ErrorState
 import org.example.fakeshop_clients.features.home.presentation.LoadingState
 import org.example.fakeshop_clients.features.home.presentation.productList.UiCategoryRow
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListState
 import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarScrollState
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HomeContent(
@@ -65,7 +66,7 @@ fun HomeContent(
     productListState.error?.let {
         //TODO handle error
         ErrorState(
-            message = stringResource(R.string.error),
+            message = stringResource(Res.string.error),
             onRetry = onRetry,
             modifier = modifier
         )

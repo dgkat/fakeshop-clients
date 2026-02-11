@@ -37,15 +37,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import org.example.fakeshop_clients.R
 import coil.compose.AsyncImage
+import fakeshop_clients.composeapp.generated.resources.Res
+import fakeshop_clients.composeapp.generated.resources.description
+import fakeshop_clients.composeapp.generated.resources.error_network
+import fakeshop_clients.composeapp.generated.resources.error_product_details
+import fakeshop_clients.composeapp.generated.resources.error_product_not_found
+import fakeshop_clients.composeapp.generated.resources.loading_details
+import fakeshop_clients.composeapp.generated.resources.product_image
+import fakeshop_clients.composeapp.generated.resources.retry
+import fakeshop_clients.composeapp.generated.resources.specifications
+import fakeshop_clients.composeapp.generated.resources.thumbnail
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import org.example.fakeshop_clients.core.presentation.models.UiDetailedProduct
 import org.example.fakeshop_clients.features.productDetail.presentation.DetailedProductState
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailError
 import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarScrollState
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun LoadingContent(modifier: Modifier = Modifier) {
@@ -73,13 +82,13 @@ fun ErrorContent(
         ) {
             Text(
                 text = when (error) {
-                    is ProductDetailError.Network -> stringResource(R.string.error_network)
-                    ProductDetailError.ProductNotFound -> stringResource(R.string.error_product_not_found)
+                    is ProductDetailError.Network -> stringResource(Res.string.error_network)
+                    ProductDetailError.ProductNotFound -> stringResource(Res.string.error_product_not_found)
                 },
                 style = MaterialTheme.typography.bodyLarge
             )
             Button(onClick = onRetry) {
-                Text(stringResource(R.string.retry))
+                Text(stringResource(Res.string.retry))
             }
         }
     }
@@ -216,7 +225,7 @@ private fun DetailedProductLoadingIndicator(modifier: Modifier = Modifier) {
     ) {
         CircularProgressIndicator(modifier = Modifier.size(20.dp))
         Text(
-            text = stringResource(R.string.loading_details),
+            text = stringResource(Res.string.loading_details),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -240,7 +249,7 @@ private fun DetailedProductErrorIndicator(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = stringResource(R.string.error_product_details),
+                text = stringResource(Res.string.error_product_details),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
@@ -261,7 +270,7 @@ private fun DetailedProductInfo(
         detailedProduct.description?.let { description ->
             HorizontalDivider()
             ProductSection(
-                title = stringResource(R.string.description),
+                title = stringResource(Res.string.description),
                 content = description
             )
         }
@@ -270,7 +279,7 @@ private fun DetailedProductInfo(
         detailedProduct.specs?.let { specs ->
             HorizontalDivider()
             ProductSection(
-                title = stringResource(R.string.specifications),
+                title = stringResource(Res.string.specifications),
                 content = specs
             )
         }
@@ -318,7 +327,7 @@ private fun ImageGallery(
             ) { page ->
                 AsyncImage(
                     model = imageUrls[page],
-                    contentDescription = stringResource(R.string.product_image),
+                    contentDescription = stringResource(Res.string.product_image),
                     modifier = Modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.surfaceVariant),
@@ -392,7 +401,7 @@ private fun ThumbnailRow(
             ) {
                 AsyncImage(
                     model = imageUrl,
-                    contentDescription = stringResource(R.string.thumbnail),
+                    contentDescription = stringResource(Res.string.thumbnail),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )

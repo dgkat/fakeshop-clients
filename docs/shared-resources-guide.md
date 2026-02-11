@@ -4,7 +4,7 @@ This guide documents the steps to centralize design resources (colors, theme, ty
 
 **Approach**:
 - **Colors & Theme**: Define once in Kotlin (`shared/commonMain`), consume natively per platform. Web CSS is generated via a Gradle task.
-- **Strings**: Define in JSON in `shared/commonMain`, generate platform-native files via Gradle tasks (Android `strings.xml`, iOS `Localizable.strings`, Web JSON).
+- **Strings**: Define in JSON in `shared/commonMain`, generate platform-native files via Gradle tasks (Compose Multiplatform `strings.xml` for Android + iOS, iOS `Localizable.strings` for SwiftUI, Web JSON).
 
 ---
 
@@ -18,7 +18,7 @@ This guide documents the steps to centralize design resources (colors, theme, ty
    - [Step 5: Wire CSS generation into the build](#step-5-wire-css-generation-into-the-build)
 2. [Part 2: Strings & Localization](#part-2-strings--localization)
    - [Step 6: Define strings source format](#step-6-define-strings-source-format)
-   - [Step 7: Gradle task to generate Android strings.xml](#step-7-gradle-task-to-generate-android-stringsxml)
+   - [Step 7: Gradle task to generate Compose Multiplatform strings.xml](#step-7-gradle-task-to-generate-compose-multiplatform-stringsxml)
    - [Step 8: Gradle task to generate iOS Localizable.strings](#step-8-gradle-task-to-generate-ios-localizablestrings)
    - [Step 9: Gradle task to generate Web JSON](#step-9-gradle-task-to-generate-web-json)
    - [Step 10: Generate Kotlin accessor object](#step-10-generate-kotlin-accessor-object)
@@ -679,22 +679,22 @@ Create a `strings/` directory in the shared module with one JSON file per locale
 
 ---
 
-### Step 7: Gradle task to generate Android strings.xml
+### Step 7: Gradle task to generate Compose Multiplatform strings.xml
 
 Add to **root `build.gradle.kts`** or create a standalone `buildSrc` plugin. Here we show the inline approach in the **shared module's `build.gradle.kts`** (since it owns the source strings).
 
 **Add to**: `shared/build.gradle.kts`
 
 ```kotlin
-val generateAndroidStrings by tasks.registering {
+val generateComposeStrings by tasks.registering {
     group = "strings"
-    description = "Generates Android strings.xml files from shared JSON strings"
+    description = "Generates Compose Multiplatform strings.xml files from shared JSON strings"
 
     val stringsDir = file("src/commonMain/resources/strings")
-    val androidResDir = rootProject.file("composeApp/src/androidMain/res")
+    val composeResDir = rootProject.file("composeApp/src/commonMain/composeResources")
 
     inputs.dir(stringsDir)
-    outputs.dir(androidResDir)
+    outputs.dir(composeResDir)
 
     doLast {
         val jsonParser = groovy.json.JsonSlurper()
@@ -706,7 +706,7 @@ val generateAndroidStrings by tasks.registering {
 
             // Android resource folder: values (default), values-es, values-fr, etc.
             val valuesDirName = if (locale == "en") "values" else "values-$locale"
-            val valuesDir = File(androidResDir, valuesDirName)
+            val valuesDir = File(composeResDir, valuesDirName)
             valuesDir.mkdirs()
 
             val xml = buildString {
@@ -746,7 +746,7 @@ val generateAndroidStrings by tasks.registering {
             }
 
             File(valuesDir, "strings.xml").writeText(xml)
-            println("Generated Android strings: $valuesDirName/strings.xml")
+            println("Generated Compose strings: $valuesDirName/strings.xml")
         }
     }
 }
@@ -766,7 +766,9 @@ fun convertPlaceholders(input: String): String {
 }
 ```
 
-**Output example** (`composeApp/src/androidMain/res/values/strings.xml`):
+**Output example** (`composeApp/src/commonMain/composeResources/values/strings.xml`):
+
+> **Note**: A minimal `composeApp/src/androidMain/res/values/strings.xml` with only `app_name` is still needed for `AndroidManifest.xml`. All other strings use Compose Multiplatform Resources (`Res.string.*`).
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -793,6 +795,7 @@ fun convertPlaceholders(input: String): String {
 val generateIosStrings by tasks.registering {
     group = "strings"
     description = "Generates iOS Localizable.strings files from shared JSON strings"
+    dependsOn(generateComposeStrings)
 
     val stringsDir = file("src/commonMain/resources/strings")
     val iosAppDir = rootProject.file("iosApp/iosApp")
@@ -1060,7 +1063,7 @@ object Strings {
 
 ```bash
 # Generate all platform string files
-./gradlew generateAndroidStrings generateIosStrings generateWebStrings generateStringKeys
+./gradlew generateComposeStrings generateIosStrings generateWebStrings generateStringKeys
 ```
 
 **Option B: Wire into build tasks** (for CI/automation):
@@ -1070,7 +1073,7 @@ object Strings {
 
 // Make Android compilation depend on string generation
 tasks.matching { it.name == "compileDebugKotlinAndroid" || it.name == "compileReleaseKotlinAndroid" }
-    .configureEach { dependsOn(generateAndroidStrings) }
+    .configureEach { dependsOn(generateComposeStrings) }
 
 // Make commonMain compilation depend on Kotlin string keys
 tasks.matching { it.name.startsWith("compileKotlin") }
@@ -1257,10 +1260,10 @@ shared/build/generated/strings/
 ./gradlew :web:common:copyBundledCss
 
 # Generate all string files for all platforms
-./gradlew generateAndroidStrings generateIosStrings generateWebStrings generateStringKeys
+./gradlew generateComposeStrings generateIosStrings generateWebStrings generateStringKeys
 
 # Full rebuild with everything regenerated
-./gradlew generateAndroidStrings generateIosStrings generateWebStrings generateStringKeys :web:common:copyBundledCss :web:islands:copyIslandsBundle :web:webApp:copySpaBundle :web:ssr:run
+./gradlew generateComposeStrings generateIosStrings generateWebStrings generateStringKeys :web:common:copyBundledCss :web:islands:copyIslandsBundle :web:webApp:copySpaBundle :web:ssr:run
 ```
 
 ---
@@ -1283,14 +1286,18 @@ fakeshop-clients/
 ├── shared/build/generated/strings/kotlin/
 │   └── .../Strings.kt                       ← GENERATED (Kotlin accessor)
 │
+├── composeApp/src/commonMain/composeResources/
+│   ├── values/strings.xml                   ← GENERATED (English, Compose Multiplatform)
+│   └── values-es/strings.xml               ← GENERATED (Spanish, Compose Multiplatform)
+│
 ├── composeApp/src/androidMain/
 │   ├── kotlin/.../ui/theme/
 │   │   ├── Color.kt                         ← Reads from DesignTokens
 │   │   ├── Theme.kt                         ← Unchanged
 │   │   └── Typography.kt                    ← Reads from DesignTokens
 │   └── res/
-│       ├── values/strings.xml               ← GENERATED (English)
-│       └── values-es/strings.xml            ← GENERATED (Spanish)
+│       ├── values/strings.xml               ← MINIMAL (app_name only, for AndroidManifest)
+│       └── values-es/strings.xml            ← MINIMAL (app_name only)
 │
 ├── iosApp/iosApp/
 │   ├── Theme/
@@ -1328,10 +1335,10 @@ fakeshop-clients/
 
 1. Add the key/value to `shared/src/commonMain/resources/strings/en.json`
 2. Add translations to other locale files (`es.json`, etc.)
-3. Run `./gradlew generateAndroidStrings generateIosStrings generateWebStrings generateStringKeys`
+3. Run `./gradlew generateComposeStrings generateIosStrings generateWebStrings generateStringKeys`
 4. Use it:
-   - **Android**: `stringResource(R.string.new_key)`
-   - **iOS**: `NSLocalizedString("new_key", comment: "")`
+   - **Android / iOS (Compose)**: `stringResource(Res.string.new_key)` (import from `fakeshop_clients.composeapp.generated.resources`)
+   - **iOS (SwiftUI)**: `NSLocalizedString("new_key", comment: "")`
    - **Web**: Read from the JSON using your i18n approach
    - **Shared Kotlin**: `Strings.NEW_KEY` (for non-localized contexts)
 

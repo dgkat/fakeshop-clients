@@ -138,15 +138,15 @@ skie {
 // String Generation from shared JSON sources
 // ============================================
 
-val generateAndroidStrings by tasks.registering {
+val generateComposeStrings by tasks.registering {
     group = "strings"
-    description = "Generates Android strings.xml files from shared JSON strings"
+    description = "Generates Compose Multiplatform strings.xml files from shared JSON strings"
 
     val stringsDir = layout.projectDirectory.dir("src/commonMain/resources/strings").asFile
-    val androidResDir = layout.projectDirectory.dir("../composeApp/src/androidMain/res").asFile
+    val composeResDir = layout.projectDirectory.dir("../composeApp/src/commonMain/composeResources").asFile
 
     inputs.dir(stringsDir)
-    outputs.dir(androidResDir)
+    outputs.dir(composeResDir)
 
     doLast {
         val placeholderRegex = Regex("""\{\{(\w+)\}\}""")
@@ -165,7 +165,7 @@ val generateAndroidStrings by tasks.registering {
             val strings = jsonParser.parseText(jsonFile.readText()) as Map<String, Any>
 
             val valuesDirName = if (locale == "en") "values" else "values-$locale"
-            val valuesDir = File(androidResDir, valuesDirName)
+            val valuesDir = File(composeResDir, valuesDirName)
             valuesDir.mkdirs()
 
             val xml = buildString {
@@ -203,7 +203,7 @@ val generateAndroidStrings by tasks.registering {
             }
 
             File(valuesDir, "strings.xml").writeText(xml)
-            logger.lifecycle("Generated Android strings: $valuesDirName/strings.xml")
+            logger.lifecycle("Generated Compose Multiplatform strings: $valuesDirName/strings.xml")
         }
     }
 }
@@ -211,6 +211,8 @@ val generateAndroidStrings by tasks.registering {
 val generateIosStrings by tasks.registering {
     group = "strings"
     description = "Generates iOS Localizable.strings files from shared JSON strings"
+
+    dependsOn(generateComposeStrings)
 
     val stringsDir = layout.projectDirectory.dir("src/commonMain/resources/strings").asFile
     val iosAppDir = layout.projectDirectory.dir("../iosApp/iosApp").asFile

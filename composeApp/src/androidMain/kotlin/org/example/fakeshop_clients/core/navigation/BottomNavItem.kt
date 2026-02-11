@@ -10,35 +10,40 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.vector.ImageVector
-import org.example.fakeshop_clients.R
+import fakeshop_clients.composeapp.generated.resources.Res
+import fakeshop_clients.composeapp.generated.resources.tab_favorites
+import fakeshop_clients.composeapp.generated.resources.tab_home
+import fakeshop_clients.composeapp.generated.resources.tab_notifications
+import fakeshop_clients.composeapp.generated.resources.tab_profile
+import org.jetbrains.compose.resources.StringResource
 
 enum class BottomNavItem(
     val route: String,
-    val titleResId: Int,
+    val titleRes: StringResource,
     val icon: ImageVector,
     val selectedIcon: ImageVector = icon
 ) {
     HOME(
         route = Route.Home.route,
-        titleResId = R.string.tab_home,
+        titleRes = Res.string.tab_home,
         icon = Icons.Outlined.Home,
         selectedIcon = Icons.Filled.Home
     ),
     FAVORITES(
         route = Route.Favorites.route,
-        titleResId = R.string.tab_favorites,
+        titleRes = Res.string.tab_favorites,
         icon = Icons.Outlined.FavoriteBorder,
         selectedIcon = Icons.Filled.Favorite
     ),
     NOTIFICATIONS(
         route = Route.Notifications.route,
-        titleResId = R.string.tab_notifications,
+        titleRes = Res.string.tab_notifications,
         icon = Icons.Outlined.Notifications,
         selectedIcon = Icons.Filled.Notifications
     ),
     PROFILE(
         route = Route.Profile.route,
-        titleResId = R.string.tab_profile,
+        titleRes = Res.string.tab_profile,
         icon = Icons.Outlined.Person,
         selectedIcon = Icons.Filled.Person
     )

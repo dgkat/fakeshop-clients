@@ -41,6 +41,14 @@ web/common/src/commonMain/resources/strings/
 # Generated Kotlin string accessor
 shared/build/generated/strings/
 
+# Generated Compose Multiplatform strings (from generateComposeStrings)
+composeApp/src/commonMain/composeResources/values/strings.xml
+composeApp/src/commonMain/composeResources/values-es/strings.xml
+
+# Generated Android strings (minimal, for AndroidManifest only)
+composeApp/src/androidMain/res/values/strings.xml
+composeApp/src/androidMain/res/values-es/strings.xml
+
 # Generated iOS localization files
 iosApp/iosApp/*.lproj/
 

@@ -14,13 +14,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.example.fakeshop_clients.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fakeshop_clients.composeapp.generated.resources.Res
+import fakeshop_clients.composeapp.generated.resources.error_generic
+import fakeshop_clients.composeapp.generated.resources.loading_products
+import fakeshop_clients.composeapp.generated.resources.retry
 import org.example.fakeshop_clients.features.home.presentation.components.HomeContent
 import org.example.fakeshop_clients.features.search_bar.presentation.components.rememberSearchBarScrollState
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -58,7 +61,7 @@ fun LoadingState(modifier: Modifier = Modifier) {
         ) {
             CircularProgressIndicator()
             Text(
-                text = stringResource(R.string.loading_products),
+                text = stringResource(Res.string.loading_products),
                 style = MaterialTheme.typography.bodyLarge
             )
         }
@@ -85,7 +88,7 @@ fun ErrorState(
                 style = MaterialTheme.typography.displayLarge
             )
             Text(
-                text = stringResource(R.string.error_generic),
+                text = stringResource(Res.string.error_generic),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -98,7 +101,7 @@ fun ErrorState(
                 onClick = onRetry,
                 modifier = Modifier.padding(top = 8.dp)
             ) {
-                Text(stringResource(R.string.retry))
+                Text(stringResource(Res.string.retry))
             }
         }
     }

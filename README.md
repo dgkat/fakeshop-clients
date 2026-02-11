@@ -83,14 +83,14 @@ Design tokens (colors, typography, spacing) and strings are defined once in the 
 
 | Platform | Task | Output |
 |----------|------|--------|
-| Android | `./gradlew generateAndroidStrings` | `composeApp/.../res/values/strings.xml` |
+| Android + iOS (Compose) | `./gradlew generateComposeStrings` | `composeApp/.../composeResources/values/strings.xml` |
 | iOS | `./gradlew generateIosStrings` | `iosApp/iosApp/<locale>.lproj/Localizable.strings` |
 | Web | `./gradlew generateWebStrings` | `web/common/.../resources/strings/` |
 | Kotlin (shared) | `./gradlew generateStringKeys` | `shared/build/generated/strings/.../Strings.kt` |
 
 Generate everything at once:
 ```shell
-./gradlew generateAndroidStrings generateIosStrings generateIosColors generateWebStrings generateStringKeys :web:common:generateThemeCss
+./gradlew generateComposeStrings generateIosStrings generateIosColors generateWebStrings generateStringKeys :web:common:generateThemeCss
 ```
 
 See [`docs/shared-resources-guide.md`](./docs/shared-resources-guide.md) for full details.
