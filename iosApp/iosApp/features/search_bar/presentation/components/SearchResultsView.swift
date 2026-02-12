@@ -30,7 +30,7 @@ struct SearchResultsView: View {
                     .padding(32)
             } else if results.isEmpty {
                 Text(String(localized: "no_results"))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(FakeShopColors.onSurfaceVariant)
                     .padding(32)
             } else {
                 let shouldScroll = results.count > maxVisibleItems

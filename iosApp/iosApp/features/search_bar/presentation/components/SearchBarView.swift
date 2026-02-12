@@ -15,7 +15,7 @@ struct SearchBarView: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
+                .foregroundColor(FakeShopColors.onSurfaceVariant)
             
             TextField(String(localized: "search_placeholder"), text: Binding(
                 get: { query },
@@ -27,7 +27,7 @@ struct SearchBarView: View {
             if !query.isEmpty {
                 Button(action: onClear) {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(FakeShopColors.onSurfaceVariant)
                 }
                 .buttonStyle(.plain)
             }

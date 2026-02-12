@@ -73,7 +73,7 @@ struct SearchBarContainer<Content: View>: View {
                                 }
                         }
                     )
-                    .background(FakeShopColors.surface)
+                    .background(FakeShopColors.background)
                     .shadow(
                         color: showShadow ? .black.opacity(0.1) : .clear,
                         radius: 4,

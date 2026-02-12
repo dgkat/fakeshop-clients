@@ -55,7 +55,7 @@ struct ErrorView: View {
             Text(errorMessage)
                 .font(.body)
                 .multilineTextAlignment(.center)
-                .foregroundColor(.secondary)
+                .foregroundColor(FakeShopColors.onSurfaceVariant)
 
             Button(action: onRetry) {
                 Text(String(localized: "retry"))
@@ -236,7 +236,7 @@ struct DetailedProductSection: View {
                     .scaleEffect(0.8)
                 Text(String(localized: "loading_details"))
                     .font(.body)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(FakeShopColors.onSurfaceVariant)
             }
 
         case .success(let successState):
@@ -245,14 +245,14 @@ struct DetailedProductSection: View {
         case .error:
             HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle")
-                    .foregroundColor(FakeShopColors.warning)
+                    .foregroundColor(FakeShopColors.error)
                 Text(String(localized: "error_product_details"))
                     .font(.body)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(FakeShopColors.onErrorContainer)
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
-            .background(FakeShopColors.warningContainer)
+            .background(FakeShopColors.errorContainer)
             .cornerRadius(8)
         }
     }
@@ -288,7 +288,7 @@ struct ProductSection: View {
 
             Text(content)
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(FakeShopColors.onSurfaceVariant)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }

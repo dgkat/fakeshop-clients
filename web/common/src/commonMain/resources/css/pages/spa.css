@@ -18,6 +18,6 @@
 }
 
 .page-placeholder p {
-    color: var(--text-secondary);
+    color: var(--color-on-surface-variant);
     margin: 0;
 }

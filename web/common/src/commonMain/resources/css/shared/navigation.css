@@ -15,7 +15,7 @@
 
 .desktop-nav .nav-link {
     text-decoration: none;
-    color: var(--text-primary);
+    color: var(--color-on-primary-container);
     font-weight: 500;
     font-size: 15px;
     padding: 10px 20px;
@@ -25,12 +25,12 @@
 }
 
 .desktop-nav .nav-link:hover {
-    background: var(--surface-hover);
+    background: var(--color-surface-variant);
 }
 
 .desktop-nav .nav-link.active {
-    color: var(--primary-color);
-    background: var(--primary-light);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
 }
 
 /* ===== BOTTOM NAVIGATION (Mobile Only) ===== */
@@ -61,7 +61,7 @@
     gap: 4px;
     padding: 8px 12px;
     text-decoration: none;
-    color: var(--text-secondary);
+    color: var(--color-on-surface-variant);
     transition: all 0.2s ease;
     border-radius: 8px;
     min-width: 64px;
@@ -70,11 +70,11 @@
 }
 
 .nav-item:hover {
-    background: var(--surface-hover);
+    background: var(--color-surface-variant);
 }
 
 .nav-item.active {
-    color: var(--primary-color);
+    color: var(--color-primary);
 }
 
 .nav-icon {
@@ -94,31 +94,31 @@
     gap: 4px;
     margin-left: 12px;
     padding-left: 12px;
-    border-left: 1px solid var(--border-color);
+    border-left: 1px solid var(--color-outline-variant);
 }
 
 .lang-option {
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-secondary);
+    color: var(--color-on-surface-variant);
     cursor: default;
 }
 
 .lang-option a {
     text-decoration: none;
-    color: var(--text-secondary);
+    color: var(--color-on-surface-variant);
     padding: 4px 6px;
     border-radius: 4px;
     transition: all 0.2s;
 }
 
 .lang-option a:hover {
-    color: var(--primary-color);
-    background: var(--primary-light);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
 }
 
 .lang-option.active {
-    color: var(--primary-color);
+    color: var(--color-primary);
     font-weight: 700;
 }
 
@@ -153,18 +153,4 @@
     }
 }
 
-/* ===== FOOTER ===== */
-.footer {
-    background: var(--surface-color);
-    border-top: 1px solid var(--border-color);
-    padding: 32px 0;
-    margin-top: 48px;
-    text-align: center;
-}
-
-@media (max-width: 767px) {
-    .footer {
-        margin-bottom: 70px;
-    }
-}
 

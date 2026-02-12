@@ -16,9 +16,9 @@ struct SearchBarPlaceholder: View {
         Button(action: onTap) {
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(FakeShopColors.onSurfaceVariant)
                 Text(String(localized: "search_placeholder"))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(FakeShopColors.onSurfaceVariant)
                 Spacer()
             }
             .padding(.horizontal, 12)
