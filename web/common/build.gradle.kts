@@ -363,16 +363,8 @@ tasks.register("runWeb") {
 }
 
 // Ensure :clean finishes before any build tasks start
-listOf(
-    ":shared:generateWebStrings",
-    ":web:common:generateThemeCss",
-    ":web:common:bundleCss",
-    ":web:common:copyBundledCss",
-    ":web:islands:copyIslandsBundle",
-    ":web:islands:copyIslandResources",
-    ":web:webApp:copySpaBundle",
-    ":web:webApp:copySpaResources",
-    ":web:ssr:processResources",
-).forEach { taskPath ->
-    rootProject.tasks.findByPath(taskPath)?.mustRunAfter(":clean")
+gradle.taskGraph.whenReady {
+    allTasks
+        .filter { it.path != ":clean" }
+        .forEach { it.mustRunAfter(":clean") }
 }
