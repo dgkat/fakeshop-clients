@@ -38,5 +38,6 @@ struct HomeView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .background(FakeShopColors.background)
     }
 }

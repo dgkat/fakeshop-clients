@@ -16,7 +16,20 @@ private val LightColorScheme = lightColorScheme(
     secondaryContainer = md_theme_light_secondaryContainer,
     onSecondaryContainer = md_theme_light_onSecondaryContainer,
     background = md_theme_light_background,
+    onBackground = md_theme_light_onBackground,
     surface = md_theme_light_surface,
+    surfaceVariant = md_theme_light_surfaceVariant,
+    onSurface = md_theme_light_onSurface,
+    onSurfaceVariant = md_theme_light_onSurfaceVariant,
+    surfaceContainer = md_theme_light_surface,
+    surfaceContainerLow = md_theme_light_surface,
+    surfaceContainerLowest = md_theme_light_surface,
+    surfaceContainerHigh = md_theme_light_surface,
+    surfaceContainerHighest = md_theme_light_surface,
+    error = md_theme_light_error,
+    onError = md_theme_light_onError,
+    errorContainer = md_theme_light_errorContainer,
+    onErrorContainer = md_theme_light_onErrorContainer,
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -29,7 +42,20 @@ private val DarkColorScheme = darkColorScheme(
     secondaryContainer = md_theme_dark_secondaryContainer,
     onSecondaryContainer = md_theme_dark_onSecondaryContainer,
     background = md_theme_dark_background,
+    onBackground = md_theme_dark_onBackground,
     surface = md_theme_dark_surface,
+    surfaceVariant = md_theme_dark_surfaceVariant,
+    onSurface = md_theme_dark_onSurface,
+    onSurfaceVariant = md_theme_dark_onSurfaceVariant,
+    surfaceContainer = md_theme_dark_surface,
+    surfaceContainerLow = md_theme_dark_surface,
+    surfaceContainerLowest = md_theme_dark_surface,
+    surfaceContainerHigh = md_theme_dark_surface,
+    surfaceContainerHighest = md_theme_dark_surface,
+    error = md_theme_dark_error,
+    onError = md_theme_dark_onError,
+    errorContainer = md_theme_dark_errorContainer,
+    onErrorContainer = md_theme_dark_onErrorContainer,
 )
 
 @Composable
