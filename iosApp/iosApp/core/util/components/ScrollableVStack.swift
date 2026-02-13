@@ -74,9 +74,12 @@ class UIScrollViewController<Content: View>: UIViewController, UIScrollViewDeleg
         scrollView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         scrollView.showsVerticalScrollIndicator = true
         scrollView.alwaysBounceVertical = true
+        scrollView.backgroundColor = .clear
+        view.backgroundColor = .clear
         view.addSubview(scrollView)
-        
+
         addChild(hostingController)
+        hostingController.view.backgroundColor = .clear
         scrollView.addSubview(hostingController.view)
         hostingController.didMove(toParent: self)
 

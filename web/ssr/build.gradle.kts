@@ -44,4 +44,6 @@ tasks.named("processResources") {
     dependsOn(":shared:generateWebStrings")
     dependsOn(":web:webApp:copySpaResources")
     dependsOn(":web:islands:copyIslandResources")
+    dependsOn(":web:webApp:copySpaBundle")
+    dependsOn(":web:islands:copyIslandsBundle")
 }

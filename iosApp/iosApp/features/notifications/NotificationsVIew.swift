@@ -19,7 +19,7 @@ struct NotificationsView: View {
 
             Text(String(localized: "notifications_empty"))
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(FakeShopColors.onSurfaceVariant)
         }
         .navigationTitle(String(localized: "tab_notifications"))
     }

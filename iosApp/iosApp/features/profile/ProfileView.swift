@@ -19,7 +19,7 @@ struct ProfileView: View {
 
             Text(String(localized: "profile_subtitle"))
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(FakeShopColors.onSurfaceVariant)
         }
         .navigationTitle(String(localized: "tab_profile"))
     }

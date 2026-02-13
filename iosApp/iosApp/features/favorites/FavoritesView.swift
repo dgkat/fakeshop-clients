@@ -19,7 +19,7 @@ struct FavoritesView: View {
 
             Text(String(localized: "favorites_empty"))
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(FakeShopColors.onSurfaceVariant)
         }
         .navigationTitle(String(localized: "tab_favorites"))
     }
