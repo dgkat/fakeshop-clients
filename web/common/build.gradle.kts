@@ -359,14 +359,20 @@ tasks.register("runWeb") {
     description = "Clean, generate strings, build JS bundles, and run the web SSR server"
 
     dependsOn(":clean")
-    dependsOn(":shared:generateWebStrings")
-    dependsOn(":web:islands:copyIslandsBundle")
-    dependsOn(":web:webApp:copySpaBundle")
     dependsOn(":web:ssr:run")
+}
 
-    // Ensure correct execution order
-    tasks.findByPath(":shared:generateWebStrings")?.mustRunAfter(":clean")
-    tasks.findByPath(":web:islands:copyIslandsBundle")?.mustRunAfter(":shared:generateWebStrings")
-    tasks.findByPath(":web:webApp:copySpaBundle")?.mustRunAfter(":shared:generateWebStrings")
-    tasks.findByPath(":web:ssr:run")?.mustRunAfter(":web:islands:copyIslandsBundle", ":web:webApp:copySpaBundle")
+// Ensure :clean finishes before any build tasks start
+listOf(
+    ":shared:generateWebStrings",
+    ":web:common:generateThemeCss",
+    ":web:common:bundleCss",
+    ":web:common:copyBundledCss",
+    ":web:islands:copyIslandsBundle",
+    ":web:islands:copyIslandResources",
+    ":web:webApp:copySpaBundle",
+    ":web:webApp:copySpaResources",
+    ":web:ssr:processResources",
+).forEach { taskPath ->
+    rootProject.tasks.findByPath(taskPath)?.mustRunAfter(":clean")
 }
