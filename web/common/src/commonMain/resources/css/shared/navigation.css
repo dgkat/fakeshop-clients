@@ -15,7 +15,7 @@
 
 .desktop-nav .nav-link {
     text-decoration: none;
-    color: var(--color-on-primary-container);
+    color: var(--color-on-surface);
     font-weight: 500;
     font-size: 15px;
     padding: 10px 20px;

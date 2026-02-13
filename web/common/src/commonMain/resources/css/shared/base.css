@@ -92,8 +92,8 @@ body {
         left: 0;
         right: 0;
         z-index: var(--z-index-fixed);
-        background-color: var(--color-primary-container);
-        color: var(--color-on-primary-container);
+        background-color: var(--color-surface);
+        color: var(--color-on-surface);
         box-shadow: var(--shadow-sm);
         transition: transform 0.3s ease-in-out;
         will-change: transform;
