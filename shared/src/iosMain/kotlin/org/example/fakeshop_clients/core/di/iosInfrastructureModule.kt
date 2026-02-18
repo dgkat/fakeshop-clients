@@ -10,9 +10,7 @@ import org.example.fakeshop_clients.core.data.KeychainTokenStorage
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-val iosInfrastructureModule = module {
-    //TODO update to real url / read from env
-    val baseUrl = "http://localhost:8080"
+fun iosInfrastructureModule(baseUrl: String) = module {
     val parsedUrl = Url(baseUrl)
 
     single<Url>(named("parsedUrl")) {

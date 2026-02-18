@@ -41,9 +41,9 @@ val iosModule = module {
     }
 }
 
-fun initKoinIos() = startKoin {
+fun initKoinIos(baseUrl: String) = startKoin {
     modules(
-        iosInfrastructureModule,
+        iosInfrastructureModule(baseUrl),
         mobileInfrastructureModule,
         homeModule,
         searchModule,

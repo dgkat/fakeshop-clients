@@ -17,11 +17,16 @@ class KoinHelper {
     
     private init() {
         // Initialize Koin (happens once when singleton is first accessed)
-        _ = IosModuleKt.doInitKoinIos()
-        
+        #if DEBUG
+        let baseUrl = "http://localhost:8080"
+        #else
+        let baseUrl = "https://api.dgkat.com"
+        #endif
+        _ = IosModuleKt.doInitKoinIos(baseUrl: baseUrl)
+
         // Create Kotlin helper
         self.iosHelper = IOSKoinHelper()
-        
+
         print("✅ Koin initialized successfully")
     }
 }

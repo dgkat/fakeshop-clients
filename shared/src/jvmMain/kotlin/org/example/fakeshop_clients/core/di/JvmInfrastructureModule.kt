@@ -5,7 +5,7 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.http.URLProtocol
+import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.example.fakeshop_clients.core.api_client.KtorClient
@@ -33,6 +33,7 @@ val jvmInfrastructureModule = module {
 
     // Public HttpClient (no auth) for fetching public data from backend API
     single<HttpClient>(named("publicHttpClient")) {
+        val backendUrl = Url(System.getenv("BACKEND_BASE_URL") ?: "http://localhost:8080")
         HttpClient(CIO) {
             install(ContentNegotiation) {
                 json(Json {
@@ -46,9 +47,9 @@ val jvmInfrastructureModule = module {
 
             defaultRequest {
                 url {
-                    protocol = URLProtocol.HTTP
-                    host = "localhost"
-                    port = 8080
+                    protocol = backendUrl.protocol
+                    host = backendUrl.host
+                    port = backendUrl.port
                 }
             }
         }
