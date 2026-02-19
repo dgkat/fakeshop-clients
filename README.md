@@ -23,18 +23,81 @@ This is a Kotlin Multiplatform project targeting Android, iOS, Web.
   - [/web/common](./web/common) — Shared web resources (CSS, design tokens)
   - [/web/searchCommon](./web/searchCommon) — Shared search components used by both islands and SPA
 
+### Environment Configuration
+
+Each target automatically selects the correct backend URL based on build type — no manual changes needed between environments.
+
+| Target | Dev URL | Prod URL | Mechanism |
+|--------|---------|----------|-----------|
+| Android | `http://10.0.2.2:8080` | `https://api.dgkat.com` | `BuildConfig.BASE_URL` per build type |
+| iOS | `http://localhost:8080` | `https://api.dgkat.com` | `#if DEBUG` in `KoinHelper.swift` |
+| Web (Islands + SPA) | `http://localhost:8080` | `https://api.dgkat.com` | `BACKEND_BASE_URL` env var at bundle build time |
+| JVM / SSR | `http://localhost:8080` | `https://api.dgkat.com` | `BACKEND_BASE_URL` env var at runtime |
+
+**Production deployment:**
+- Web bundles: set `BACKEND_BASE_URL=https://api.dgkat.com` before running the Gradle bundle tasks
+- SSR server: set `BACKEND_BASE_URL=https://api.dgkat.com` in the VPS environment (systemd unit, Docker env, etc.)
+
+---
+
 ### Build and Run Android Application
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+By default the **debug** build points to `http://10.0.2.2:8080` (Android emulator localhost). The **release** build always uses `https://api.dgkat.com`.
+
+**Run with dev URL (default):**
+```shell
+./gradlew :composeApp:assembleDebug
+```
+
+**Run with prod URL — one-off:** Temporarily change the debug URL in `shared/build.gradle.kts`:
+```kotlin
+debug { buildConfigField("String", "BASE_URL", "\"https://api.dgkat.com\"") }
+```
+Rebuild, test, then revert.
+
+**Run with prod URL — persistent:** Add a `debugProd` build type to both `shared/build.gradle.kts` and `composeApp/build.gradle.kts` that inherits debug settings but overrides the URL:
+```kotlin
+// shared/build.gradle.kts  (inside android { buildTypes { ... } })
+create("debugProd") {
+    initWith(getByName("debug"))
+    buildConfigField("String", "BASE_URL", "\"https://api.dgkat.com\"")
+}
+```
+```kotlin
+// composeApp/build.gradle.kts  (inside android { buildTypes { ... } })
+create("debugProd") {
+    initWith(getByName("debug"))
+}
+```
+Then select the `debugProd` variant in your IDE's Build Variants panel and run normally.
+
+---
+
+### Build and Run iOS Application
+
+By default a **Debug** scheme run points to `http://localhost:8080`. An **Archive / Release** build always uses `https://api.dgkat.com`.
+
+**Run with dev URL (default):**
+
+Use the run configuration from the IDE toolbar or open [/iosApp](./iosApp) in Xcode and run with the Debug scheme.
+
+**Run with prod URL — one-off:** Temporarily edit the URL in `iosApp/iosApp/core/KoinHelper.swift`:
+```swift
+// Change:
+let baseUrl = "http://localhost:8080"
+// To:
+let baseUrl = "https://api.dgkat.com"
+```
+Run, test, then revert.
+
+**Run with prod URL — persistent (no code change):** Change the scheme's build configuration in Xcode:
+1. Product → Scheme → Edit Scheme (or long-press the Run button)
+2. Run → Info → Build Configuration → set to **Release**
+3. Run on simulator as normal — `#if DEBUG` evaluates to false, prod URL is used
+
+Switch back to **Debug** when done.
+
+---
 
 ### Build and Run Web Application
 
@@ -63,6 +126,13 @@ in your IDE's toolbar or run it directly from the terminal:
    ./gradlew :web:ssr:run
    ```
 
+**With prod URL** — set `BACKEND_BASE_URL` before the bundle tasks (the URL is baked in at build time) and pass it to the SSR server at runtime:
+```shell
+BACKEND_BASE_URL=https://api.dgkat.com ./gradlew :web:islands:copyIslandsBundle
+BACKEND_BASE_URL=https://api.dgkat.com ./gradlew :web:webApp:copySpaBundle
+BACKEND_BASE_URL=https://api.dgkat.com ./gradlew :web:ssr:run
+```
+
 The web app supports i18n with locale-based URL routing (`/en/...`, `/es/...`). Visiting `/` auto-detects the locale from the browser's `Accept-Language` header.
 
 **Troubleshooting**
@@ -75,11 +145,6 @@ For yarn.lock related issues:
    ```shell
   ./gradlew :kotlinUpgradeYarnLock
    ```
-
-### Build and Run iOS Application
-
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
 
 ### Shared Resource Generation
 

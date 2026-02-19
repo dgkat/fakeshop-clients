@@ -21,8 +21,11 @@ import org.example.fakeshop_clients.core.network.WebUrlProvider
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
+@JsName("__BACKEND_BASE_URL__")
+external val BACKEND_BASE_URL: String
+
 val webInfrastructureModule = module {
-    val baseUrl = "http://localhost:8080"
+    val baseUrl = BACKEND_BASE_URL
 
     single<UrlProvider> { WebUrlProvider() }
 
