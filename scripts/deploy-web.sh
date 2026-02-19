@@ -24,4 +24,4 @@ scp "$JAR" "$VPS_USER@$VPS_HOST:$VPS_JAR_PATH/ssr-all.jar"
 echo "==> Restarting fakeshop-web container..."
 ssh "$VPS_USER@$VPS_HOST" "cd $COMPOSE_DIR && docker compose restart fakeshop-web"
 
-echo "==> Done. Remember to purge the Cloudflare cache for /static/* manually."
+echo "==> Done."

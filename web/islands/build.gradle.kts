@@ -74,5 +74,17 @@ tasks.register<Copy>("copyIslandsBundle") {
 
     doLast {
         println("✅ Islands bundle copied to SSR static folder")
+        val jsDir = project(":web:ssr").projectDir.resolve("src/main/resources/static/js")
+        val hashedPattern = Regex("islands-bundle\\.[a-f0-9]{8}\\.js")
+        val bundles = jsDir.listFiles { f -> f.name.matches(hashedPattern) }?.toList() ?: emptyList()
+        val bundle = bundles.maxByOrNull { it.lastModified() }
+            ?: error("Hashed islands-bundle not found in $jsDir")
+        // Remove stale hashed bundles left from previous builds
+        bundles.filter { it != bundle }.forEach { stale ->
+            stale.delete()
+            jsDir.resolve("${stale.name}.map").delete()
+        }
+        jsDir.resolve("islands-manifest.json").writeText("""{"islands-bundle.js":"${bundle.name}"}""")
+        println("✅ islands-manifest.json written → ${bundle.name}")
     }
 }

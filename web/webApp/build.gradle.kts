@@ -84,5 +84,17 @@ tasks.register<Copy>("copySpaBundle") {
 
     doLast {
         println("✅ SPA bundle copied to SSR static folder")
+        val jsDir = project(":web:ssr").projectDir.resolve("src/main/resources/static/js")
+        val hashedPattern = Regex("spa-bundle\\.[a-f0-9]{8}\\.js")
+        val bundles = jsDir.listFiles { f -> f.name.matches(hashedPattern) }?.toList() ?: emptyList()
+        val bundle = bundles.maxByOrNull { it.lastModified() }
+            ?: error("Hashed spa-bundle not found in $jsDir")
+        // Remove stale hashed bundles left from previous builds
+        bundles.filter { it != bundle }.forEach { stale ->
+            stale.delete()
+            jsDir.resolve("${stale.name}.map").delete()
+        }
+        jsDir.resolve("spa-manifest.json").writeText("""{"spa-bundle.js":"${bundle.name}"}""")
+        println("✅ spa-manifest.json written → ${bundle.name}")
     }
 }

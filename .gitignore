@@ -28,8 +28,14 @@ web/webApp/webpack.config.d/env.js
 # Generated web bundles (copied by gradle tasks)
 web/ssr/src/main/resources/static/js/islands-bundle.js
 web/ssr/src/main/resources/static/js/islands-bundle.js.map
+web/ssr/src/main/resources/static/js/islands-bundle.*.js
+web/ssr/src/main/resources/static/js/islands-bundle.*.js.map
+web/ssr/src/main/resources/static/js/islands-manifest.json
 web/ssr/src/main/resources/static/js/spa-bundle.js
 web/ssr/src/main/resources/static/js/spa-bundle.js.map
+web/ssr/src/main/resources/static/js/spa-bundle.*.js
+web/ssr/src/main/resources/static/js/spa-bundle.*.js.map
+web/ssr/src/main/resources/static/js/spa-manifest.json
 
 # Generated CSS bundles (created by bundleCss task)
 web/common/build/bundled-css/

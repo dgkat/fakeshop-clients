@@ -141,7 +141,7 @@ export VPS_USER=<your-ssh-user>
 export VPS_HOST=<your-vps-ip>
 ./scripts/deploy-web.sh
 ```
-After deploying, purge the Cloudflare cache for `/static/*` manually (Caching → Cache Purge → Custom Purge → `https://dgkat.com/static/js/islands-bundle.js` and `spa-bundle.js`).
+JS bundles use content hashes in their filenames, so Cloudflare's cache is automatically busted on every deploy — no manual purge needed.
 
 **Troubleshooting**
 

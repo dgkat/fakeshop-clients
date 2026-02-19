@@ -11,6 +11,7 @@ import kotlinx.html.meta
 import kotlinx.html.script
 import kotlinx.html.title
 import kotlinx.html.unsafe
+import org.example.fakeshop_clients.core.assets.AssetManifest
 import org.example.fakeshop_clients.core.i18n.WebStrings
 
 fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: String) {
@@ -68,7 +69,7 @@ fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: Stri
         }
 
         // Load SPA bundle
-        script(src = "/static/js/spa-bundle.js") {
+        script(src = AssetManifest.spaBundle) {
             attributes["type"] = "module"
         }
         script(src = "/static/js/view-transitions.js") {}
