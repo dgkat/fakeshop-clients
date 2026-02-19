@@ -68,13 +68,13 @@ tasks.register<Copy>("copyIslandsBundle") {
     dependsOn("copyIslandResources")
 
     from(layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable"))
-    into(project(":web:ssr").projectDir.resolve("src/main/resources/static/js"))
+    val jsDir = project(":web:ssr").projectDir.resolve("src/main/resources/static/js")
+    into(jsDir)
 
     include("*.js", "*.js.map")
 
     doLast {
         println("✅ Islands bundle copied to SSR static folder")
-        val jsDir = project(":web:ssr").projectDir.resolve("src/main/resources/static/js")
         val hashedPattern = Regex("islands-bundle\\.[a-f0-9]{8}\\.js")
         val bundles = jsDir.listFiles { f -> f.name.matches(hashedPattern) }?.toList() ?: emptyList()
         val bundle = bundles.maxByOrNull { it.lastModified() }
