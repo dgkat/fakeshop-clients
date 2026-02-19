@@ -21,6 +21,10 @@ kotlin-js-store/
 
 CLAUDE.md
 
+# Generated webpack env config (written by generateWebpackEnv task)
+web/islands/webpack.config.d/env.js
+web/webApp/webpack.config.d/env.js
+
 # Generated web bundles (copied by gradle tasks)
 web/ssr/src/main/resources/static/js/islands-bundle.js
 web/ssr/src/main/resources/static/js/islands-bundle.js.map

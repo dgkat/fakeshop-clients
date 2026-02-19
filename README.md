@@ -126,14 +126,22 @@ in your IDE's toolbar or run it directly from the terminal:
    ./gradlew :web:ssr:run
    ```
 
-**With prod URL** — set `BACKEND_BASE_URL` before the bundle tasks (the URL is baked in at build time) and pass it to the SSR server at runtime:
+**With prod URL** — pass `-PbackendBaseUrl` to bake the URL into the JS bundles at Webpack build time, and set `BACKEND_BASE_URL` as a runtime env var for the SSR server:
 ```shell
-BACKEND_BASE_URL=https://api.dgkat.com ./gradlew :web:islands:copyIslandsBundle
-BACKEND_BASE_URL=https://api.dgkat.com ./gradlew :web:webApp:copySpaBundle
+./gradlew :web:islands:copyIslandsBundle -PbackendBaseUrl=https://api.dgkat.com
+./gradlew :web:webApp:copySpaBundle -PbackendBaseUrl=https://api.dgkat.com
 BACKEND_BASE_URL=https://api.dgkat.com ./gradlew :web:ssr:run
 ```
 
 The web app supports i18n with locale-based URL routing (`/en/...`, `/es/...`). Visiting `/` auto-detects the locale from the browser's `Accept-Language` header.
+
+**Deploy to production** — builds the fat JAR with the production URL baked into JS bundles, uploads it to the VPS, and restarts the Docker container:
+```shell
+export VPS_USER=<your-ssh-user>
+export VPS_HOST=<your-vps-ip>
+./scripts/deploy-web.sh
+```
+After deploying, purge the Cloudflare cache for `/static/*` manually (Caching → Cache Purge → Custom Purge → `https://dgkat.com/static/js/islands-bundle.js` and `spa-bundle.js`).
 
 **Troubleshooting**
 

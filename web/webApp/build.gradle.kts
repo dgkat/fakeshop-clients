@@ -52,6 +52,27 @@ tasks.register<Copy>("copySpaResources") {
     into("${project(":web:ssr").projectDir}/src/main/resources/common")
 }
 
+tasks.register("generateWebpackEnv") {
+    val url = project.findProperty("backendBaseUrl")?.toString() ?: "http://localhost:8080"
+    inputs.property("backendBaseUrl", url)
+    val outputFile = layout.projectDirectory.file("webpack.config.d/env.js")
+    outputs.file(outputFile)
+    doLast {
+        outputFile.asFile.writeText(
+            """
+            config.plugins = (config.plugins || []).concat([
+                new (require('webpack')).DefinePlugin({
+                    '__BACKEND_BASE_URL__': JSON.stringify('$url')
+                })
+            ]);
+            """.trimIndent()
+        )
+    }
+}
+
+tasks.named("jsBrowserProductionWebpack") { dependsOn("generateWebpackEnv") }
+tasks.named("jsBrowserDevelopmentWebpack") { dependsOn("generateWebpackEnv") }
+
 tasks.register<Copy>("copySpaBundle") {
     dependsOn("jsBrowserProductionWebpack")
     dependsOn("copySpaResources")
