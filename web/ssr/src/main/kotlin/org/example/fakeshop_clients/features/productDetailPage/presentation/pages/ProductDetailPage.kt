@@ -22,6 +22,7 @@ import kotlinx.html.script
 import kotlinx.html.span
 import kotlinx.html.title
 import kotlinx.html.unsafe
+import org.example.fakeshop_clients.core.assets.AssetManifest
 import org.example.fakeshop_clients.core.i18n.WebStrings
 import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
 import org.example.fakeshop_clients.features.core.navigation.mobile.bottomNavigation
@@ -51,13 +52,13 @@ fun HTML.productDetailPage(
         }
 
         // ===== PRELOAD ISLAND BUNDLE =====
-        link(rel = "preload", href = "/static/js/islands-bundle.js") {
+        link(rel = "preload", href = AssetManifest.islandsBundle) {
             attributes["as"] = "script"
             attributes["crossorigin"] = ""
         }
 
         // Prefetch SPA bundle
-        link(rel = "prefetch", href = "/static/js/spa-bundle.js") {
+        link(rel = "prefetch", href = AssetManifest.spaBundle) {
             attributes["as"] = "script"
         }
 
@@ -183,7 +184,7 @@ fun HTML.productDetailPage(
         bottomNavigation(activeTab = null, locale = locale, strings = strings)
 
         // ===== LOAD ISLAND BUNDLE =====
-        script(src = "/static/js/islands-bundle.js") {
+        script(src = AssetManifest.islandsBundle) {
             attributes["type"] = "module"
         }
 

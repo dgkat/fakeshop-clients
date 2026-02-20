@@ -35,8 +35,8 @@ Each target automatically selects the correct backend URL based on build type �
 | JVM / SSR | `http://localhost:8080` | `https://api.dgkat.com` | `BACKEND_BASE_URL` env var at runtime |
 
 **Production deployment:**
-- Web bundles: set `BACKEND_BASE_URL=https://api.dgkat.com` before running the Gradle bundle tasks
-- SSR server: set `BACKEND_BASE_URL=https://api.dgkat.com` in the VPS environment (systemd unit, Docker env, etc.)
+- Web: push to a `web/prod/deploy/**` branch — GitHub Actions builds the fat JAR, packages it into a Docker image, pushes to GHCR, and deploys to the VPS automatically
+- The production URL (`https://api.dgkat.com`) is baked into the JS bundles at build time via `-PbackendBaseUrl`
 
 ---
 
@@ -126,14 +126,34 @@ in your IDE's toolbar or run it directly from the terminal:
    ./gradlew :web:ssr:run
    ```
 
-**With prod URL** — set `BACKEND_BASE_URL` before the bundle tasks (the URL is baked in at build time) and pass it to the SSR server at runtime:
+**With prod URL** — pass `-PbackendBaseUrl` to bake the URL into the JS bundles at Webpack build time, and set `BACKEND_BASE_URL` as a runtime env var for the SSR server:
 ```shell
-BACKEND_BASE_URL=https://api.dgkat.com ./gradlew :web:islands:copyIslandsBundle
-BACKEND_BASE_URL=https://api.dgkat.com ./gradlew :web:webApp:copySpaBundle
+./gradlew :web:islands:copyIslandsBundle -PbackendBaseUrl=https://api.dgkat.com
+./gradlew :web:webApp:copySpaBundle -PbackendBaseUrl=https://api.dgkat.com
 BACKEND_BASE_URL=https://api.dgkat.com ./gradlew :web:ssr:run
 ```
 
 The web app supports i18n with locale-based URL routing (`/en/...`, `/es/...`). Visiting `/` auto-detects the locale from the browser's `Accept-Language` header.
+
+**Deploy to production** — push to any branch matching `web/prod/deploy/**`:
+```shell
+git push origin <your-branch>:web/prod/deploy/my-deploy
+```
+GitHub Actions will:
+1. Build the fat JAR (with `https://api.dgkat.com` baked into the JS bundles)
+2. Build a multi-platform Docker image (`linux/amd64` + `linux/arm64`) and push it to GHCR
+3. SSH into the VPS, pull the new image, and restart the container
+
+JS bundles include a content hash in their filename (e.g. `islands-bundle.a1b2c3d4.js`), so Cloudflare's cache is automatically busted on every deploy — no manual purge needed.
+
+Required repository secrets:
+
+| Secret | Description |
+|---|---|
+| `VPS_HOST` | VPS IP or hostname |
+| `VPS_USER` | SSH user |
+| `VPS_SSH_KEY` | Passphrase-less private SSH key |
+| `GHCR_TOKEN` | GitHub PAT with `read:packages` scope (used by the VPS to pull the image) |
 
 **Troubleshooting**
 
