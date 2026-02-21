@@ -12,6 +12,7 @@ import kotlinx.html.script
 import kotlinx.html.title
 import kotlinx.html.unsafe
 import org.example.fakeshop_clients.core.assets.AssetManifest
+import org.example.fakeshop_clients.core.assets.ReactCdn
 import org.example.fakeshop_clients.core.i18n.WebStrings
 
 fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: String) {
@@ -32,8 +33,8 @@ fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: Stri
         }
 
         // React
-        script(src = "https://unpkg.com/react@18/umd/react.development.js") {}
-        script(src = "https://unpkg.com/react-dom@18/umd/react-dom.development.js") {}
+        script(src = ReactCdn.react) {}
+        script(src = ReactCdn.reactDom) {}
 
         // React Router for client-side routing
         script(src = "https://unpkg.com/react-router-dom@6/dist/umd/react-router-dom.production.min.js") {}
