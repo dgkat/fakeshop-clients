@@ -19,7 +19,6 @@ val LoadingView = FC<LoadingViewProps> { props ->
         button {
             className = ClassName("btn btn-primary")
             onClick = {
-                console.log("[Get fake items] Clicked!")
                 props.onLoadClick()
             }
             +"Get fake items"

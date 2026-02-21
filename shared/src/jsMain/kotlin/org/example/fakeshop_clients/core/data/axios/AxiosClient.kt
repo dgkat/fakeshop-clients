@@ -36,19 +36,16 @@ class AxiosClient(
     private fun setupInterceptors() {
         axios.interceptors.request.use(
             onFulfilled = { config ->
-                console.log("Request:", config.method, config.url)
                 config.withCredentials = true
                 config
             },
             onRejected = { error ->
-                console.error("Request error:", error)
                 Promise.reject(error)
             }
         )
 
         axios.interceptors.response.use(
             onFulfilled = { response ->
-                console.log("Response:", response.status, response.config.url)
                 response
             },
             onRejected = { error ->
@@ -57,8 +54,6 @@ class AxiosClient(
 
                 if (status == 401 && originalRequest._retry != true) {
                     if (isRefreshing) {
-                        console.log("Session refresh in progress, queuing request...")
-
                         return@use Promise { resolve, reject ->
                             refreshSubscribers.add { refreshError ->
                                 if (refreshError != null) {
@@ -75,8 +70,6 @@ class AxiosClient(
                     originalRequest._retry = true
                     isRefreshing = true
 
-                    console.log("Session expired, attempting refresh...")
-
                     return@use scope.promise {
                         try {
                             //TODO clean up try/catch ( already in .refreshSession) and else + Result.Error (duplicate)
@@ -85,25 +78,21 @@ class AxiosClient(
                             when (refreshResult) {
                                 is Result.Success -> {
                                     if (refreshResult.data) {
-                                        console.log("Session refresh successful")
                                         onSessionRefreshed()
                                         retryRequest(originalRequest).await()
                                     } else {
                                         val error = Exception("Session refresh returned false")
-                                        console.error("Session refresh failed:", error)
                                         onSessionRefreshFailed(error)
                                         throw error
                                     }
                                 }
                                 is Result.Error -> {
                                     val error = Exception("Session refresh failed: ${refreshResult.error}")
-                                    console.error("Session refresh failed:", error)
                                     onSessionRefreshFailed(error)
                                     throw error
                                 }
                             }
                         } catch (refreshError: Throwable) {
-                            console.error("Session refresh exception:", refreshError)
                             onSessionRefreshFailed(refreshError)
                             throw refreshError
                         } finally {
@@ -112,7 +101,6 @@ class AxiosClient(
                     }
                 }
 
-                console.error("Response error:", status, error.message)
                 Promise.reject(error)
             }
         )

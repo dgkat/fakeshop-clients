@@ -16,51 +16,34 @@ import web.dom.Element
 @OptIn(ExperimentalJsExport::class)
 @JsExport
 fun setupSearchIsland() {
-    console.log("[setupSearchIsland] Setting up search island...")
+    WebKoinManager.initialize()
 
-    try {
-        // Initialize Koin if not already initialized
-        WebKoinManager.initialize()
+    val koin = WebKoinManager.getKoin()
 
-        val koin = WebKoinManager.getKoin()
+    val scope = MainScope()
 
-        // Create scope for this island
-        val scope = MainScope()
+    val store: SearchViewStore = koin.get { parametersOf(scope) }
+    val viewModel: SearchViewModel = koin.get { parametersOf(store) }
 
-        // Get SearchViewStore with scope parameter
-        val store: SearchViewStore = koin.get { parametersOf(scope) }
+    val page = document.body?.getAttribute("data-page") ?: "home"
+    val behavior = BehaviorMapping.getSearchBarBehavior(page)
 
-        // Create ViewModel
-        val viewModel: SearchViewModel = koin.get { parametersOf(store) }
+    val rootElement = document.getElementById("search-island-root") as? Element
+        ?: error("Search island root element not found")
 
-        // Detect page type from body data attribute
-        val page = document.body?.getAttribute("data-page") ?: "home"
-        val behavior = BehaviorMapping.getSearchBarBehavior(page)
-
-        console.log("[setupSearchIsland] Page: $page, Behavior: $behavior")
-
-        val rootElement = document.getElementById("search-island-root") as? Element
-            ?: error("Search island root element not found")
-
-        createRoot(rootElement).render(
-            SearchBar.create {
-                this.viewModel = viewModel
-                this.behavior = behavior
-                this.onNavigateToProduct = { productId ->
-                    val locale = I18n.locale
-                    console.log("[setupSearchIsland] Navigating to product: $productId")
-                    window.location.href = "/$locale/product/$productId"
-                }
+    createRoot(rootElement).render(
+        SearchBar.create {
+            this.viewModel = viewModel
+            this.behavior = behavior
+            this.onNavigateToProduct = { productId ->
+                val locale = I18n.locale
+                window.location.href = "/$locale/product/$productId"
             }
-        )
+        }
+    )
 
-        console.log("[setupSearchIsland] ✅ Island hydrated successfully")
-
-        window.addEventListener("beforeunload", {
-            viewModel.cleanup()
-            scope.cancel()
-        })
-    } catch (e: Exception) {
-        console.error("[setupSearchIsland] Error:", e.message)
-    }
+    window.addEventListener("beforeunload", {
+        viewModel.cleanup()
+        scope.cancel()
+    })
 }
