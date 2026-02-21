@@ -126,7 +126,7 @@ in your IDE's toolbar or run it directly from the terminal:
    ./gradlew :web:ssr:run
    ```
 
-**With prod URL** — pass `-PbackendBaseUrl` to bake the URL into the JS bundles at Webpack build time, and set `BACKEND_BASE_URL` as a runtime env var for the SSR server:
+**With prod URL** — `-PbackendBaseUrl` is **required** for `copyIslandsBundle` and `copySpaBundle`. The build will fail immediately if omitted. Set `BACKEND_BASE_URL` as a runtime env var for the SSR server (the server will also fail at startup in production if it is missing):
 ```shell
 ./gradlew :web:islands:copyIslandsBundle -PbackendBaseUrl=https://api.dgkat.com
 ./gradlew :web:webApp:copySpaBundle -PbackendBaseUrl=https://api.dgkat.com
@@ -154,6 +154,69 @@ Required repository secrets:
 | `VPS_USER` | SSH user |
 | `VPS_SSH_KEY` | Passphrase-less private SSH key |
 | `GHCR_TOKEN` | GitHub PAT with `read:packages` scope (used by the VPS to pull the image) |
+
+---
+
+### Production Hardening
+
+The following changes are in place to make production builds safe and performant. Some introduce new **required steps** when upgrading dependencies or building for release.
+
+#### React build mode (automatic)
+
+The SSR server automatically serves React development or production builds based on environment:
+
+| How you run | React loaded |
+|---|---|
+| `./gradlew :web:ssr:run` | `react.development.js` (full warnings, larger) |
+| Deployed JAR / Docker | `react.production.min.js` (optimised, ~3x smaller) |
+
+No configuration needed — this is controlled by the `io.ktor.development` JVM flag that Ktor's Gradle plugin sets automatically.
+
+#### CDN Subresource Integrity (SRI)
+
+All external scripts (React, React DOM, HTMX, React Router DOM) are loaded with `integrity` and `crossorigin` attributes. The browser verifies the hash of each file before executing it. If the CDN is compromised or the file is tampered with, the script is blocked.
+
+Hashes are stored in `web/ssr/src/main/kotlin/.../core/assets/ReactCdn.kt` alongside the pinned versions.
+
+**When you upgrade React, HTMX, or React Router DOM**, you must regenerate the hashes:
+
+```shell
+# Re-hash current pinned versions (e.g. after confirming they haven't changed)
+./gradlew :web:ssr:updateCdnHashes
+
+# Upgrade to new versions and regenerate hashes in one command
+./gradlew :web:ssr:updateCdnHashes \
+  -PreactVersion=18.4.0 \
+  -PhtmxVersion=2.0.0 \
+  -PreactRouterVersion=7.0.0
+```
+
+This fetches the actual files from unpkg, computes SHA-384 hashes, and rewrites `ReactCdn.kt` automatically. Commit the updated file alongside your version bump.
+
+**Current pinned versions:**
+
+| Library | Version |
+|---|---|
+| React + React DOM | 18.3.1 |
+| HTMX | 1.9.10 |
+| React Router DOM | 6.30.3 |
+
+#### Source maps not served in production
+
+`.js.map` files are excluded from production builds. The `copyIslandsBundle` and `copySpaBundle` tasks copy only `.js` files to the SSR server. Any existing `.map` files are cleaned up on the next bundle copy.
+
+#### CSS minification
+
+CSS bundles are automatically minified during the `bundleCss` task (comments stripped, whitespace collapsed, redundant characters removed). This runs automatically as part of any SSR build. No manual step required.
+
+#### Required environment variables
+
+| Variable | Where required | What happens if missing |
+|---|---|---|
+| `-PbackendBaseUrl` | Gradle build (`copyIslandsBundle`, `copySpaBundle`) | Build fails immediately with a descriptive error |
+| `BACKEND_BASE_URL` | SSR server runtime | Server fails to start in production (falls back to localhost in dev mode) |
+
+---
 
 **Troubleshooting**
 
