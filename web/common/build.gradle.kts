@@ -275,7 +275,7 @@ val cssBundles = mapOf(
 tasks.register("bundleCss") {
     dependsOn(generateThemeCss)
     group = "build"
-    description = "Bundle CSS files into common + page-specific bundles"
+    description = "Bundle and minify CSS files into common + page-specific bundles"
 
     val cssSourceDir = file("src/commonMain/resources/css")
     val outputDir = layout.buildDirectory.dir("bundled-css")
@@ -284,6 +284,20 @@ tasks.register("bundleCss") {
     outputs.dir(outputDir)
 
     doLast {
+        fun minifyCss(css: String): String = css
+            .replace(Regex("""/\*[\s\S]*?\*/"""), "")  // strip comments
+            .replace(Regex("""\s+"""), " ")             // collapse whitespace
+            .replace(" {", "{")
+            .replace("{ ", "{")
+            .replace(" }", "}")
+            .replace("} ", "}")
+            .replace(": ", ":")
+            .replace("; ", ";")
+            .replace(" ;", ";")
+            .replace(", ", ",")
+            .replace(";}", "}")                         // drop trailing semicolons
+            .trim()
+
         val bundles = mapOf(
             "common" to listOf(
                 "shared/theme.css",
@@ -309,26 +323,29 @@ tasks.register("bundleCss") {
             )
         )
         bundles.forEach { (bundleName, cssFiles) ->
-            // Read and concatenate CSS files
-            val bundleContent = cssFiles.joinToString("\n\n/* ========================================== */\n\n") { cssPath ->
+            val concatenated = cssFiles.joinToString("\n") { cssPath ->
                 val cssFile = cssSourceDir.resolve(cssPath)
                 if (cssFile.exists()) {
-                    "/* ===== ${cssPath.substringAfterLast('/')} ===== */\n${cssFile.readText()}"
+                    cssFile.readText()
                 } else {
                     logger.warn("⚠️  WARNING: ${cssPath} not found!")
-                    "/* WARNING: ${cssPath} not found */"
+                    ""
                 }
             }
 
-            // Write bundle file
+            val minified = minifyCss(concatenated)
+
             val bundleFile = outputDir.get().file("${bundleName}.css").asFile
             bundleFile.parentFile.mkdirs()
-            bundleFile.writeText(bundleContent)
+            bundleFile.writeText(minified)
 
-            logger.lifecycle("✅ Created ${bundleName}.css (${bundleContent.lines().size} lines)")
+            val saving = if (concatenated.isNotEmpty()) {
+                100 - (minified.length * 100 / concatenated.length)
+            } else 0
+            logger.lifecycle("✅ Created ${bundleName}.css — ${minified.length} chars ($saving% smaller)")
         }
 
-        logger.lifecycle("🎉 All CSS bundles created successfully!")
+        logger.lifecycle("🎉 All CSS bundles created and minified successfully!")
     }
 }
 

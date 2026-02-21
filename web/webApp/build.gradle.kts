@@ -77,11 +77,22 @@ tasks.register<Copy>("copySpaBundle") {
     dependsOn("jsBrowserProductionWebpack")
     dependsOn("copySpaResources")
 
+    val backendBaseUrl = project.findProperty("backendBaseUrl")
+
+    doFirst {
+        if (backendBaseUrl == null) {
+            throw GradleException(
+                "\n\n  'backendBaseUrl' property is required for production builds.\n" +
+                "  Pass it with: ./gradlew :web:webApp:copySpaBundle -PbackendBaseUrl=https://your-api.com\n"
+            )
+        }
+    }
+
     from(layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable"))
     val jsDir = project(":web:ssr").projectDir.resolve("src/main/resources/static/js")
     into(jsDir)
 
-    include("*.js", "*.js.map")
+    include("*.js")
 
     doLast {
         println("✅ SPA bundle copied to SSR static folder")
@@ -94,6 +105,8 @@ tasks.register<Copy>("copySpaBundle") {
             stale.delete()
             jsDir.resolve("${stale.name}.map").delete()
         }
+        // Remove source map for current bundle if it exists from a previous build
+        jsDir.resolve("${bundle.name}.map").delete()
         jsDir.resolve("spa-manifest.json").writeText("""{"spa-bundle.js":"${bundle.name}"}""")
         println("✅ spa-manifest.json written → ${bundle.name}")
     }

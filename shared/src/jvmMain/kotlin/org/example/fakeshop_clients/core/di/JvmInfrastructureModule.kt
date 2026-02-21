@@ -33,7 +33,12 @@ val jvmInfrastructureModule = module {
 
     // Public HttpClient (no auth) for fetching public data from backend API
     single<HttpClient>(named("publicHttpClient")) {
-        val backendUrl = Url(System.getenv("BACKEND_BASE_URL") ?: "http://localhost:8080")
+        val isDevelopment = System.getProperty("io.ktor.development")?.toBoolean() ?: false
+        val backendUrl = Url(
+            System.getenv("BACKEND_BASE_URL")
+                ?: if (isDevelopment) "http://localhost:8080"
+                else error("BACKEND_BASE_URL environment variable is required in production")
+        )
         HttpClient(CIO) {
             install(ContentNegotiation) {
                 json(Json {

@@ -126,7 +126,7 @@ in your IDE's toolbar or run it directly from the terminal:
    ./gradlew :web:ssr:run
    ```
 
-**With prod URL** — pass `-PbackendBaseUrl` to bake the URL into the JS bundles at Webpack build time, and set `BACKEND_BASE_URL` as a runtime env var for the SSR server:
+**With prod URL** — `-PbackendBaseUrl` is **required** for `copyIslandsBundle` and `copySpaBundle`. The build will fail immediately if omitted. Set `BACKEND_BASE_URL` as a runtime env var for the SSR server (the server will also fail at startup in production if it is missing):
 ```shell
 ./gradlew :web:islands:copyIslandsBundle -PbackendBaseUrl=https://api.dgkat.com
 ./gradlew :web:webApp:copySpaBundle -PbackendBaseUrl=https://api.dgkat.com
@@ -154,6 +154,59 @@ Required repository secrets:
 | `VPS_USER` | SSH user |
 | `VPS_SSH_KEY` | Passphrase-less private SSH key |
 | `GHCR_TOKEN` | GitHub PAT with `read:packages` scope (used by the VPS to pull the image) |
+
+---
+
+### Production Hardening
+
+The following changes are in place to make production builds safe and performant. Some introduce new **required steps** when upgrading dependencies or building for release.
+
+#### React bundled by webpack (not CDN)
+
+React 19 removed UMD builds, so React and React DOM cannot be loaded from a CDN. They are bundled directly into the islands and SPA webpack bundles. No CDN scripts, no global `window.React` — webpack handles everything.
+
+The Kotlin React wrappers (`2025.10.11-19.2.0`) target React 19, which is pulled from npm at build time and included in the output bundle.
+
+#### CDN Subresource Integrity (SRI) — HTMX only
+
+HTMX is the only external script loaded from a CDN. It is loaded with `integrity` and `crossorigin="anonymous"` attributes so the browser verifies the file's SHA-384 hash before executing it. If the CDN is compromised or the file is tampered with, the script is blocked.
+
+The hash and pinned version are stored in `web/ssr/src/main/kotlin/.../core/assets/ExternalScripts.kt`.
+
+**When you upgrade HTMX**, regenerate the hash:
+
+```shell
+# Re-hash the current pinned version
+./gradlew :web:ssr:updateCdnHashes
+
+# Upgrade to a new version and regenerate the hash in one command
+./gradlew :web:ssr:updateCdnHashes -PhtmxVersion=2.0.0
+```
+
+This fetches the file from unpkg, computes the SHA-384 hash, and rewrites `ExternalScripts.kt` automatically. Commit the updated file alongside your version bump.
+
+**Current pinned CDN versions:**
+
+| Library | Version |
+|---|---|
+| HTMX | 1.9.10 |
+
+#### Source maps not served in production
+
+`.js.map` files are excluded from production builds. The `copyIslandsBundle` and `copySpaBundle` tasks copy only `.js` files to the SSR server. Any existing `.map` files are cleaned up on the next bundle copy.
+
+#### CSS minification
+
+CSS bundles are automatically minified during the `bundleCss` task (comments stripped, whitespace collapsed, redundant characters removed). This runs automatically as part of any SSR build. No manual step required.
+
+#### Required environment variables
+
+| Variable | Where required | What happens if missing |
+|---|---|---|
+| `-PbackendBaseUrl` | Gradle build (`copyIslandsBundle`, `copySpaBundle`) | Build fails immediately with a descriptive error |
+| `BACKEND_BASE_URL` | SSR server runtime | Server fails to start in production (falls back to localhost in dev mode) |
+
+---
 
 **Troubleshooting**
 

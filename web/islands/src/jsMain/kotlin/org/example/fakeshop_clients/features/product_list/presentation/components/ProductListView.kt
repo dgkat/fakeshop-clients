@@ -53,9 +53,7 @@ val ProductListView = FC<ProductListProps> { props ->
             else -> {
                 CategoriesView {
                     categories = state.categories
-                    onProductClick = { productId ->
-                        console.log("[ProductList] Product clicked: $productId")
-                    }
+                    onProductClick = { }
                 }
             }
         }

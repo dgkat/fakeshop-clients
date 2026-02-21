@@ -167,9 +167,6 @@ private suspend fun refreshTokensSafely(
                 refreshToken = response.refreshToken
             )
         },
-        onError = { error ->
-            println("Token refresh failed: $error")
-            null
-        }
+        onError = { null }
     )
 }

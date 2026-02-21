@@ -21,7 +21,6 @@ class HeaderScrollController {
 
     init() {
         if (!this.header) {
-            console.warn('Header element not found');
             return;
         }
 

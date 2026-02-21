@@ -92,7 +92,6 @@ class SearchViewStore(
 
     private fun onProductClicked(productId: String) {
         //TODO navigate to product details
-        println("Product clicked: $productId")
         deactivateSearch()
     }
 

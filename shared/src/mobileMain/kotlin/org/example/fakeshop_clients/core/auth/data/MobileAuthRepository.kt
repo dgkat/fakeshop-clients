@@ -17,7 +17,6 @@ class MobileAuthRepository(
                 accessToken = accessToken,
                 refreshToken = refreshToken
             )
-            println("SignUp Success")
         }
     }
 
@@ -29,7 +28,6 @@ class MobileAuthRepository(
                 accessToken = accessToken,
                 refreshToken = refreshToken
             )
-            println("LoginResult Success")
         }
     }
 }

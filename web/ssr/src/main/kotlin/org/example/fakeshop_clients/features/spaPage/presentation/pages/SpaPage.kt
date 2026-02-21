@@ -31,13 +31,6 @@ fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: Stri
             attributes["hreflang"] = "x-default"
         }
 
-        // React
-        script(src = "https://unpkg.com/react@18/umd/react.development.js") {}
-        script(src = "https://unpkg.com/react-dom@18/umd/react-dom.development.js") {}
-
-        // React Router for client-side routing
-        script(src = "https://unpkg.com/react-router-dom@6/dist/umd/react-router-dom.production.min.js") {}
-
         // Fonts
         link(rel = "preconnect", href = "https://fonts.googleapis.com")
         link(rel = "preconnect", href = "https://fonts.gstatic.com") {

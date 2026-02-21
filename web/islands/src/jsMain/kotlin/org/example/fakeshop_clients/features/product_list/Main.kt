@@ -10,31 +10,18 @@ import web.dom.Element
 @OptIn(ExperimentalJsExport::class)
 @JsExport
 fun setupProductListIsland() {
-    console.log("[setupProductListIsland] Setting up product list island...")
+    WebKoinManager.initialize()
 
-    try {
-        WebKoinManager.initialize()
+    val koin = WebKoinManager.getKoin()
 
-        val koin = WebKoinManager.getKoin()
+    val viewModel = koin.get<ProductListViewmodel>()
 
-        val viewModel = koin.get<ProductListViewmodel>()
+    val rootElement = document.getElementById("product-list-island-root") as? Element
+        ?: error("Root element not found")
 
-        val rootElement = document.getElementById("product-list-island-root") as? Element
-            ?: error("Root element not found")
-
-        createRoot(rootElement).render(
-            ProductListView.create {
-                this.viewModel = viewModel
-            }
-        )
-
-        console.log("[setupProductListIsland] ✅ Island hydrated successfully")
-
-
-        window.addEventListener("beforeunload", {
-            //stopKoin here
-        })
-    } catch (e: Exception) {
-        console.error("[setupProductListIsland] Error:", e.message)
-    }
+    createRoot(rootElement).render(
+        ProductListView.create {
+            this.viewModel = viewModel
+        }
+    )
 }
