@@ -77,6 +77,15 @@ tasks.register<Copy>("copySpaBundle") {
     dependsOn("jsBrowserProductionWebpack")
     dependsOn("copySpaResources")
 
+    doFirst {
+        if (project.findProperty("backendBaseUrl") == null) {
+            throw GradleException(
+                "\n\n  'backendBaseUrl' property is required for production builds.\n" +
+                "  Pass it with: ./gradlew :web:webApp:copySpaBundle -PbackendBaseUrl=https://your-api.com\n"
+            )
+        }
+    }
+
     from(layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable"))
     val jsDir = project(":web:ssr").projectDir.resolve("src/main/resources/static/js")
     into(jsDir)
