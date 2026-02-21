@@ -38,7 +38,7 @@ fun Route.productRoutes() {
         when (fullProduct) {
             is Result.Error -> {
                 call.respondText(
-                    "Failed to load product details: ${fullProduct.error}",
+                    "Unable to load product details. Please try again later.",
                     status = HttpStatusCode.InternalServerError
                 )
             }
@@ -69,7 +69,7 @@ fun Route.productApiRoutes() {
         when (toggleResult) {
             is Result.Error -> {
                 call.respondText(
-                    "Failed to toggle like: ${toggleResult.error}",
+                    "Unable to process request. Please try again later.",
                     status = HttpStatusCode.InternalServerError
                 )
             }
