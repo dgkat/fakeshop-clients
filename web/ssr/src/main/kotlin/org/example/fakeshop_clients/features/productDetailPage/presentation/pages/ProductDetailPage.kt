@@ -67,6 +67,7 @@ fun HTML.productDetailPage(
         script(src = ExternalScripts.HTMX_SRC) {
             attributes["integrity"] = ExternalScripts.HTMX_INTEGRITY
             attributes["crossorigin"] = "anonymous"
+            attributes["defer"] = ""
         }
 
         // Google Fonts

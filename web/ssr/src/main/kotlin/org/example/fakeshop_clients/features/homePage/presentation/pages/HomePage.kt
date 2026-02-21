@@ -54,6 +54,7 @@ fun HTML.homePage(locale: String, strings: Map<String, String>, stringsJson: Str
         script(src = ExternalScripts.HTMX_SRC) {
             attributes["integrity"] = ExternalScripts.HTMX_INTEGRITY
             attributes["crossorigin"] = "anonymous"
+            attributes["defer"] = ""
         }
 
         // Google Fonts
