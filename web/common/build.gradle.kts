@@ -272,20 +272,6 @@ val cssBundles = mapOf(
     )
 )
 
-fun minifyCss(css: String): String = css
-    .replace(Regex("""/\*[\s\S]*?\*/"""), "")  // strip comments
-    .replace(Regex("""\s+"""), " ")             // collapse whitespace
-    .replace(" {", "{")
-    .replace("{ ", "{")
-    .replace(" }", "}")
-    .replace("} ", "}")
-    .replace(": ", ":")
-    .replace("; ", ";")
-    .replace(" ;", ";")
-    .replace(", ", ",")
-    .replace(";}", "}")                         // drop trailing semicolons
-    .trim()
-
 tasks.register("bundleCss") {
     dependsOn(generateThemeCss)
     group = "build"
@@ -298,6 +284,20 @@ tasks.register("bundleCss") {
     outputs.dir(outputDir)
 
     doLast {
+        fun minifyCss(css: String): String = css
+            .replace(Regex("""/\*[\s\S]*?\*/"""), "")  // strip comments
+            .replace(Regex("""\s+"""), " ")             // collapse whitespace
+            .replace(" {", "{")
+            .replace("{ ", "{")
+            .replace(" }", "}")
+            .replace("} ", "}")
+            .replace(": ", ":")
+            .replace("; ", ";")
+            .replace(" ;", ";")
+            .replace(", ", ",")
+            .replace(";}", "}")                         // drop trailing semicolons
+            .trim()
+
         val bundles = mapOf(
             "common" to listOf(
                 "shared/theme.css",

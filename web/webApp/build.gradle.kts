@@ -77,8 +77,10 @@ tasks.register<Copy>("copySpaBundle") {
     dependsOn("jsBrowserProductionWebpack")
     dependsOn("copySpaResources")
 
+    val backendBaseUrl = project.findProperty("backendBaseUrl")
+
     doFirst {
-        if (project.findProperty("backendBaseUrl") == null) {
+        if (backendBaseUrl == null) {
             throw GradleException(
                 "\n\n  'backendBaseUrl' property is required for production builds.\n" +
                 "  Pass it with: ./gradlew :web:webApp:copySpaBundle -PbackendBaseUrl=https://your-api.com\n"

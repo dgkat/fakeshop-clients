@@ -67,8 +67,10 @@ tasks.register<Copy>("copyIslandsBundle") {
     dependsOn("jsBrowserProductionWebpack")
     dependsOn("copyIslandResources")
 
+    val backendBaseUrl = project.findProperty("backendBaseUrl")
+
     doFirst {
-        if (project.findProperty("backendBaseUrl") == null) {
+        if (backendBaseUrl == null) {
             throw GradleException(
                 "\n\n  'backendBaseUrl' property is required for production builds.\n" +
                 "  Pass it with: ./gradlew :web:islands:copyIslandsBundle -PbackendBaseUrl=https://your-api.com\n"
