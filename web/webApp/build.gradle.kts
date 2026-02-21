@@ -81,7 +81,7 @@ tasks.register<Copy>("copySpaBundle") {
     val jsDir = project(":web:ssr").projectDir.resolve("src/main/resources/static/js")
     into(jsDir)
 
-    include("*.js", "*.js.map")
+    include("*.js")
 
     doLast {
         println("✅ SPA bundle copied to SSR static folder")
@@ -94,6 +94,8 @@ tasks.register<Copy>("copySpaBundle") {
             stale.delete()
             jsDir.resolve("${stale.name}.map").delete()
         }
+        // Remove source map for current bundle if it exists from a previous build
+        jsDir.resolve("${bundle.name}.map").delete()
         jsDir.resolve("spa-manifest.json").writeText("""{"spa-bundle.js":"${bundle.name}"}""")
         println("✅ spa-manifest.json written → ${bundle.name}")
     }
