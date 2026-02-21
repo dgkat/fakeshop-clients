@@ -12,8 +12,6 @@ import kotlinx.html.script
 import kotlinx.html.title
 import kotlinx.html.unsafe
 import org.example.fakeshop_clients.core.assets.AssetManifest
-import org.example.fakeshop_clients.core.assets.ExternalScripts
-import org.example.fakeshop_clients.core.assets.ReactCdn
 import org.example.fakeshop_clients.core.i18n.WebStrings
 
 fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: String) {
@@ -31,22 +29,6 @@ fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: Stri
         }
         link(rel = "alternate", href = "/en/favorites") {
             attributes["hreflang"] = "x-default"
-        }
-
-        // React
-        script(src = ReactCdn.react) {
-            attributes["integrity"] = ReactCdn.reactIntegrity
-            attributes["crossorigin"] = "anonymous"
-        }
-        script(src = ReactCdn.reactDom) {
-            attributes["integrity"] = ReactCdn.reactDomIntegrity
-            attributes["crossorigin"] = "anonymous"
-        }
-
-        // React Router for client-side routing
-        script(src = ExternalScripts.REACT_ROUTER_SRC) {
-            attributes["integrity"] = ExternalScripts.REACT_ROUTER_INTEGRITY
-            attributes["crossorigin"] = "anonymous"
         }
 
         // Fonts

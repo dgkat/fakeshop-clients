@@ -161,45 +161,35 @@ Required repository secrets:
 
 The following changes are in place to make production builds safe and performant. Some introduce new **required steps** when upgrading dependencies or building for release.
 
-#### React build mode (automatic)
+#### React bundled by webpack (not CDN)
 
-The SSR server automatically serves React development or production builds based on environment:
+React 19 removed UMD builds, so React and React DOM cannot be loaded from a CDN. They are bundled directly into the islands and SPA webpack bundles. No CDN scripts, no global `window.React` — webpack handles everything.
 
-| How you run | React loaded |
-|---|---|
-| `./gradlew :web:ssr:run` | `react.development.js` (full warnings, larger) |
-| Deployed JAR / Docker | `react.production.min.js` (optimised, ~3x smaller) |
+The Kotlin React wrappers (`2025.10.11-19.2.0`) target React 19, which is pulled from npm at build time and included in the output bundle.
 
-No configuration needed — this is controlled by the `io.ktor.development` JVM flag that Ktor's Gradle plugin sets automatically.
+#### CDN Subresource Integrity (SRI) — HTMX only
 
-#### CDN Subresource Integrity (SRI)
+HTMX is the only external script loaded from a CDN. It is loaded with `integrity` and `crossorigin="anonymous"` attributes so the browser verifies the file's SHA-384 hash before executing it. If the CDN is compromised or the file is tampered with, the script is blocked.
 
-All external scripts (React, React DOM, HTMX, React Router DOM) are loaded with `integrity` and `crossorigin` attributes. The browser verifies the hash of each file before executing it. If the CDN is compromised or the file is tampered with, the script is blocked.
+The hash and pinned version are stored in `web/ssr/src/main/kotlin/.../core/assets/ExternalScripts.kt`.
 
-Hashes are stored in `web/ssr/src/main/kotlin/.../core/assets/ReactCdn.kt` alongside the pinned versions.
-
-**When you upgrade React, HTMX, or React Router DOM**, you must regenerate the hashes:
+**When you upgrade HTMX**, regenerate the hash:
 
 ```shell
-# Re-hash current pinned versions (e.g. after confirming they haven't changed)
+# Re-hash the current pinned version
 ./gradlew :web:ssr:updateCdnHashes
 
-# Upgrade to new versions and regenerate hashes in one command
-./gradlew :web:ssr:updateCdnHashes \
-  -PreactVersion=18.4.0 \
-  -PhtmxVersion=2.0.0 \
-  -PreactRouterVersion=7.0.0
+# Upgrade to a new version and regenerate the hash in one command
+./gradlew :web:ssr:updateCdnHashes -PhtmxVersion=2.0.0
 ```
 
-This fetches the actual files from unpkg, computes SHA-384 hashes, and rewrites `ReactCdn.kt` automatically. Commit the updated file alongside your version bump.
+This fetches the file from unpkg, computes the SHA-384 hash, and rewrites `ExternalScripts.kt` automatically. Commit the updated file alongside your version bump.
 
-**Current pinned versions:**
+**Current pinned CDN versions:**
 
 | Library | Version |
 |---|---|
-| React + React DOM | 18.3.1 |
 | HTMX | 1.9.10 |
-| React Router DOM | 6.30.3 |
 
 #### Source maps not served in production
 
