@@ -12,6 +12,7 @@ import kotlinx.html.script
 import kotlinx.html.title
 import kotlinx.html.unsafe
 import org.example.fakeshop_clients.core.assets.AssetManifest
+import org.example.fakeshop_clients.core.assets.ExternalScripts
 import org.example.fakeshop_clients.core.assets.ReactCdn
 import org.example.fakeshop_clients.core.i18n.WebStrings
 
@@ -33,11 +34,20 @@ fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: Stri
         }
 
         // React
-        script(src = ReactCdn.react) {}
-        script(src = ReactCdn.reactDom) {}
+        script(src = ReactCdn.react) {
+            attributes["integrity"] = ReactCdn.reactIntegrity
+            attributes["crossorigin"] = "anonymous"
+        }
+        script(src = ReactCdn.reactDom) {
+            attributes["integrity"] = ReactCdn.reactDomIntegrity
+            attributes["crossorigin"] = "anonymous"
+        }
 
         // React Router for client-side routing
-        script(src = "https://unpkg.com/react-router-dom@6/dist/umd/react-router-dom.production.min.js") {}
+        script(src = ExternalScripts.REACT_ROUTER_SRC) {
+            attributes["integrity"] = ExternalScripts.REACT_ROUTER_INTEGRITY
+            attributes["crossorigin"] = "anonymous"
+        }
 
         // Fonts
         link(rel = "preconnect", href = "https://fonts.googleapis.com")

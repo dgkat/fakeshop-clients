@@ -23,6 +23,7 @@ import kotlinx.html.span
 import kotlinx.html.title
 import kotlinx.html.unsafe
 import org.example.fakeshop_clients.core.assets.AssetManifest
+import org.example.fakeshop_clients.core.assets.ExternalScripts
 import org.example.fakeshop_clients.core.assets.ReactCdn
 import org.example.fakeshop_clients.core.i18n.WebStrings
 import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
@@ -64,11 +65,20 @@ fun HTML.productDetailPage(
         }
 
         // HTMX
-        script(src = "https://unpkg.com/htmx.org@1.9.10") {}
+        script(src = ExternalScripts.HTMX_SRC) {
+            attributes["integrity"] = ExternalScripts.HTMX_INTEGRITY
+            attributes["crossorigin"] = "anonymous"
+        }
 
         // ===== REACT (needed for islands) =====
-        script(src = ReactCdn.react) {}
-        script(src = ReactCdn.reactDom) {}
+        script(src = ReactCdn.react) {
+            attributes["integrity"] = ReactCdn.reactIntegrity
+            attributes["crossorigin"] = "anonymous"
+        }
+        script(src = ReactCdn.reactDom) {
+            attributes["integrity"] = ReactCdn.reactDomIntegrity
+            attributes["crossorigin"] = "anonymous"
+        }
 
         // Google Fonts
         link(rel = "preconnect", href = "https://fonts.googleapis.com")
