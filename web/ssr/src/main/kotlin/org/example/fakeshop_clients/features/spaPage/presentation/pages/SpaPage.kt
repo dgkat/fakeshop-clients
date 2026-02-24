@@ -42,8 +42,8 @@ fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: Stri
         )
 
         // CSS Bundles (split bundle approach for optimal caching)
-        link(rel = "stylesheet", href = "/static/css/bundles/common.css")  // Cached across all pages
-        link(rel = "stylesheet", href = "/static/css/bundles/spa.css")     // SPA specific
+        link(rel = "stylesheet", href = AssetManifest.commonCss)  // Cached across all pages
+        link(rel = "stylesheet", href = AssetManifest.spaCss)     // SPA specific
 
         // Inject locale and strings for client-side use (SPA)
         script {

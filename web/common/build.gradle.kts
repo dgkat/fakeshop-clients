@@ -1,3 +1,5 @@
+import java.security.MessageDigest
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
 }
@@ -322,6 +324,8 @@ tasks.register("bundleCss") {
                 "pages/profile-page.css"
             )
         )
+        val manifest = mutableMapOf<String, String>()
+
         bundles.forEach { (bundleName, cssFiles) ->
             val concatenated = cssFiles.joinToString("\n") { cssPath ->
                 val cssFile = cssSourceDir.resolve(cssPath)
@@ -335,15 +339,25 @@ tasks.register("bundleCss") {
 
             val minified = minifyCss(concatenated)
 
-            val bundleFile = outputDir.get().file("${bundleName}.css").asFile
+            val hash = MessageDigest.getInstance("MD5")
+                .digest(minified.toByteArray())
+                .take(4)
+                .joinToString("") { "%02x".format(it) }
+            val hashedName = "$bundleName.$hash.css"
+            manifest[bundleName] = hashedName
+
+            val bundleFile = outputDir.get().file(hashedName).asFile
             bundleFile.parentFile.mkdirs()
             bundleFile.writeText(minified)
 
             val saving = if (concatenated.isNotEmpty()) {
                 100 - (minified.length * 100 / concatenated.length)
             } else 0
-            logger.lifecycle("✅ Created ${bundleName}.css — ${minified.length} chars ($saving% smaller)")
+            logger.lifecycle("✅ Created $hashedName — ${minified.length} chars ($saving% smaller)")
         }
+
+        val manifestJson = manifest.entries.joinToString(",", "{", "}") { (k, v) -> """"$k":"$v"""" }
+        outputDir.get().file("css-manifest.json").asFile.writeText(manifestJson)
 
         logger.lifecycle("🎉 All CSS bundles created and minified successfully!")
     }
@@ -353,8 +367,16 @@ tasks.register("bundleCss") {
 tasks.register<Copy>("copyBundledCss") {
     dependsOn("bundleCss")
 
+    val cssDestDir = project(":web:ssr").projectDir.resolve("src/main/resources/static/css/bundles")
+
+    doFirst {
+        // Remove stale hashed CSS files from previous builds
+        val hashedPattern = Regex("""[a-z][a-z-]*\.[a-f0-9]{8}\.css$""")
+        cssDestDir.listFiles { f -> f.name.matches(hashedPattern) }?.forEach { it.delete() }
+    }
+
     from(layout.buildDirectory.dir("bundled-css"))
-    into(project(":web:ssr").projectDir.resolve("src/main/resources/static/css/bundles"))
+    into(cssDestDir)
 
     doLast {
         logger.lifecycle("✅ CSS bundles copied to SSR static folder")
