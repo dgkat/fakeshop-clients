@@ -54,6 +54,7 @@ fun HTML.homePage(locale: String, strings: Map<String, String>, stringsJson: Str
         script(src = ExternalScripts.HTMX_SRC) {
             attributes["integrity"] = ExternalScripts.HTMX_INTEGRITY
             attributes["crossorigin"] = "anonymous"
+            attributes["defer"] = ""
         }
 
         // Google Fonts
@@ -67,8 +68,8 @@ fun HTML.homePage(locale: String, strings: Map<String, String>, stringsJson: Str
         )
 
         // CSS Bundles (split bundle approach for optimal caching)
-        link(rel = "stylesheet", href = "/static/css/bundles/common.css")  // Cached across all pages
-        link(rel = "stylesheet", href = "/static/css/bundles/home.css")    // Home page specific
+        link(rel = "stylesheet", href = AssetManifest.commonCss)  // Cached across all pages
+        link(rel = "stylesheet", href = AssetManifest.homeCss)    // Home page specific
 
         // Inject locale and strings for client-side use (islands)
         script {

@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients
 
+import io.ktor.http.HttpHeaders
 import io.ktor.server.application.Application
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.response.respondRedirect
@@ -40,7 +41,14 @@ fun Application.configureRouting() {
             // This will serve files from webCommon module's resources
         }
 
-        staticResources("/static", "static")
+        staticResources("/static", "static") {
+            modify { url, call ->
+                val filename = url.path.substringAfterLast("/")
+                if (filename.matches(Regex(""".*\.[a-f0-9]{8}\.(css|js)$"""))) {
+                    call.response.headers.append(HttpHeaders.CacheControl, "public, max-age=31536000, immutable")
+                }
+            }
+        }
 
         // HTMX API routes (no locale prefix)
         productApiRoutes()

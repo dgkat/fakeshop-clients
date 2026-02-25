@@ -67,6 +67,7 @@ fun HTML.productDetailPage(
         script(src = ExternalScripts.HTMX_SRC) {
             attributes["integrity"] = ExternalScripts.HTMX_INTEGRITY
             attributes["crossorigin"] = "anonymous"
+            attributes["defer"] = ""
         }
 
         // Google Fonts
@@ -80,14 +81,8 @@ fun HTML.productDetailPage(
         )
 
         // CSS Bundles (split bundle approach for optimal caching)
-        link(
-            rel = "stylesheet",
-            href = "/static/css/bundles/common.css"
-        )         // Cached across all pages
-        link(
-            rel = "stylesheet",
-            href = "/static/css/bundles/product-detail.css"
-        ) // Product detail specific
+        link(rel = "stylesheet", href = AssetManifest.commonCss)         // Cached across all pages
+        link(rel = "stylesheet", href = AssetManifest.productDetailCss)  // Product detail specific
 
         // Inject locale and strings for client-side use (islands)
         script {
