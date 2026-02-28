@@ -395,15 +395,7 @@ tasks.named("jvmProcessResources") {
 
 tasks.register("runWeb") {
     group = "application"
-    description = "Clean, generate strings, build JS bundles, and run the web SSR server"
+    description = "Generate strings, build JS bundles, and run the web SSR server"
 
-    dependsOn(":clean")
     dependsOn(":web:ssr:run")
-}
-
-// Ensure :clean finishes before any build tasks start
-gradle.taskGraph.whenReady {
-    allTasks
-        .filter { it.path != ":clean" }
-        .forEach { it.mustRunAfter(":clean") }
 }
