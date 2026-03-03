@@ -89,6 +89,11 @@
     outline-offset: 2px;
 }
 
+/* ===== Active State: Raise above backdrop ===== */
+.search-bar-container.search-bar-active {
+    z-index: var(--z-index-modal);
+}
+
 /* ===== Search Backdrop ===== */
 .search-backdrop {
     position: fixed;

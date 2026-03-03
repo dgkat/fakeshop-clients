@@ -21,6 +21,7 @@ import react.useState
 import web.cssom.ClassName
 import web.dom.document
 import web.html.HTMLDivElement
+import web.html.HTMLElement
 
 external interface SearchBarProps : Props {
     var viewModel: SearchViewModel
@@ -68,14 +69,26 @@ val SearchBar = FC<SearchBarProps> { props ->
         }
     }
 
+    // Raise header z-index on desktop when search is active so it appears above the backdrop
+    useEffect(searchState.isActive, isDesktop) {
+        if (isDesktop) {
+            val header = document.querySelector(".header") as? HTMLElement
+            if (searchState.isActive) {
+                header?.style?.zIndex = "var(--z-index-modal)"
+            } else {
+                header?.style?.zIndex = ""
+            }
+        }
+    }
+
     // Show shadow based on behavior (only on mobile with STATIC behavior)
     val showShadow = !isDesktop && props.behavior == SearchBarBehavior.STATIC
 
-    // Build class name based on behavior
-    val containerClass = if (props.behavior == SearchBarBehavior.HIDDEN) {
-        "search-bar-container search-bar-hidden"
-    } else {
-        "search-bar-container"
+    // Build class name based on behavior and active state
+    val containerClass = buildString {
+        append("search-bar-container")
+        if (props.behavior == SearchBarBehavior.HIDDEN) append(" search-bar-hidden")
+        if (searchState.isActive) append(" search-bar-active")
     }
 
     div {
