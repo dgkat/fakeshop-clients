@@ -233,6 +233,11 @@
         visibility: hidden; /* Invisible but takes up space */
         pointer-events: none; /* Non-interactive */
     }
+
+    /* Results overlay positioned below the header on desktop */
+    .search-results-overlay {
+        top: 80px; /* Header height (~64px) + spacing */
+    }
 }
 
 /* ===== Scrollbar Styling (Optional Enhancement) ===== */
