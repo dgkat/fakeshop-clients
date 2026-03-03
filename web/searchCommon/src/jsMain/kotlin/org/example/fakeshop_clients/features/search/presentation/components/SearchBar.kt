@@ -70,7 +70,8 @@ val SearchBar = FC<SearchBarProps> { props ->
     }
 
     // Raise header z-index on desktop when search is active so it appears above the backdrop
-    useEffect(searchState.isActive, isDesktop) {
+    // Also dismiss search on scroll
+    useEffectWithCleanup(searchState.isActive, isDesktop) {
         if (isDesktop) {
             val header = document.querySelector(".header") as? HTMLElement
             if (searchState.isActive) {
@@ -78,6 +79,20 @@ val SearchBar = FC<SearchBarProps> { props ->
             } else {
                 header?.style?.zIndex = ""
             }
+        }
+
+        val scrollListener: (dynamic) -> Unit = {
+            if (searchState.isActive) {
+                props.viewModel.onEvent(SearchEvent.CancelClicked)
+            }
+        }
+
+        if (searchState.isActive) {
+            kotlinx.browser.window.addEventListener("scroll", scrollListener)
+        }
+
+        onCleanup {
+            kotlinx.browser.window.removeEventListener("scroll", scrollListener)
         }
     }
 
