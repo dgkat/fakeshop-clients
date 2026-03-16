@@ -75,6 +75,32 @@
     margin: var(--spacing-lg) 0;
 }
 
+/* Product Gallery */
+.product-gallery {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+    overflow-x: auto;
+}
+
+.product-gallery-thumbnail {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid var(--color-outline-variant);
+}
+
+/* Product Specs */
+.product-specs {
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-on-surface-variant);
+    margin: var(--spacing-sm) 0;
+    white-space: pre-line;
+}
+
 /* Product Actions */
 .product-actions {
     display: flex;

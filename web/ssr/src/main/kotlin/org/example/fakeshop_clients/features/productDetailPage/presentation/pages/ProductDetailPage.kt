@@ -131,9 +131,19 @@ fun HTML.productDetailPage(
             div(classes = "container") {
 
                 div(classes = "product-detail") {
-                    // Product Image
+                    // Product Image Section
                     div(classes = "product-image-section") {
+                        // Main image
                         img(src = product.imageUrl, alt = product.name, classes = "product-image")
+
+                        // Gallery thumbnails
+                        if (!product.galleryUrls.isNullOrEmpty()) {
+                            div(classes = "product-gallery") {
+                                product.galleryUrls.forEach { galleryUrl ->
+                                    img(src = galleryUrl, alt = product.name, classes = "product-gallery-thumbnail")
+                                }
+                            }
+                        }
                     }
 
                     // Product Info
@@ -150,10 +160,16 @@ fun HTML.productDetailPage(
                             +"$${String.format("%.2f", product.price)}"
                         }
 
-
                         // Description
                         product.description?.let {
                             p(classes = "product-description") {
+                                +it
+                            }
+                        }
+
+                        // Specs
+                        product.specs?.let {
+                            p(classes = "product-specs") {
                                 +it
                             }
                         }
