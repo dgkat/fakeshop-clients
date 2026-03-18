@@ -131,35 +131,38 @@ fun HTML.productDetailPage(
         // Main Content
         main(classes = "main-content") {
                 div(classes = "product-detail") {
-                    // Product Image Section with like button overlay
-                    div(classes = "product-image-section") {
-                        img(src = product.imageUrl, alt = product.name, classes = "product-image")
+                    // Top section: image + basic info (side-by-side on desktop)
+                    div(classes = "product-detail-top") {
+                        // Product Image Section with like button overlay
+                        div(classes = "product-image-section") {
+                            img(src = product.imageUrl, alt = product.name, classes = "product-image")
 
-                        // Like button overlay
-                        likeButton(productId = product.id, isLiked = product.isLiked)
+                            // Like button overlay
+                            likeButton(productId = product.id, isLiked = product.isLiked)
 
-                        // Gallery thumbnails
-                        if (!product.galleryUrls.isNullOrEmpty()) {
-                            div(classes = "product-gallery") {
-                                product.galleryUrls.forEach { galleryUrl ->
-                                    img(src = galleryUrl, alt = product.name, classes = "product-gallery-thumbnail")
+                            // Gallery thumbnails
+                            if (!product.galleryUrls.isNullOrEmpty()) {
+                                div(classes = "product-gallery") {
+                                    product.galleryUrls.forEach { galleryUrl ->
+                                        img(src = galleryUrl, alt = product.name, classes = "product-gallery-thumbnail")
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    // Product Info (category, name, price)
-                    div(classes = "product-info-section") {
-                        span(classes = "product-category") {
-                            +product.category
-                        }
+                        // Product Info (category, name, price)
+                        div(classes = "product-info-section") {
+                            span(classes = "product-category") {
+                                +product.category
+                            }
 
-                        h1(classes = "product-title") {
-                            +product.name
-                        }
+                            h1(classes = "product-title") {
+                                +product.name
+                            }
 
-                        p(classes = "product-price") {
-                            +"$${String.format("%.2f", product.price)}"
+                            p(classes = "product-price") {
+                                +"$${String.format("%.2f", product.price)}"
+                            }
                         }
                     }
 

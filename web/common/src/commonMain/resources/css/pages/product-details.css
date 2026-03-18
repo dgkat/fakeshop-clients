@@ -140,18 +140,21 @@
     white-space: pre-line;
 }
 
-/* Desktop: two-column layout */
+/* Desktop layout */
 @media (min-width: 769px) {
-    .product-detail {
+    .product-detail-top {
+        display: flex;
         flex-direction: row;
-        gap: var(--spacing-3xl);
-        max-width: 1200px;
-        margin: 0 auto;
+        gap: var(--spacing-xxxl);
         padding: 0 var(--spacing-xl);
     }
 
+    .product-section {
+        padding: var(--spacing-lg) var(--spacing-xl);
+    }
+
     .product-image-section {
-        flex: 1;
+        flex: 0 0 50%;
         min-width: 0;
     }
 
