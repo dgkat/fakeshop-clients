@@ -8,8 +8,10 @@ import kotlinx.html.classes
 import kotlinx.html.div
 import kotlinx.html.footer
 import kotlinx.html.h1
+import kotlinx.html.h2
 import kotlinx.html.head
 import kotlinx.html.header
+import kotlinx.html.hr
 import kotlinx.html.id
 import kotlinx.html.img
 import kotlinx.html.lang
@@ -128,13 +130,13 @@ fun HTML.productDetailPage(
 
         // Main Content
         main(classes = "main-content") {
-            div(classes = "container") {
-
                 div(classes = "product-detail") {
-                    // Product Image Section
+                    // Product Image Section with like button overlay
                     div(classes = "product-image-section") {
-                        // Main image
                         img(src = product.imageUrl, alt = product.name, classes = "product-image")
+
+                        // Like button overlay
+                        likeButton(productId = product.id, isLiked = product.isLiked)
 
                         // Gallery thumbnails
                         if (!product.galleryUrls.isNullOrEmpty()) {
@@ -146,7 +148,7 @@ fun HTML.productDetailPage(
                         }
                     }
 
-                    // Product Info
+                    // Product Info (category, name, price)
                     div(classes = "product-info-section") {
                         span(classes = "product-category") {
                             +product.category
@@ -159,29 +161,34 @@ fun HTML.productDetailPage(
                         p(classes = "product-price") {
                             +"$${String.format("%.2f", product.price)}"
                         }
+                    }
 
-                        // Description
-                        product.description?.let {
-                            p(classes = "product-description") {
-                                +it
+                    // Description
+                    product.description?.let { desc ->
+                        hr(classes = "product-divider") {}
+                        div(classes = "product-section") {
+                            h2(classes = "product-section-title") {
+                                +(strings["description"] ?: "Description")
+                            }
+                            p(classes = "product-section-content") {
+                                +desc
                             }
                         }
+                    }
 
-                        // Specs
-                        product.specs?.let {
-                            p(classes = "product-specs") {
-                                +it
+                    // Specs
+                    product.specs?.let { specs ->
+                        hr(classes = "product-divider") {}
+                        div(classes = "product-section") {
+                            h2(classes = "product-section-title") {
+                                +(strings["specifications"] ?: "Specifications")
                             }
-                        }
-
-                        // Actions
-                        div(classes = "product-actions") {
-                            // Like button with HTMX
-                            likeButton(productId = product.id, isLiked = product.isLiked)
+                            p(classes = "product-section-content") {
+                                +specs
+                            }
                         }
                     }
                 }
-            }
         }
 
         // Footer
