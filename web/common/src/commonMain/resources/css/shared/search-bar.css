@@ -63,6 +63,23 @@
     outline: none;
 }
 
+/* Outline on the whole search bar container - invisible by default */
+.search-bar-input {
+    outline: 2px solid transparent;
+    outline-offset: 0px;
+    transition: box-shadow var(--transition-base), outline-color var(--transition-fast);
+}
+
+/* Show outline on hover */
+.search-bar-input:hover {
+    outline-color: var(--color-primary);
+}
+
+/* Show outline when search is active (dropdown visible) */
+.search-bar-container.search-bar-active .search-bar-input {
+    outline-color: var(--color-primary);
+}
+
 .search-clear-btn {
     background: none;
     border: none;
@@ -87,6 +104,11 @@
 .search-clear-btn:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
+}
+
+/* ===== Active State: Raise above backdrop ===== */
+.search-bar-container.search-bar-active {
+    z-index: var(--z-index-modal);
 }
 
 /* ===== Search Backdrop ===== */
@@ -233,6 +255,11 @@
         visibility: hidden; /* Invisible but takes up space */
         pointer-events: none; /* Non-interactive */
     }
+
+    /* Results overlay positioned below the header on desktop */
+    .search-results-overlay {
+        top: 80px; /* Header height (~64px) + spacing */
+    }
 }
 
 /* ===== Scrollbar Styling (Optional Enhancement) ===== */
@@ -255,10 +282,9 @@
 }
 
 /* ===== Accessibility ===== */
-.search-input:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-    border-radius: var(--radius-sm);
+/* Focus-visible outline targets the whole search bar container via :has() */
+.search-bar-input:has(.search-input:focus-visible) {
+    outline-color: var(--color-primary);
 }
 
 /* ===== Print Styles ===== */

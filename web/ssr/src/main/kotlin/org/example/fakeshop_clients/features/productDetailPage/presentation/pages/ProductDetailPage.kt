@@ -8,8 +8,10 @@ import kotlinx.html.classes
 import kotlinx.html.div
 import kotlinx.html.footer
 import kotlinx.html.h1
+import kotlinx.html.h2
 import kotlinx.html.head
 import kotlinx.html.header
+import kotlinx.html.hr
 import kotlinx.html.id
 import kotlinx.html.img
 import kotlinx.html.lang
@@ -128,44 +130,96 @@ fun HTML.productDetailPage(
 
         // Main Content
         main(classes = "main-content") {
-            div(classes = "container") {
-
                 div(classes = "product-detail") {
-                    // Product Image
-                    div(classes = "product-image-section") {
-                        img(src = product.imageUrl, alt = product.name, classes = "product-image")
-                    }
+                    // Top section: image + basic info (side-by-side on desktop)
+                    div(classes = "product-detail-top") {
+                        // Product Image Section with carousel and like button overlay
+                        div(classes = "product-image-section") {
+                            // Like button overlay
+                            likeButton(productId = product.id, isLiked = product.isLiked)
 
-                    // Product Info
-                    div(classes = "product-info-section") {
-                        span(classes = "product-category") {
-                            +product.category
-                        }
+                            // Carousel: main image + gallery images
+                            val allImages = listOf(product.imageUrl) + (product.galleryUrls ?: emptyList())
+                            div(classes = "carousel-track") {
+                                allImages.forEach { url ->
+                                    img(src = url, alt = product.name, classes = "carousel-slide")
+                                }
+                            }
 
-                        h1(classes = "product-title") {
-                            +product.name
-                        }
+                            // Arrow buttons (visible on desktop only via CSS)
+                            if (allImages.size > 1) {
+                                button(classes = "carousel-arrow carousel-arrow-prev") {
+                                    attributes["aria-label"] = "Previous image"
+                                    unsafe { +"&#8249;" }
+                                }
+                                button(classes = "carousel-arrow carousel-arrow-next") {
+                                    attributes["aria-label"] = "Next image"
+                                    unsafe { +"&#8250;" }
+                                }
 
-                        p(classes = "product-price") {
-                            +"$${String.format("%.2f", product.price)}"
-                        }
-
-
-                        // Description
-                        product.description?.let {
-                            p(classes = "product-description") {
-                                +it
+                                // Dot indicators
+                                div(classes = "carousel-dots") {
+                                    allImages.forEachIndexed { index, _ ->
+                                        span(classes = if (index == 0) "carousel-dot active" else "carousel-dot")
+                                    }
+                                }
                             }
                         }
 
-                        // Actions
-                        div(classes = "product-actions") {
-                            // Like button with HTMX
-                            likeButton(productId = product.id, isLiked = product.isLiked)
+                        // Product Info (category, name, price, description)
+                        div(classes = "product-info-section") {
+                            span(classes = "product-category") {
+                                +product.category
+                            }
+
+                            h1(classes = "product-title") {
+                                +product.name
+                            }
+
+                            p(classes = "product-price") {
+                                +"$${String.format("%.2f", product.price)}"
+                            }
+
+                            // Description (inline - visible on desktop, hidden on mobile via CSS)
+                            product.description?.let { desc ->
+                                div(classes = "product-section product-section-inline") {
+                                    h2(classes = "product-section-title") {
+                                        +(strings["description"] ?: "Description")
+                                    }
+                                    p(classes = "product-section-content") {
+                                        +desc
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Description (standalone - visible on mobile, hidden on desktop via CSS)
+                    product.description?.let { desc ->
+                        hr(classes = "product-divider product-divider-mobile") {}
+                        div(classes = "product-section product-section-standalone") {
+                            h2(classes = "product-section-title") {
+                                +(strings["description"] ?: "Description")
+                            }
+                            p(classes = "product-section-content") {
+                                +desc
+                            }
+                        }
+                    }
+
+                    // Specs
+                    product.specs?.let { specs ->
+                        hr(classes = "product-divider") {}
+                        div(classes = "product-section") {
+                            h2(classes = "product-section-title") {
+                                +(strings["specifications"] ?: "Specifications")
+                            }
+                            p(classes = "product-section-content") {
+                                +specs
+                            }
                         }
                     }
                 }
-            }
         }
 
         // Footer
@@ -186,6 +240,9 @@ fun HTML.productDetailPage(
         // ===== HYDRATOR SCRIPT =====
         script(src = "/static/js/universal-hydrator.js") {}
         script(src = "/static/js/view-transitions.js") {}
+
+        // ===== CAROUSEL (arrow nav + dot sync) =====
+        script(src = "/static/js/carousel.js") {}
 
         // ===== HEADER SCROLL BEHAVIOR (Desktop only) =====
         script(src = "/static/js/header-scroll.js") {}

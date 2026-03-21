@@ -9,14 +9,19 @@ import org.example.fakeshop_clients.features.search.presentation.SearchState
 import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
 import org.example.fakeshop_clients.features.search.presentation.hooks.useScrollOffset
 import react.FC
+import react.Fragment
 import react.Props
+import react.create
+import react.dom.createPortal
 import react.dom.html.ReactHTML.div
 import react.useEffect
 import react.useEffectWithCleanup
 import react.useRef
 import react.useState
 import web.cssom.ClassName
+import web.dom.document
 import web.html.HTMLDivElement
+import web.html.HTMLElement
 
 external interface SearchBarProps : Props {
     var viewModel: SearchViewModel
@@ -64,14 +69,41 @@ val SearchBar = FC<SearchBarProps> { props ->
         }
     }
 
+    // Raise header z-index on desktop when search is active so it appears above the backdrop
+    // Also dismiss search on scroll
+    useEffectWithCleanup(searchState.isActive, isDesktop) {
+        if (isDesktop) {
+            val header = document.querySelector(".header") as? HTMLElement
+            if (searchState.isActive) {
+                header?.style?.zIndex = "var(--z-index-modal)"
+            } else {
+                header?.style?.zIndex = ""
+            }
+        }
+
+        val scrollListener: (dynamic) -> Unit = {
+            if (searchState.isActive) {
+                props.viewModel.onEvent(SearchEvent.CancelClicked)
+            }
+        }
+
+        if (searchState.isActive) {
+            kotlinx.browser.window.addEventListener("scroll", scrollListener)
+        }
+
+        onCleanup {
+            kotlinx.browser.window.removeEventListener("scroll", scrollListener)
+        }
+    }
+
     // Show shadow based on behavior (only on mobile with STATIC behavior)
     val showShadow = !isDesktop && props.behavior == SearchBarBehavior.STATIC
 
-    // Build class name based on behavior
-    val containerClass = if (props.behavior == SearchBarBehavior.HIDDEN) {
-        "search-bar-container search-bar-hidden"
-    } else {
-        "search-bar-container"
+    // Build class name based on behavior and active state
+    val containerClass = buildString {
+        append("search-bar-container")
+        if (props.behavior == SearchBarBehavior.HIDDEN) append(" search-bar-hidden")
+        if (searchState.isActive) append(" search-bar-active")
     }
 
     div {
@@ -91,20 +123,36 @@ val SearchBar = FC<SearchBarProps> { props ->
         }
     }
 
-    // Backdrop when active (rendered as sibling to container)
+    // Backdrop and results overlay when active
+    // On desktop, render via portal to escape the header's stacking context
+    // (header has will-change: transform which traps position: fixed children)
     if (searchState.isActive && props.behavior != SearchBarBehavior.HIDDEN) {
-        div {
+        if (isDesktop) {
+            // Portal to escape the header's stacking context
+            +createPortal(
+                Fragment.create {
+                    SearchBackdrop {
+                        this.onClick = {
+                            props.viewModel.onEvent(SearchEvent.CancelClicked)
+                        }
+                    }
+                    SearchResultsOverlay {
+                        this.results = searchState.results
+                        this.isLoading = searchState.isLoading
+                        this.onResultClick = { result ->
+                            props.onNavigateToProduct(result.productId)
+                            props.viewModel.onEvent(SearchEvent.CancelClicked)
+                        }
+                    }
+                },
+                document.body
+            )
+        } else {
             SearchBackdrop {
                 this.onClick = {
                     props.viewModel.onEvent(SearchEvent.CancelClicked)
                 }
             }
-        }
-    }
-
-    // Results overlay when active (rendered as sibling to container)
-    if (searchState.isActive && props.behavior != SearchBarBehavior.HIDDEN) {
-        div {
             SearchResultsOverlay {
                 this.results = searchState.results
                 this.isLoading = searchState.isLoading

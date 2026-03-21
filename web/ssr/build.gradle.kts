@@ -16,6 +16,12 @@ application {
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+
+    // Default BACKEND_BASE_URL for local development
+    val backendUrl = findProperty("backendBaseUrl")?.toString() ?: "http://localhost:8080"
+    tasks.named<JavaExec>("run") {
+        environment("BACKEND_BASE_URL", backendUrl)
+    }
 }
 
 dependencies {

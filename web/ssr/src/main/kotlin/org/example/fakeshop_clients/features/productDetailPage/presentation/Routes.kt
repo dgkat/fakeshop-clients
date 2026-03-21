@@ -10,7 +10,8 @@ import kotlinx.html.FlowContent
 import kotlinx.html.body
 import kotlinx.html.button
 import kotlinx.html.id
-import kotlinx.html.span
+import org.example.fakeshop_clients.core.design.IconPaths
+import org.example.fakeshop_clients.core.ui.svgIcon
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.extensions.extractCookies
 import org.example.fakeshop_clients.core.i18n.WebStrings
@@ -90,7 +91,7 @@ fun Route.productApiRoutes() {
 }
 
 fun FlowContent.likeButton(productId: String, isLiked: Boolean) {
-    button(classes = "btn btn-like ${if (isLiked) "liked" else ""}") {
+    button(classes = "btn-like-circle ${if (isLiked) "liked" else ""}") {
         id = "like-button"
 
         // HTMX attributes
@@ -98,11 +99,6 @@ fun FlowContent.likeButton(productId: String, isLiked: Boolean) {
         attributes["hx-swap"] = "outerHTML"
         attributes["hx-target"] = "#like-button"
 
-        span(classes = "like-icon") {
-            if (isLiked) +"❤️" else +"🤍"
-        }
-        span(classes = "like-text") {
-            +if (isLiked) "Liked" else "Like"
-        }
+        svgIcon(pathData = IconPaths.HEART, cssClass = "like-icon")
     }
 }
