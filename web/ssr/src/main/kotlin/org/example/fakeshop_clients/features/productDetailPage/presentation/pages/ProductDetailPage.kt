@@ -133,24 +133,40 @@ fun HTML.productDetailPage(
                 div(classes = "product-detail") {
                     // Top section: image + basic info (side-by-side on desktop)
                     div(classes = "product-detail-top") {
-                        // Product Image Section with like button overlay
+                        // Product Image Section with carousel and like button overlay
                         div(classes = "product-image-section") {
-                            img(src = product.imageUrl, alt = product.name, classes = "product-image")
-
                             // Like button overlay
                             likeButton(productId = product.id, isLiked = product.isLiked)
 
-                            // Gallery thumbnails
-                            if (!product.galleryUrls.isNullOrEmpty()) {
-                                div(classes = "product-gallery") {
-                                    product.galleryUrls.forEach { galleryUrl ->
-                                        img(src = galleryUrl, alt = product.name, classes = "product-gallery-thumbnail")
+                            // Carousel: main image + gallery images
+                            val allImages = listOf(product.imageUrl) + (product.galleryUrls ?: emptyList())
+                            div(classes = "carousel-track") {
+                                allImages.forEach { url ->
+                                    img(src = url, alt = product.name, classes = "carousel-slide")
+                                }
+                            }
+
+                            // Arrow buttons (visible on desktop only via CSS)
+                            if (allImages.size > 1) {
+                                button(classes = "carousel-arrow carousel-arrow-prev") {
+                                    attributes["aria-label"] = "Previous image"
+                                    unsafe { +"&#8249;" }
+                                }
+                                button(classes = "carousel-arrow carousel-arrow-next") {
+                                    attributes["aria-label"] = "Next image"
+                                    unsafe { +"&#8250;" }
+                                }
+
+                                // Dot indicators
+                                div(classes = "carousel-dots") {
+                                    allImages.forEachIndexed { index, _ ->
+                                        span(classes = if (index == 0) "carousel-dot active" else "carousel-dot")
                                     }
                                 }
                             }
                         }
 
-                        // Product Info (category, name, price)
+                        // Product Info (category, name, price, description)
                         div(classes = "product-info-section") {
                             span(classes = "product-category") {
                                 +product.category
@@ -163,13 +179,25 @@ fun HTML.productDetailPage(
                             p(classes = "product-price") {
                                 +"$${String.format("%.2f", product.price)}"
                             }
+
+                            // Description (inline - visible on desktop, hidden on mobile via CSS)
+                            product.description?.let { desc ->
+                                div(classes = "product-section product-section-inline") {
+                                    h2(classes = "product-section-title") {
+                                        +(strings["description"] ?: "Description")
+                                    }
+                                    p(classes = "product-section-content") {
+                                        +desc
+                                    }
+                                }
+                            }
                         }
                     }
 
-                    // Description
+                    // Description (standalone - visible on mobile, hidden on desktop via CSS)
                     product.description?.let { desc ->
-                        hr(classes = "product-divider") {}
-                        div(classes = "product-section") {
+                        hr(classes = "product-divider product-divider-mobile") {}
+                        div(classes = "product-section product-section-standalone") {
                             h2(classes = "product-section-title") {
                                 +(strings["description"] ?: "Description")
                             }
@@ -212,6 +240,9 @@ fun HTML.productDetailPage(
         // ===== HYDRATOR SCRIPT =====
         script(src = "/static/js/universal-hydrator.js") {}
         script(src = "/static/js/view-transitions.js") {}
+
+        // ===== CAROUSEL (arrow nav + dot sync) =====
+        script(src = "/static/js/carousel.js") {}
 
         // ===== HEADER SCROLL BEHAVIOR (Desktop only) =====
         script(src = "/static/js/header-scroll.js") {}
