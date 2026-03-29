@@ -8,7 +8,7 @@
     /* ===== Color Palette ===== */
     --color-primary: #555992;
     --color-primary-dark: #3B4083;
-    --color-primary-light: #E0E0FF;
+    --color-primary-light: #BEC2FF;
     --color-on-primary: #FFFFFF;
     --color-primary-container: #E0E0FF;
     --color-on-primary-container: #3E4278;
@@ -53,8 +53,8 @@
     --color-inverse-primary: #BEC2FF;
     --color-scrim: #000000;
     --color-shadow: #000000;
-    --color-disabled-background: #E0E0E0;
-    --color-disabled-content: #9E9E9E;
+    --color-disabled-background: #E4E1E9;
+    --color-disabled-content: #78767A;
 
     /* ===== Typography ===== */
     --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
@@ -182,8 +182,8 @@
         --color-inverse-primary: #555992;
         --color-scrim: #000000;
         --color-shadow: #000000;
-        --color-disabled-background: #424242;
-        --color-disabled-content: #757575;
+        --color-disabled-background: #313033;
+        --color-disabled-content: #78767A;
 
         --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
         --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);

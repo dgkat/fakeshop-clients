@@ -11,50 +11,50 @@ val Typography = Typography(
     displayLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = Typo.DisplayLarge.sp,
-        lineHeight = Typo.DisplayLargeLineHeight.sp,
+        fontSize = Typo.DISPLAY_LARGE.sp,
+        lineHeight = Typo.DISPLAY_LARGE_LINE_HEIGHT.sp,
         letterSpacing = 0.sp
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = Typo.HeadlineMedium.sp,
-        lineHeight = Typo.HeadlineMediumLineHeight.sp,
+        fontSize = Typo.HEADLINE_MEDIUM.sp,
+        lineHeight = Typo.HEADLINE_MEDIUM_LINE_HEIGHT.sp,
         letterSpacing = 0.sp
     ),
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = Typo.TitleLarge.sp,
-        lineHeight = Typo.TitleLargeLineHeight.sp,
+        fontSize = Typo.TITLE_LARGE.sp,
+        lineHeight = Typo.TITLE_LARGE_LINE_HEIGHT.sp,
         letterSpacing = 0.sp
     ),
     titleMedium = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight(Typo.WeightMedium),
-        fontSize = Typo.TitleMedium.sp,
-        lineHeight = Typo.TitleMediumLineHeight.sp,
-        letterSpacing = Typo.TitleMediumLetterSpacing.sp
+        fontWeight = FontWeight(Typo.WEIGHT_MEDIUM),
+        fontSize = Typo.TITLE_MEDIUM.sp,
+        lineHeight = Typo.TITLE_MEDIUM_LINE_HEIGHT.sp,
+        letterSpacing = Typo.TITLE_MEDIUM_LETTER_SPACING.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = Typo.BodyLarge.sp,
-        lineHeight = Typo.BodyLargeLineHeight.sp,
-        letterSpacing = Typo.BodyLargeLetterSpacing.sp
+        fontSize = Typo.BODY_LARGE.sp,
+        lineHeight = Typo.BODY_LARGE_LINE_HEIGHT.sp,
+        letterSpacing = Typo.BODY_LARGE_LETTER_SPACING.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = Typo.BodyMedium.sp,
-        lineHeight = Typo.BodyMediumLineHeight.sp,
-        letterSpacing = Typo.BodyMediumLetterSpacing.sp
+        fontSize = Typo.BODY_MEDIUM.sp,
+        lineHeight = Typo.BODY_MEDIUM_LINE_HEIGHT.sp,
+        letterSpacing = Typo.BODY_MEDIUM_LETTER_SPACING.sp
     ),
     labelSmall = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight(Typo.WeightMedium),
-        fontSize = Typo.LabelSmall.sp,
-        lineHeight = Typo.LabelSmallLineHeight.sp,
-        letterSpacing = Typo.LabelSmallLetterSpacing.sp
+        fontWeight = FontWeight(Typo.WEIGHT_MEDIUM),
+        fontSize = Typo.LABEL_SMALL.sp,
+        lineHeight = Typo.LABEL_SMALL_LINE_HEIGHT.sp,
+        letterSpacing = Typo.LABEL_SMALL_LETTER_SPACING.sp
     )
 )

@@ -440,25 +440,31 @@ val generateIosColors by tasks.registering {
             addAll(darkColors.keys)
         }
 
-        // Convert PascalCase to camelCase
+        // Convert SCREAMING_SNAKE_CASE to camelCase
         fun toCamelCase(name: String): String {
-            return name[0].lowercase() + name.substring(1)
+            return name.split("_").mapIndexed { index, part ->
+                if (index == 0) part.lowercase()
+                else part.lowercase().replaceFirstChar { it.uppercase() }
+            }.joinToString("")
         }
 
         // Detect comment group headers from the source
         fun detectGroup(name: String): String? {
             // Map color names to their group based on prefix patterns
             return when {
-                name.startsWith("Primary") || name == "OnPrimary" || name.startsWith("OnPrimary") -> "Primary"
-                name.startsWith("Secondary") || name == "OnSecondary" || name.startsWith("OnSecondary") -> "Secondary"
-                name.startsWith("Surface") || name.startsWith("OnSurface") -> "Surface"
-                name.startsWith("Background") || name.startsWith("OnBackground") -> "Background"
-                name.startsWith("Error") || name.startsWith("OnError") -> "Error"
-                name.startsWith("Success") -> "Success"
-                name.startsWith("Warning") -> "Warning / Rating"
-                name.startsWith("Favorite") -> "Favorite / Like"
-                name.startsWith("Outline") -> "Outline"
-                name.startsWith("Disabled") -> "Disabled"
+                name.startsWith("PRIMARY") || name.startsWith("ON_PRIMARY") -> "Primary"
+                name.startsWith("SECONDARY") || name.startsWith("ON_SECONDARY") -> "Secondary"
+                name.startsWith("TERTIARY") || name.startsWith("ON_TERTIARY") -> "Tertiary"
+                name.startsWith("SURFACE") || name.startsWith("ON_SURFACE") -> "Surface"
+                name.startsWith("BACKGROUND") || name.startsWith("ON_BACKGROUND") -> "Background"
+                name.startsWith("ERROR") || name.startsWith("ON_ERROR") -> "Error"
+                name.startsWith("SUCCESS") -> "Success"
+                name.startsWith("WARNING") -> "Warning / Rating"
+                name.startsWith("FAVORITE") -> "Favorite / Like"
+                name.startsWith("OUTLINE") -> "Outline"
+                name.startsWith("INVERSE") -> "Inverse"
+                name.startsWith("SCRIM") || name.startsWith("SHADOW") -> "Scrim & Shadow"
+                name.startsWith("DISABLED") -> "Disabled"
                 else -> null
             }
         }
