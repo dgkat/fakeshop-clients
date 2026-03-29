@@ -14,36 +14,50 @@ object DesignTokens {
     object Colors {
         object Light {
             // Primary
-            const val Primary = 0xFF6750A4L
-            const val PrimaryDark = 0xFF4F378BL
-            const val PrimaryLight = 0xFFD0BCFFL
+            const val Primary = 0xFF555992L
+            const val PrimaryDark = 0xFF3B4083L
+            const val PrimaryLight = 0xFFE0E0FFL
             const val OnPrimary = 0xFFFFFFFFL
-            const val PrimaryContainer = 0xFFEADDFFL
-            const val OnPrimaryContainer = 0xFF21005DL
+            const val PrimaryContainer = 0xFFE0E0FFL
+            const val OnPrimaryContainer = 0xFF3E4278L
 
             // Secondary
-            const val Secondary = 0xFF625B71L
-            const val SecondaryDark = 0xFF4A4458L
-            const val SecondaryLight = 0xFFCCC2DCL
+            const val Secondary = 0xFF5C5D72L
+            const val SecondaryDark = 0xFF454556L
+            const val SecondaryLight = 0xFFE2E0F6L
             const val OnSecondary = 0xFFFFFFFFL
-            const val SecondaryContainer = 0xFFE8DEF8L
-            const val OnSecondaryContainer = 0xFF1D192BL
+            const val SecondaryContainer = 0xFFE1E0F9L
+            const val OnSecondaryContainer = 0xFF444559L
+
+            // Tertiary
+            const val Tertiary = 0xFF845416L
+            const val OnTertiary = 0xFFFFFFFFL
+            const val TertiaryContainer = 0xFFFFDCBBL
+            const val OnTertiaryContainer = 0xFF673D00L
 
             // Surface
-            const val Surface = 0xFFFFFFFFL
-            const val SurfaceVariant = 0xFFE7E0ECL
-            const val OnSurface = 0xFF1C1B1FL
-            const val OnSurfaceVariant = 0xFF49454FL
+            const val Surface = 0xFFFBF8FFL
+            const val SurfaceTint = 0xFF555992L
+            const val SurfaceVariant = 0xFFE4E1ECL
+            const val OnSurface = 0xFF1B1B21L
+            const val OnSurfaceVariant = 0xFF46464FL
+            const val SurfaceDim = 0xFFDBD9E0L
+            const val SurfaceBright = 0xFFFBF8FFL
+            const val SurfaceContainerLowest = 0xFFFFFFFFL
+            const val SurfaceContainerLow = 0xFFF5F2FAL
+            const val SurfaceContainer = 0xFFF0ECF4L
+            const val SurfaceContainerHigh = 0xFFEAE7EFL
+            const val SurfaceContainerHighest = 0xFFE4E1E9L
 
             // Background
-            const val Background = 0xFFFFFBFEL
-            const val OnBackground = 0xFF1C1B1FL
+            const val Background = 0xFFFBF8FFL
+            const val OnBackground = 0xFF1B1B21L
 
             // Error
-            const val Error = 0xFFB3261EL
+            const val Error = 0xFFBA1A1AL
             const val OnError = 0xFFFFFFFFL
-            const val ErrorContainer = 0xFFF9DEDCL
-            const val OnErrorContainer = 0xFF410E0BL
+            const val ErrorContainer = 0xFFFFDAD6L
+            const val OnErrorContainer = 0xFF93000AL
 
             // Success
             const val Success = 0xFF2E7D32L
@@ -58,8 +72,17 @@ object DesignTokens {
             const val FavoriteContainer = 0xFFFFE8E8L
 
             // Outline
-            const val Outline = 0xFF79747EL
-            const val OutlineVariant = 0xFFCAC4D0L
+            const val Outline = 0xFF777680L
+            const val OutlineVariant = 0xFFC7C5D0L
+
+            // Inverse
+            const val InverseSurface = 0xFF303036L
+            const val InverseOnSurface = 0xFFF2EFF7L
+            const val InversePrimary = 0xFFBEC2FFL
+
+            // Scrim & Shadow
+            const val Scrim = 0xFF000000L
+            const val Shadow = 0xFF000000L
 
             // Disabled
             const val DisabledBackground = 0xFFE0E0E0L
@@ -68,36 +91,50 @@ object DesignTokens {
 
         object Dark {
             // Primary
-            const val Primary = 0xFFD0BCFFL
-            const val PrimaryDark = 0xFFEADDFFL
-            const val PrimaryLight = 0xFF4F378BL
-            const val OnPrimary = 0xFF381E72L
-            const val PrimaryContainer = 0xFF4F378BL
-            const val OnPrimaryContainer = 0xFFEADDFFL
+            const val Primary = 0xFFBEC2FFL
+            const val PrimaryDark = 0xFFE0E0FFL
+            const val PrimaryLight = 0xFF3B4083L
+            const val OnPrimary = 0xFF272B60L
+            const val PrimaryContainer = 0xFF3E4278L
+            const val OnPrimaryContainer = 0xFFE0E0FFL
 
             // Secondary
-            const val Secondary = 0xFFCCC2DCL
-            const val SecondaryDark = 0xFFE8DEF8L
-            const val SecondaryLight = 0xFF4A4458L
-            const val OnSecondary = 0xFF332D41L
-            const val SecondaryContainer = 0xFF4A4458L
-            const val OnSecondaryContainer = 0xFFE8DEF8L
+            const val Secondary = 0xFFC5C4DDL
+            const val SecondaryDark = 0xFFE2E0F6L
+            const val SecondaryLight = 0xFF454556L
+            const val OnSecondary = 0xFF2E2F42L
+            const val SecondaryContainer = 0xFF444559L
+            const val OnSecondaryContainer = 0xFFE1E0F9L
+
+            // Tertiary
+            const val Tertiary = 0xFFFBBA73L
+            const val OnTertiary = 0xFF482900L
+            const val TertiaryContainer = 0xFF673D00L
+            const val OnTertiaryContainer = 0xFFFFDCBBL
 
             // Surface
-            const val Surface = 0xFF1C1B1FL
-            const val SurfaceVariant = 0xFF49454FL
-            const val OnSurface = 0xFFE6E1E5L
-            const val OnSurfaceVariant = 0xFFCAC4D0L
+            const val Surface = 0xFF131318L
+            const val SurfaceTint = 0xFFBEC2FFL
+            const val SurfaceVariant = 0xFF46464FL
+            const val OnSurface = 0xFFE4E1E9L
+            const val OnSurfaceVariant = 0xFFC7C5D0L
+            const val SurfaceDim = 0xFF131318L
+            const val SurfaceBright = 0xFF39393FL
+            const val SurfaceContainerLowest = 0xFF0E0E13L
+            const val SurfaceContainerLow = 0xFF1B1B21L
+            const val SurfaceContainer = 0xFF1F1F25L
+            const val SurfaceContainerHigh = 0xFF2A292FL
+            const val SurfaceContainerHighest = 0xFF34343AL
 
             // Background
-            const val Background = 0xFF1C1B1FL
-            const val OnBackground = 0xFFE6E1E5L
+            const val Background = 0xFF131318L
+            const val OnBackground = 0xFFE4E1E9L
 
             // Error
-            const val Error = 0xFFCF6679L
-            const val OnError = 0xFF000000L
+            const val Error = 0xFFFFB4ABL
+            const val OnError = 0xFF690005L
             const val ErrorContainer = 0xFF93000AL
-            const val OnErrorContainer = 0xFFF9DEDCL
+            const val OnErrorContainer = 0xFFFFDAD6L
 
             // Success
             const val Success = 0xFF81C784L
@@ -112,8 +149,17 @@ object DesignTokens {
             const val FavoriteContainer = 0xFF5C1A1AL
 
             // Outline
-            const val Outline = 0xFF938F99L
-            const val OutlineVariant = 0xFF49454FL
+            const val Outline = 0xFF91909AL
+            const val OutlineVariant = 0xFF46464FL
+
+            // Inverse
+            const val InverseSurface = 0xFFE4E1E9L
+            const val InverseOnSurface = 0xFF303036L
+            const val InversePrimary = 0xFF555992L
+
+            // Scrim & Shadow
+            const val Scrim = 0xFF000000L
+            const val Shadow = 0xFF000000L
 
             // Disabled
             const val DisabledBackground = 0xFF424242L
