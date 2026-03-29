@@ -16,7 +16,7 @@ object DesignTokens {
             // Primary
             const val Primary = 0xFF555992L
             const val PrimaryDark = 0xFF3B4083L
-            const val PrimaryLight = 0xFFE0E0FFL
+            const val PrimaryLight = 0xFFBEC2FFL
             const val OnPrimary = 0xFFFFFFFFL
             const val PrimaryContainer = 0xFFE0E0FFL
             const val OnPrimaryContainer = 0xFF3E4278L
@@ -85,8 +85,8 @@ object DesignTokens {
             const val Shadow = 0xFF000000L
 
             // Disabled
-            const val DisabledBackground = 0xFFE0E0E0L
-            const val DisabledContent = 0xFF9E9E9EL
+            const val DisabledBackground = 0xFFE4E1E9L
+            const val DisabledContent = 0xFF78767AL
         }
 
         object Dark {
@@ -162,8 +162,8 @@ object DesignTokens {
             const val Shadow = 0xFF000000L
 
             // Disabled
-            const val DisabledBackground = 0xFF424242L
-            const val DisabledContent = 0xFF757575L
+            const val DisabledBackground = 0xFF313033L
+            const val DisabledContent = 0xFF78767AL
         }
     }
 
