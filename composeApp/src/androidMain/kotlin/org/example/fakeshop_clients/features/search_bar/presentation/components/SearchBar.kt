@@ -93,7 +93,7 @@ fun SearchBarOverlay(
                     elevation = if (showShadow) 4.dp else 0.dp,
                     shape = RoundedCornerShape(0.dp)
                 ),
-            color = MaterialTheme.colorScheme.background,
+            color = MaterialTheme.colorScheme.surfaceContainer,
             tonalElevation = if (showShadow) 2.dp else 0.dp
         ) {
             SearchBarContent(

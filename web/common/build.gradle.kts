@@ -59,7 +59,7 @@ val generateThemeCss by tasks.registering {
                     val name = match.groupValues[1]
                     val hex = match.groupValues[2]
                     val cssHex = if (hex.length == 8) hex.substring(2) else hex
-                    val cssName = name.replace(Regex("([a-z])([A-Z])"), "$1-$2").lowercase()
+                    val cssName = name.replace("_", "-").lowercase()
                     put(cssName, "#$cssHex")
                 }
             }
@@ -88,7 +88,7 @@ val generateThemeCss by tasks.registering {
         val spacingInts = parseIntConsts("Spacing")
         val radiusInts = parseIntConsts("BorderRadius")
 
-        fun camelToKebab(s: String) = s.replace(Regex("([a-z])([A-Z])"), "$1-$2").lowercase()
+        fun toKebab(s: String) = s.replace("_", "-").lowercase()
 
         // --- Build CSS ---
         val css = buildString {
@@ -109,32 +109,32 @@ val generateThemeCss by tasks.registering {
 
             // Typography
             appendLine("    /* ===== Typography ===== */")
-            typoStrings["WebFontFamily"]?.let { font ->
+            typoStrings["WEB_FONT_FAMILY"]?.let { font ->
                 appendLine("    --font-family-base: $font;")
             }
             appendLine()
 
             appendLine("    /* Font Sizes */")
             val fontSizeKeys = listOf(
-                "DisplayLarge", "DisplayMedium", "DisplaySmall",
-                "HeadlineLarge", "HeadlineMedium", "HeadlineSmall",
-                "TitleLarge", "TitleMedium", "TitleSmall",
-                "BodyLarge", "BodyMedium", "BodySmall",
-                "LabelLarge", "LabelMedium", "LabelSmall"
+                "DISPLAY_LARGE", "DISPLAY_MEDIUM", "DISPLAY_SMALL",
+                "HEADLINE_LARGE", "HEADLINE_MEDIUM", "HEADLINE_SMALL",
+                "TITLE_LARGE", "TITLE_MEDIUM", "TITLE_SMALL",
+                "BODY_LARGE", "BODY_MEDIUM", "BODY_SMALL",
+                "LABEL_LARGE", "LABEL_MEDIUM", "LABEL_SMALL"
             )
             fontSizeKeys.forEach { key ->
                 typoInts[key]?.let { size ->
-                    appendLine("    --font-size-${camelToKebab(key)}: ${size}px;")
+                    appendLine("    --font-size-${toKebab(key)}: ${size}px;")
                 }
             }
             appendLine()
 
             appendLine("    /* Font Weights */")
             val fontWeightMap = mapOf(
-                "WeightRegular" to "regular",
-                "WeightMedium" to "medium",
-                "WeightSemiBold" to "semibold",
-                "WeightBold" to "bold"
+                "WEIGHT_REGULAR" to "regular",
+                "WEIGHT_MEDIUM" to "medium",
+                "WEIGHT_SEMI_BOLD" to "semibold",
+                "WEIGHT_BOLD" to "bold"
             )
             fontWeightMap.forEach { (key, cssName) ->
                 typoInts[key]?.let { weight ->

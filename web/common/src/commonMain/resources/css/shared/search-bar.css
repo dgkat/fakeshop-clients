@@ -10,7 +10,7 @@
     left: 0;
     right: 0;
     z-index: var(--z-index-fixed);
-    background-color: var(--color-background);
+    background-color: var(--color-surface-container);
     transition: transform 0.3s ease-in-out, box-shadow var(--transition-base);
     will-change: transform; /* Performance optimization for GPU acceleration */
 }
