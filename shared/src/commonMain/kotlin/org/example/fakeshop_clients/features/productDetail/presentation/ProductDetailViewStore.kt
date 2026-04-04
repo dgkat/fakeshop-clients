@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.features.productDetail.presentation
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,16 +39,16 @@ class ProductDetailViewStore(
         _state.update {
             it.copy(
                 briefState = BriefProductState.Loading,
-                detailedState = DetailedProductState.Loading,
-                isFavorited = false,
-                isFavoriteLoading = false
+                detailedState = DetailedProductState.Loading
             )
         }
 
         scope.launch {
-            loadBriefProduct(productId)
-            loadDetailedProduct(productId)
-            checkFavoriteStatus(productId)
+            coroutineScope {
+                launch { loadBriefProduct(productId) }
+                launch { loadDetailedProduct(productId) }
+                launch { checkFavoriteStatus(productId) }
+            }
         }
     }
 

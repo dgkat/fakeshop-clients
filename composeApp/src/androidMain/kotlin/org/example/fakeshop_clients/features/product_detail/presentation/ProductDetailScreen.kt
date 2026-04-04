@@ -48,6 +48,9 @@ fun ProductDetailScreen(
             ProductContent(
                 briefProduct = briefState.product,
                 detailedState = state.detailedState,
+                isFavorited = state.isFavorited,
+                isFavoriteLoading = state.isFavoriteLoading,
+                onToggleFavorite = { viewModel.onEvent(ProductDetailEvent.ToggleFavorite) },
                 scrollState = scrollState,
                 contentPadding = contentPadding,
                 modifier = Modifier
