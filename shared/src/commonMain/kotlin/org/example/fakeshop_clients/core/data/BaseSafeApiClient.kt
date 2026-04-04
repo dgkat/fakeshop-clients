@@ -52,3 +52,21 @@ suspend inline fun <reified T : Any> BaseSafeApiClient.delete(path: String): Res
         Result.Error(exceptionMapper.map(e))
     }
 }
+
+suspend inline fun <reified B : Any> BaseSafeApiClient.postNoContent(path: String, body: B): Result<Unit, NetworkError> {
+    return try {
+        client.postNoContent(path, body)
+        Result.Success(Unit)
+    } catch (e: Exception) {
+        Result.Error(exceptionMapper.map(e))
+    }
+}
+
+suspend fun BaseSafeApiClient.deleteNoContent(path: String): Result<Unit, NetworkError> {
+    return try {
+        client.deleteNoContent(path)
+        Result.Success(Unit)
+    } catch (e: Exception) {
+        Result.Error(exceptionMapper.map(e))
+    }
+}

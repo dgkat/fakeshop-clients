@@ -167,6 +167,19 @@ class AxiosClient(
     }
 
     @OptIn(InternalSerializationApi::class)
+    override suspend fun <B : Any> postNoContent(path: String, body: B, bodyType: KClass<B>) {
+        @Suppress("UNCHECKED_CAST")
+        val bodySerializer = bodyType.serializer() as SerializationStrategy<B>
+        val bodyJson = jsonParser.encodeToString(bodySerializer, body)
+        val bodyObject = JSON.parse<dynamic>(bodyJson)
+        axios.post("$baseUrl$path", bodyObject).await()
+    }
+
+    override suspend fun deleteNoContent(path: String) {
+        axios.delete("$baseUrl$path").await()
+    }
+
+    @OptIn(InternalSerializationApi::class)
     private fun <T : Any> parseResponse(data: dynamic, responseType: KClass<T>): T {
         val jsonString = JSON.stringify(data)
         return jsonParser.decodeFromString(responseType.serializer(), jsonString)

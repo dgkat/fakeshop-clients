@@ -5,7 +5,8 @@ import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 data class ProductListState(
     val categories: List<UiCategoryRow> = emptyList(),
     val isLoading: Boolean = true,
-    val error: HomeError? = null
+    val error: HomeError? = null,
+    val favoritedProductIds: Set<String> = emptySet()
 )
 
 data class UiCategoryRow(

@@ -3,10 +3,12 @@ package org.example.fakeshop_clients.di
 import kotlinx.coroutines.CoroutineScope
 import org.example.fakeshop_clients.core.auth.di.mobileInfrastructureModule
 import org.example.fakeshop_clients.core.di.iosInfrastructureModule
+import org.example.fakeshop_clients.features.favorites.di.favoritesModule
 import org.example.fakeshop_clients.features.home.di.homeModule
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListViewStore
 import org.example.fakeshop_clients.features.productDetail.di.productDetailModule
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailViewStore
+import org.example.fakeshop_clients.features.recents.di.recentsModule
 import org.example.fakeshop_clients.features.search.di.searchModule
 import org.example.fakeshop_clients.features.search.presentation.SearchViewStore
 import org.koin.core.component.KoinComponent
@@ -20,6 +22,7 @@ val iosModule = module {
         ProductListViewStore(
             scope = scope,
             productListService = get(),
+            favoritesService = get(),
             mapper = get()
         )
     }
@@ -35,6 +38,7 @@ val iosModule = module {
         ProductDetailViewStore(
             scope = scope,
             productDetailService = get(),
+            favoritesService = get(),
             briefProductMapper = get(),
             detailedProductMapper = get()
         )
@@ -48,6 +52,8 @@ fun initKoinIos(baseUrl: String) = startKoin {
         homeModule,
         searchModule,
         productDetailModule,
+        favoritesModule,
+        recentsModule,
         iosModule
     )
 }

@@ -4,14 +4,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.error_handling.fold
+import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.home.domain.ProductListService
 import org.example.fakeshop_clients.features.home.domain.mappers.DomainToPresentationBriefProductMapper
 
 class ProductListViewStore(
     private val scope: CoroutineScope,
     private val productListService: ProductListService,
+    private val favoritesService: FavoritesService,
     private val mapper: DomainToPresentationBriefProductMapper
 ) {
     private val _productListState = MutableStateFlow(ProductListState(isLoading = true))
@@ -55,5 +59,45 @@ class ProductListViewStore(
         }
 
         _productListState.value = _productListState.value.copy(isLoading = false)
+        checkBulkFavorites()
+    }
+
+    private suspend fun checkBulkFavorites() {
+        val allProductIds = _productListState.value.categories
+            .flatMap { it.products }
+            .map { it.id }
+
+        if (allProductIds.isEmpty()) return
+
+        favoritesService.checkBulkFavorites(allProductIds).fold(
+            onSuccess = { favoritedIds ->
+                _productListState.update { it.copy(favoritedProductIds = favoritedIds) }
+            },
+            onError = { }
+        )
+    }
+
+    fun toggleFavorite(productId: String) {
+        val currentlyFavorited = productId in _productListState.value.favoritedProductIds
+        val updatedIds = if (currentlyFavorited) {
+            _productListState.value.favoritedProductIds - productId
+        } else {
+            _productListState.value.favoritedProductIds + productId
+        }
+        _productListState.update { it.copy(favoritedProductIds = updatedIds) }
+
+        scope.launch {
+            favoritesService.toggleFavorite(productId, currentlyFavorited).fold(
+                onSuccess = { },
+                onError = {
+                    _productListState.update {
+                        it.copy(favoritedProductIds = it.favoritedProductIds.let { ids ->
+                            if (currentlyFavorited) ids + productId else ids - productId
+                        })
+                    }
+                    checkBulkFavorites()
+                }
+            )
+        }
     }
 }

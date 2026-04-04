@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.error_handling.fold
+import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailService
 import org.example.fakeshop_clients.features.productDetail.domain.mappers.DomainToPresentationBriefProductMapper
 import org.example.fakeshop_clients.features.productDetail.domain.mappers.DomainToPresentationDetailedProductMapper
@@ -14,6 +15,7 @@ import org.example.fakeshop_clients.features.productDetail.domain.mappers.Domain
 class ProductDetailViewStore(
     private val scope: CoroutineScope,
     private val productDetailService: ProductDetailService,
+    private val favoritesService: FavoritesService,
     private val briefProductMapper: DomainToPresentationBriefProductMapper,
     private val detailedProductMapper: DomainToPresentationDetailedProductMapper
 ) {
@@ -27,6 +29,7 @@ class ProductDetailViewStore(
         when (event) {
             is ProductDetailEvent.LoadProduct -> loadProduct(event.productId)
             ProductDetailEvent.Retry -> retry()
+            ProductDetailEvent.ToggleFavorite -> toggleFavorite()
         }
     }
 
@@ -35,13 +38,16 @@ class ProductDetailViewStore(
         _state.update {
             it.copy(
                 briefState = BriefProductState.Loading,
-                detailedState = DetailedProductState.Loading
+                detailedState = DetailedProductState.Loading,
+                isFavorited = false,
+                isFavoriteLoading = false
             )
         }
 
         scope.launch {
             loadBriefProduct(productId)
             loadDetailedProduct(productId)
+            checkFavoriteStatus(productId)
         }
     }
 
@@ -89,6 +95,31 @@ class ProductDetailViewStore(
                 }
             }
         )
+    }
+
+    private suspend fun checkFavoriteStatus(productId: String) {
+        favoritesService.checkFavorite(productId).fold(
+            onSuccess = { isFavorited ->
+                _state.update { it.copy(isFavorited = isFavorited) }
+            },
+            onError = { }
+        )
+    }
+
+    private fun toggleFavorite() {
+        val currentlyFavorited = _state.value.isFavorited
+        _state.update { it.copy(isFavorited = !currentlyFavorited, isFavoriteLoading = true) }
+
+        scope.launch {
+            favoritesService.toggleFavorite(currentProductId ?: return@launch, currentlyFavorited).fold(
+                onSuccess = {
+                    _state.update { it.copy(isFavoriteLoading = false) }
+                },
+                onError = {
+                    _state.update { it.copy(isFavorited = currentlyFavorited, isFavoriteLoading = false) }
+                }
+            )
+        }
     }
 
     private fun retry() {

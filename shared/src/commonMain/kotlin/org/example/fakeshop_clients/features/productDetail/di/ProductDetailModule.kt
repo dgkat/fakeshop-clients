@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.features.productDetail.di
 
+import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailDatasource
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailDatasourceImpl
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailRepositoryImpl

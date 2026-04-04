@@ -50,4 +50,16 @@ class KtorClient(val http: HttpClient) : ApiClient {
         val response = http.delete(path)
         return response.body(TypeInfo(responseType)) as T
     }
+
+    override suspend fun <B : Any> postNoContent(path: String, body: B, bodyType: KClass<B>) {
+        val bodyTypeInfo = TypeInfo(bodyType)
+        http.post(path) {
+            contentType(ContentType.Application.Json)
+            setBody(body, bodyTypeInfo)
+        }
+    }
+
+    override suspend fun deleteNoContent(path: String) {
+        http.delete(path)
+    }
 }
