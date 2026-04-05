@@ -75,29 +75,34 @@ private struct FavoritesTabContent: View {
     let onScrollOffsetChange: (CGFloat) -> Void
 
     var body: some View {
-        let state = viewModel.favoritesState
+        Group {
+            let state = viewModel.favoritesState
 
-        if state.error != nil {
-            NetworkErrorContent(onRetry: {
-                viewModel.onFavoritesEvent(FavoritesEvent.Retry())
-            })
-        } else if state.isLoading {
-            Spacer()
-            ProgressView()
-            Spacer()
-        } else if state.products.isEmpty {
-            FavoritesEmptyContent()
-        } else {
-            ProductGrid(
-                products: state.products,
-                onProductClick: { productId in
-                    navigationPath.append(productId)
-                },
-                onRemoveFavorite: { productId in
-                    viewModel.onFavoritesEvent(FavoritesEvent.RemoveFavorite(productId: productId))
-                },
-                onScrollOffsetChange: onScrollOffsetChange
-            )
+            if state.error != nil {
+                NetworkErrorContent(onRetry: {
+                    viewModel.onFavoritesEvent(FavoritesEvent.Retry())
+                })
+            } else if state.isLoading {
+                Spacer()
+                ProgressView()
+                Spacer()
+            } else if state.products.isEmpty {
+                FavoritesEmptyContent()
+            } else {
+                ProductGrid(
+                    products: state.products,
+                    onProductClick: { productId in
+                        navigationPath.append(productId)
+                    },
+                    onRemoveFavorite: { productId in
+                        viewModel.onFavoritesEvent(FavoritesEvent.RemoveFavorite(productId: productId))
+                    },
+                    onScrollOffsetChange: onScrollOffsetChange
+                )
+            }
+        }
+        .onAppear {
+            viewModel.onFavoritesEvent(FavoritesEvent.LoadFavorites())
         }
     }
 }
@@ -110,35 +115,33 @@ private struct RecentsTabContent: View {
     let onScrollOffsetChange: (CGFloat) -> Void
 
     var body: some View {
-        let state = viewModel.recentsState
+        Group {
+            let state = viewModel.recentsState
 
-        if state.error != nil {
-            NetworkErrorContent(onRetry: {
-                viewModel.onRecentsEvent(RecentsEvent.Retry())
-            })
-        } else if state.isLoading {
-            Spacer()
-            ProgressView()
-            Spacer()
-        } else if state.products.isEmpty {
-            RecentsEmptyContent()
-        } else {
-            ProductGrid(
-                products: state.products,
-                onProductClick: { productId in
-                    navigationPath.append(productId)
-                },
-                onRemoveFavorite: nil,
-                onScrollOffsetChange: onScrollOffsetChange
-            )
+            if state.error != nil {
+                NetworkErrorContent(onRetry: {
+                    viewModel.onRecentsEvent(RecentsEvent.Retry())
+                })
+            } else if state.isLoading {
+                Spacer()
+                ProgressView()
+                Spacer()
+            } else if state.products.isEmpty {
+                RecentsEmptyContent()
+            } else {
+                ProductGrid(
+                    products: state.products,
+                    onProductClick: { productId in
+                        navigationPath.append(productId)
+                    },
+                    onRemoveFavorite: nil,
+                    onScrollOffsetChange: onScrollOffsetChange
+                )
+            }
         }
-    }
-
-    init(viewModel: FavoritesViewModel, navigationPath: Binding<NavigationPath>, onScrollOffsetChange: @escaping (CGFloat) -> Void) {
-        self._viewModel = ObservedObject(wrappedValue: viewModel)
-        self._navigationPath = navigationPath
-        self.onScrollOffsetChange = onScrollOffsetChange
-        viewModel.onRecentsEvent(RecentsEvent.LoadRecents())
+        .onAppear {
+            viewModel.onRecentsEvent(RecentsEvent.LoadRecents())
+        }
     }
 }
 
@@ -184,17 +187,20 @@ struct ProductCardWithHeart: View {
         Button(action: onClick) {
             VStack(alignment: .leading, spacing: 0) {
                 ZStack(alignment: .topTrailing) {
-                    AsyncImage(url: URL(string: product.imageUrl)) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Rectangle()
-                            .fill(FakeShopColors.surfaceVariant)
-                            .overlay(ProgressView())
-                    }
-                    .frame(height: 160)
-                    .clipped()
+                    Color.clear
+                        .frame(height: 140)
+                        .overlay(
+                            AsyncImage(url: URL(string: product.imageUrl)) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                Rectangle()
+                                    .fill(FakeShopColors.surfaceVariant)
+                                    .overlay(ProgressView())
+                            }
+                        )
+                        .clipped()
 
                     Button(action: onToggleFavorite) {
                         Image(systemName: isFavorited ? "heart.fill" : "heart")
@@ -223,7 +229,7 @@ struct ProductCardWithHeart: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .background(FakeShopColors.surface)
-            .cornerRadius(12)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
             .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         }
         .buttonStyle(CardButtonStyle())
