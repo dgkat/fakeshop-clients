@@ -47,7 +47,11 @@ class ProductListViewModel: ObservableObject {
             }
         }
     }
-    
+
+    func toggleFavorite(productId: String) {
+        viewStore.toggleFavorite(productId: productId)
+    }
+
     deinit {
         ScopeHelperKt.cancelScope(scope: scope)
         stateObservationTask?.cancel()

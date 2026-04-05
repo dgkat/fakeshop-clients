@@ -11,18 +11,22 @@ import ComposeApp
 
 struct CategorySection: View {
     let categoryRow: UiCategoryRow
+    let favoritedProductIds: Set<String>
     let onProductClick: (String) -> Void
-    
+    let onToggleFavorite: (String) -> Void
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(categoryRow.category)
                 .font(.title2)
                 .fontWeight(.bold)
                 .padding(.horizontal, 16)
-            
+
             ProductRow(
                 products: categoryRow.products,
-                onProductClick: onProductClick
+                favoritedProductIds: favoritedProductIds,
+                onProductClick: onProductClick,
+                onToggleFavorite: onToggleFavorite
             )
         }
     }
@@ -31,15 +35,19 @@ struct CategorySection: View {
 // ProductRow.swift
 struct ProductRow: View {
     let products: [UiBriefProduct]
+    let favoritedProductIds: Set<String>
     let onProductClick: (String) -> Void
-    
+    let onToggleFavorite: (String) -> Void
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 12) {
                 ForEach(products, id: \.id) { product in
                     ProductCard(
                         product: product,
-                        onClick: { onProductClick(product.id) }
+                        isFavorited: favoritedProductIds.contains(product.id),
+                        onClick: { onProductClick(product.id) },
+                        onToggleFavorite: { onToggleFavorite(product.id) }
                     )
                 }
             }
@@ -53,26 +61,40 @@ struct ProductRow: View {
 // ProductCard.swift
 struct ProductCard: View {
     let product: UiBriefProduct
+    let isFavorited: Bool
     let onClick: () -> Void
-    
+    let onToggleFavorite: () -> Void
+
     var body: some View {
         Button(action: onClick) {
             VStack(alignment: .leading, spacing: 0) {
-                // Product Image
-                AsyncImage(url: URL(string: product.imageUrl)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Rectangle()
-                        .fill(FakeShopColors.surfaceVariant)
-                        .overlay(
-                            ProgressView()
-                        )
+                ZStack(alignment: .topTrailing) {
+                    // Product Image
+                    AsyncImage(url: URL(string: product.imageUrl)) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Rectangle()
+                            .fill(FakeShopColors.surfaceVariant)
+                            .overlay(
+                                ProgressView()
+                            )
+                    }
+                    .frame(width: 160, height: 160)
+                    .clipped()
+
+                    // Favorite button
+                    Button(action: onToggleFavorite) {
+                        Image(systemName: isFavorited ? "heart.fill" : "heart")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(isFavorited ? FakeShopColors.error : .white)
+                            .shadow(color: .black.opacity(0.35), radius: 4, x: 0, y: 1)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(8)
                 }
-                .frame(width: 160, height: 160)
-                .clipped()
-                
+
                 // Product Info
                 VStack(alignment: .leading, spacing: 4) {
                     Text(product.name)
@@ -81,7 +103,7 @@ struct ProductCard: View {
                         .foregroundColor(.primary)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
-                    
+
                     Text(String(format: "$%.2f", product.price))
                         .font(.title3)
                         .fontWeight(.bold)
