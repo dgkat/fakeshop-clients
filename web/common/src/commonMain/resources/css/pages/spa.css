@@ -66,10 +66,82 @@
     padding: var(--spacing-md, 16px) 0;
 }
 
+/* ===== PRODUCT CARD (for favorites/recents grid) ===== */
 .product-grid .product-card {
-    min-width: unset;
-    flex-shrink: unset;
-    scroll-snap-align: unset;
+    background-color: var(--color-surface);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.product-grid .product-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.product-grid .product-image-container {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background-color: var(--color-surface-variant);
+    position: relative;
+}
+
+.product-grid .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+
+.product-grid .product-card:hover .product-image {
+    transform: scale(1.05);
+}
+
+.product-grid .product-info {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    flex: 1;
+}
+
+.product-grid .product-category {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--color-secondary-container);
+    color: var(--color-on-secondary-container);
+    border-radius: var(--radius-xs);
+    font-size: var(--font-size-label-small);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    width: fit-content;
+}
+
+.product-grid .product-name {
+    font-size: var(--font-size-title-medium);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-on-surface);
+    line-height: var(--line-height-normal);
+    margin: var(--spacing-xs) 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.product-grid .product-price {
+    font-size: var(--font-size-title-large);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    margin-top: auto;
 }
 
 /* ===== HEART BUTTON ON CARD ===== */
@@ -147,6 +219,22 @@
         gap: var(--spacing-md, 16px);
     }
 
+    .product-grid .product-image-container {
+        height: 160px;
+    }
+
+    .product-grid .product-info {
+        padding: var(--spacing-sm);
+    }
+
+    .product-grid .product-name {
+        font-size: var(--font-size-body-large);
+    }
+
+    .product-grid .product-price {
+        font-size: var(--font-size-title-medium);
+    }
+
     .tab-button {
         padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
         font-size: var(--font-size-body-medium, 14px);
@@ -157,5 +245,9 @@
     .product-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: var(--spacing-sm, 8px);
+    }
+
+    .product-grid .product-image-container {
+        height: 140px;
     }
 }
