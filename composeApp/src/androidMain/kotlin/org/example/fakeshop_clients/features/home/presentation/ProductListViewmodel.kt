@@ -11,4 +11,8 @@ class ProductListViewModel() : ViewModel() {
         getKoin().get<ProductListViewStore> { parametersOf(viewModelScope) }
     }
     val uiState = store.productListState
+
+    fun toggleFavorite(productId: String) {
+        store.toggleFavorite(productId)
+    }
 }

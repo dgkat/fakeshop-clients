@@ -28,6 +28,10 @@
   "thumbnail": "Miniatura",
 
   "favorites_empty": "Tus productos favoritos aparecerán aquí",
+  "recents_empty": "Los productos que has visto aparecerán aquí",
+  "tab_recently_seen": "Vistos recientemente",
+  "login_required_message": "Inicia sesión para ver este contenido",
+  "go_to_profile": "Ir al perfil",
   "notifications_empty": "Mantente atento a las novedades",
   "profile_subtitle": "Administra tu cuenta",
 

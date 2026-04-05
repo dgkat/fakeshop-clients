@@ -42,6 +42,7 @@ fun HomeScreen(
     HomeContent(
         productListState = uiState,
         onProductClick = onProductClick,
+        onToggleFavorite = { productId -> productListViewModel.toggleFavorite(productId) },
         onRetry = {},
         modifier = Modifier,
         contentPadding = contentPadding,

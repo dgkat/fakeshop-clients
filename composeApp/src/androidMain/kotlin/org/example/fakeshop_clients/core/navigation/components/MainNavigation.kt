@@ -104,7 +104,18 @@ fun MainNavigation() {
                 }
 
                 composable(Route.Favorites.route) {
-                    FavoritesScreen()
+                    FavoritesScreen(
+                        onProductClick = { productId ->
+                            navController.navigate(Route.ProductDetail.createRoute(productId))
+                        },
+                        onGoToProfile = {
+                            navController.navigate(Route.Profile.route) {
+                                popUpTo(Route.Profile.route) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        },
+                        contentPadding = contentPadding
+                    )
                 }
 
                 composable(Route.Notifications.route) {

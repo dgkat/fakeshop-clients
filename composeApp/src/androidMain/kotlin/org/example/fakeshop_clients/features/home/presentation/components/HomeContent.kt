@@ -4,31 +4,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import fakeshop_clients.composeapp.generated.resources.Res
 import fakeshop_clients.composeapp.generated.resources.error
+import org.example.fakeshop_clients.core.presentation.components.ProductCard
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import org.example.fakeshop_clients.features.home.presentation.ErrorState
 import org.example.fakeshop_clients.features.home.presentation.LoadingState
@@ -41,6 +32,7 @@ import org.jetbrains.compose.resources.stringResource
 fun HomeContent(
     productListState: ProductListState,
     onProductClick: (String) -> Unit,
+    onToggleFavorite: (String) -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
@@ -52,7 +44,9 @@ fun HomeContent(
     if (categories.isNotEmpty()) {
         ProductListContent(
             categories = productListState.categories,
+            favoritedProductIds = productListState.favoritedProductIds,
             onProductClick = onProductClick,
+            onToggleFavorite = onToggleFavorite,
             modifier = modifier,
             contentPadding = contentPadding,
             scrollState = scrollState
@@ -76,7 +70,9 @@ fun HomeContent(
 @Composable
 private fun ProductListContent(
     categories: List<UiCategoryRow>,
+    favoritedProductIds: Set<String>,
     onProductClick: (String) -> Unit,
+    onToggleFavorite: (String) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
     scrollState: SearchBarScrollState
@@ -98,7 +94,9 @@ private fun ProductListContent(
         ) { categoryRow ->
             CategorySection(
                 categoryRow = categoryRow,
+                favoritedProductIds = favoritedProductIds,
                 onProductClick = onProductClick,
+                onToggleFavorite = onToggleFavorite,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -108,7 +106,9 @@ private fun ProductListContent(
 @Composable
 private fun CategorySection(
     categoryRow: UiCategoryRow,
+    favoritedProductIds: Set<String>,
     onProductClick: (String) -> Unit,
+    onToggleFavorite: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -123,7 +123,9 @@ private fun CategorySection(
 
         ProductRow(
             products = categoryRow.products,
-            onProductClick = onProductClick
+            favoritedProductIds = favoritedProductIds,
+            onProductClick = onProductClick,
+            onToggleFavorite = onToggleFavorite
         )
     }
 }
@@ -131,7 +133,9 @@ private fun CategorySection(
 @Composable
 private fun ProductRow(
     products: List<UiBriefProduct>,
+    favoritedProductIds: Set<String>,
     onProductClick: (String) -> Unit,
+    onToggleFavorite: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier) {
@@ -146,54 +150,9 @@ private fun ProductRow(
             ) { product ->
                 ProductCard(
                     product = product,
-                    onClick = { onProductClick(product.id) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProductCard(
-    product: UiBriefProduct,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.width(160.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column {
-            AsyncImage(
-                model = product.imageUrl,
-                contentDescription = product.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp)
-                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-            )
-
-            Column(
-                modifier = Modifier.padding(12.dp)
-            ) {
-                Text(
-                    text = product.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "$${String.format("%.2f", product.price)}",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    onClick = { onProductClick(product.id) },
+                    isFavorited = product.id in favoritedProductIds,
+                    onToggleFavorite = { onToggleFavorite(product.id) }
                 )
             }
         }
