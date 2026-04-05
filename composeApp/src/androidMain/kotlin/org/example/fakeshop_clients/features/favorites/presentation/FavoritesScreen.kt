@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -11,11 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import fakeshop_clients.composeapp.generated.resources.Res
 import fakeshop_clients.composeapp.generated.resources.tab_favorites
 import fakeshop_clients.composeapp.generated.resources.tab_recently_seen
@@ -62,7 +63,8 @@ private fun FavoritesTabbedContent(
         stringResource(Res.string.tab_favorites),
         stringResource(Res.string.tab_recently_seen)
     )
-    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState { tabs.size }
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -70,27 +72,36 @@ private fun FavoritesTabbedContent(
             .padding(top = contentPadding.calculateTopPadding())
     ) {
         TabRow(
-            selectedTabIndex = selectedTabIndex,
+            selectedTabIndex = pagerState.currentPage,
             containerColor = MaterialTheme.colorScheme.surface
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    },
                     text = { Text(title) }
                 )
             }
         }
 
-        when (selectedTabIndex) {
-            0 -> FavoritesTabContent(
-                viewModel = viewModel,
-                onProductClick = onProductClick
-            )
-            1 -> RecentsTabContent(
-                viewModel = viewModel,
-                onProductClick = onProductClick
-            )
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            when (page) {
+                0 -> FavoritesTabContent(
+                    viewModel = viewModel,
+                    onProductClick = onProductClick
+                )
+                1 -> RecentsTabContent(
+                    viewModel = viewModel,
+                    onProductClick = onProductClick
+                )
+            }
         }
     }
 }

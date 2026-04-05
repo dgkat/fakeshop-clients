@@ -50,19 +50,23 @@ private struct FavoritesTabbedContent: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
 
-            if selectedTab == 0 {
+            TabView(selection: $selectedTab) {
                 FavoritesTabContent(
                     viewModel: viewModel,
                     navigationPath: $navigationPath,
                     onScrollOffsetChange: onScrollOffsetChange
                 )
-            } else {
+                .tag(0)
+
                 RecentsTabContent(
                     viewModel: viewModel,
                     navigationPath: $navigationPath,
                     onScrollOffsetChange: onScrollOffsetChange
                 )
+                .tag(1)
             }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .animation(.easeInOut(duration: 0.25), value: selectedTab)
         }
     }
 }
