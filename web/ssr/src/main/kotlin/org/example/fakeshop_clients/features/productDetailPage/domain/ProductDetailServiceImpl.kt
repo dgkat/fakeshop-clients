@@ -41,12 +41,24 @@ class ProductDetailServiceImpl(
         }
     }
 
-    override suspend fun toggleLike(
+    override suspend fun addFavorite(
         productId: String,
         cookies: Cookies
     ): Result<Unit, NetworkError> {
-        return productDetailRepository.toggleLike(productId, cookies)
-
+        return productDetailRepository.addFavorite(productId, cookies)
     }
 
+    override suspend fun removeFavorite(
+        productId: String,
+        cookies: Cookies
+    ): Result<Unit, NetworkError> {
+        return productDetailRepository.removeFavorite(productId, cookies)
+    }
+
+    override suspend fun checkFavorite(
+        productId: String,
+        cookies: Cookies
+    ): Result<Boolean, NetworkError> {
+        return productDetailRepository.checkFavorite(productId, cookies)
+    }
 }

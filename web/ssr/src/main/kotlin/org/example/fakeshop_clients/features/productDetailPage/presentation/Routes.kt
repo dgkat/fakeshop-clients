@@ -5,6 +5,7 @@ import io.ktor.server.html.respondHtml
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.post
 import kotlinx.html.FlowContent
 import kotlinx.html.body
@@ -56,7 +57,27 @@ fun Route.productRoutes() {
 fun Route.productApiRoutes() {
     val productDetailService by inject<ProductDetailService>()
 
-    // HTMX endpoint - Toggle like (no locale prefix)
+    // HTMX endpoint - Check initial like state on page load (intersect once)
+    get("/product/like/{id}") {
+        val productId = call.parameters["id"] ?: return@get call.respondText(
+            "Product ID is required",
+            status = HttpStatusCode.BadRequest
+        )
+
+        val cookies = call.extractCookies()
+        val isLiked = when (val result = productDetailService.checkFavorite(productId, cookies)) {
+            is Result.Success -> result.data
+            is Result.Error -> false
+        }
+
+        call.respondHtml(HttpStatusCode.OK) {
+            body {
+                likeButton(productId = productId, isLiked = isLiked)
+            }
+        }
+    }
+
+    // HTMX endpoint - Add like
     post("/product/like/{id}") {
         val productId = call.parameters["id"] ?: return@post call.respondText(
             "Product ID is required",
@@ -65,26 +86,33 @@ fun Route.productApiRoutes() {
 
         val cookies = call.extractCookies()
 
-        val toggleResult = productDetailService.toggleLike(productId, cookies)
-
-        when (toggleResult) {
-            is Result.Error -> {
-                call.respondText(
-                    "Unable to process request. Please try again later.",
-                    status = HttpStatusCode.InternalServerError
-                )
+        when (productDetailService.addFavorite(productId, cookies)) {
+            is Result.Error -> call.respondText(
+                "Unable to process request. Please try again later.",
+                status = HttpStatusCode.InternalServerError
+            )
+            is Result.Success -> call.respondHtml(HttpStatusCode.OK) {
+                body { likeButton(productId = productId, isLiked = true) }
             }
+        }
+    }
 
-            is Result.Success -> {
+    // HTMX endpoint - Remove like
+    delete("/product/like/{id}") {
+        val productId = call.parameters["id"] ?: return@delete call.respondText(
+            "Product ID is required",
+            status = HttpStatusCode.BadRequest
+        )
 
-                call.respondHtml(HttpStatusCode.OK) {
-                    body {
-                        likeButton(
-                            productId = productId,
-                            isLiked = true
-                        )
-                    }
-                }
+        val cookies = call.extractCookies()
+
+        when (productDetailService.removeFavorite(productId, cookies)) {
+            is Result.Error -> call.respondText(
+                "Unable to process request. Please try again later.",
+                status = HttpStatusCode.InternalServerError
+            )
+            is Result.Success -> call.respondHtml(HttpStatusCode.OK) {
+                body { likeButton(productId = productId, isLiked = false) }
             }
         }
     }
@@ -94,8 +122,11 @@ fun FlowContent.likeButton(productId: String, isLiked: Boolean) {
     button(classes = "btn-like-circle ${if (isLiked) "liked" else ""}") {
         id = "like-button"
 
-        // HTMX attributes
-        attributes["hx-post"] = "/product/like/$productId"
+        if (isLiked) {
+            attributes["hx-delete"] = "/product/like/$productId"
+        } else {
+            attributes["hx-post"] = "/product/like/$productId"
+        }
         attributes["hx-swap"] = "outerHTML"
         attributes["hx-target"] = "#like-button"
 

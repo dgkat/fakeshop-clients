@@ -17,8 +17,18 @@ interface ProductDetailRepository {
         cookies: Cookies
     ): Result<DetailedProduct, NetworkError>
 
-    suspend fun toggleLike(
+    suspend fun addFavorite(
         productId: String,
         cookies: Cookies
     ): Result<Unit, NetworkError>
+
+    suspend fun removeFavorite(
+        productId: String,
+        cookies: Cookies
+    ): Result<Unit, NetworkError>
+
+    suspend fun checkFavorite(
+        productId: String,
+        cookies: Cookies
+    ): Result<Boolean, NetworkError>
 }

@@ -30,7 +30,8 @@ import org.example.fakeshop_clients.core.i18n.WebStrings
 import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
 import org.example.fakeshop_clients.features.core.navigation.mobile.bottomNavigation
 import org.example.fakeshop_clients.features.productDetailPage.domain.models.FullProduct
-import org.example.fakeshop_clients.features.productDetailPage.presentation.likeButton
+import org.example.fakeshop_clients.core.design.IconPaths
+import org.example.fakeshop_clients.core.ui.svgIcon
 
 fun HTML.productDetailPage(
     product: FullProduct,
@@ -135,8 +136,14 @@ fun HTML.productDetailPage(
                     div(classes = "product-detail-top") {
                         // Product Image Section with carousel and like button overlay
                         div(classes = "product-image-section") {
-                            // Like button overlay
-                            likeButton(productId = product.id, isLiked = product.isLiked)
+                            // Like button - HTMX loads real state on first intersection
+                            button(classes = "btn-like-circle") {
+                                id = "like-button"
+                                attributes["hx-get"] = "/product/like/${product.id}"
+                                attributes["hx-trigger"] = "intersect once"
+                                attributes["hx-swap"] = "outerHTML"
+                                svgIcon(pathData = IconPaths.HEART, cssClass = "like-icon")
+                            }
 
                             // Carousel: main image + gallery images
                             val allImages = listOf(product.imageUrl) + (product.galleryUrls ?: emptyList())

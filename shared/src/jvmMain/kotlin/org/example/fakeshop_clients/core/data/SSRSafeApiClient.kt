@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.cookie
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -67,6 +68,23 @@ class SSRSafeApiClient(
     ): Result<T, NetworkError> {
         return try {
             val response = httpClient.post(path) {
+                configureCookiesAndAuth(cookies)
+            }
+            Result.Success(response.body(TypeInfo(T::class)))
+        } catch (e: Exception) {
+            Result.Error(exceptionMapper.map(e))
+        }
+    }
+
+    /**
+     * Performs a DELETE request with cookie forwarding and automatic error handling.
+     */
+    suspend inline fun <reified T : Any> delete(
+        path: String,
+        cookies: Cookies
+    ): Result<T, NetworkError> {
+        return try {
+            val response = httpClient.delete(path) {
                 configureCookiesAndAuth(cookies)
             }
             Result.Success(response.body(TypeInfo(T::class)))

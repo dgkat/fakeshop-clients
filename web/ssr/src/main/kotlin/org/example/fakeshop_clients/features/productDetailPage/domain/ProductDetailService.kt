@@ -11,8 +11,18 @@ interface ProductDetailService {
         cookies: Cookies
     ): Result<FullProduct, NetworkError>
 
-    suspend fun toggleLike(
+    suspend fun addFavorite(
         productId: String,
         cookies: Cookies
     ): Result<Unit, NetworkError>
+
+    suspend fun removeFavorite(
+        productId: String,
+        cookies: Cookies
+    ): Result<Unit, NetworkError>
+
+    suspend fun checkFavorite(
+        productId: String,
+        cookies: Cookies
+    ): Result<Boolean, NetworkError>
 }
