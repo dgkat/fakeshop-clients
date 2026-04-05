@@ -34,6 +34,9 @@ struct ProductDetailView: View {
                 ProductContentView(
                     briefProduct: successState.product,
                     detailedState: viewModel.state.detailedState,
+                    isFavorited: viewModel.state.isFavorited,
+                    isFavoriteLoading: viewModel.state.isFavoriteLoading,
+                    onToggleFavorite: { viewModel.onEvent(ProductDetailEvent.ToggleFavorite()) },
                     onScrollOffsetChange: onScrollOffsetChange
                 )
             }
@@ -83,6 +86,9 @@ struct ErrorView: View {
 struct ProductContentView: View {
     let briefProduct: UiBriefProduct
     let detailedState: DetailedProductState
+    let isFavorited: Bool
+    let isFavoriteLoading: Bool
+    let onToggleFavorite: () -> Void
     let onScrollOffsetChange: (CGFloat) -> Void
 
     var body: some View {
@@ -91,7 +97,10 @@ struct ProductContentView: View {
                 // Image Section
                 ImageSection(
                     briefProduct: briefProduct,
-                    detailedState: detailedState
+                    detailedState: detailedState,
+                    isFavorited: isFavorited,
+                    isFavoriteLoading: isFavoriteLoading,
+                    onToggleFavorite: onToggleFavorite
                 )
 
                 // Product Info Section
@@ -115,19 +124,49 @@ struct ProductContentView: View {
 struct ImageSection: View {
     let briefProduct: UiBriefProduct
     let detailedState: DetailedProductState
+    let isFavorited: Bool
+    let isFavoriteLoading: Bool
+    let onToggleFavorite: () -> Void
 
     var body: some View {
-        switch onEnum(of: detailedState) {
-        case .success(let successState):
-            if let galleryUrls = successState.product.galleryUrls, !galleryUrls.isEmpty {
-                ImageGallery(imageUrls: galleryUrls)
-            } else {
+        ZStack(alignment: .topTrailing) {
+            switch onEnum(of: detailedState) {
+            case .success(let successState):
+                if let galleryUrls = successState.product.galleryUrls, !galleryUrls.isEmpty {
+                    ImageGallery(imageUrls: galleryUrls)
+                } else {
+                    SingleProductImage(imageUrl: briefProduct.imageUrl)
+                }
+
+            default:
                 SingleProductImage(imageUrl: briefProduct.imageUrl)
             }
 
-        default:
-            SingleProductImage(imageUrl: briefProduct.imageUrl)
+            FavoriteButton(
+                isFavorited: isFavorited,
+                isLoading: isFavoriteLoading,
+                onToggle: onToggleFavorite
+            )
+            .padding(12)
         }
+    }
+}
+
+// MARK: - Favorite Button
+private struct FavoriteButton: View {
+    let isFavorited: Bool
+    let isLoading: Bool
+    let onToggle: () -> Void
+
+    var body: some View {
+        Button(action: onToggle) {
+            Image(systemName: isFavorited ? "heart.fill" : "heart")
+                .font(.system(size: 28, weight: .medium))
+                .foregroundColor(isFavorited ? FakeShopColors.error : .white)
+                .shadow(color: .black.opacity(0.35), radius: 5, x: 0, y: 1)
+        }
+        .disabled(isLoading)
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
