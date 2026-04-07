@@ -20,14 +20,14 @@ val favoritesModule = module {
     factory<FavoritesRepository> {
         FavoritesRepositoryImpl(
             datasource = get(),
-            briefProductMapper = get()
+            briefProductMapper = get(),
+            cache = get()
         )
     }
 
     single<FavoritesService> {
         FavoritesServiceImpl(
-            repository = get(),
-            cache = get()
+            repository = get()
         )
     }
 }
