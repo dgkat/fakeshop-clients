@@ -11,6 +11,7 @@ val productListModule = module {
         ProductListViewStore(
             scope = get(qualifier = named("appScope")),
             productListService = get(),
+            favoritesService = get(),
             mapper = get()
         )
     }

@@ -11,7 +11,7 @@ val mobileProfileModule = module {
     includes(profileModule)
 
     factory<ProfileViewStore> { (scope: CoroutineScope) ->
-        ProfileViewStore(scope = scope, profileService = get())
+        ProfileViewStore(scope = scope, profileService = get(), favoritesService = get())
     }
 
     viewModel {

@@ -13,6 +13,8 @@ import web.cssom.ClassName
 external interface CategorySectionProps : Props {
     var category: UiCategoryRow
     var onProductClick: (String) -> Unit
+    var favoritedProductIds: Set<String>
+    var onToggleFavorite: ((String) -> Unit)?
 }
 
 val CategorySection = FC<CategorySectionProps> { props ->
@@ -71,6 +73,10 @@ val CategorySection = FC<CategorySectionProps> { props ->
                         key = product.id
                         this.product = product
                         onClick = props.onProductClick
+                        isFavorited = product.id in props.favoritedProductIds
+                        onToggleFavorite = props.onToggleFavorite?.let { toggle ->
+                            { toggle(product.id) }
+                        }
                     }
                 }
             }

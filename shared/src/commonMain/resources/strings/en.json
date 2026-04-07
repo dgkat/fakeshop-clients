@@ -28,6 +28,10 @@
   "thumbnail": "Thumbnail",
 
   "favorites_empty": "Your favorite products will appear here",
+  "recents_empty": "Products you have viewed will appear here",
+  "tab_recently_seen": "Recently Seen",
+  "login_required_message": "Please log in to view this content",
+  "go_to_profile": "Go to Profile",
   "notifications_empty": "Stay tuned for updates",
   "profile_subtitle": "Manage your account",
 

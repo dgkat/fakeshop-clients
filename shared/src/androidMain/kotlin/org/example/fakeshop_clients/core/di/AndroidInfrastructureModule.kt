@@ -1,7 +1,9 @@
 package org.example.fakeshop_clients.core.di
 
+import android.util.Log
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.logging.Logger
 import io.ktor.http.Url
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
 import org.example.fakeshop_clients.core.concurrency.AndroidDispatcherProvider
@@ -16,6 +18,16 @@ val androidInfrastructureModule = module {
 
     single<Url>(named("parsedUrl")) {
         parsedUrl
+    }
+
+    if (BuildConfig.IS_DEBUG) {
+        single<Logger>(named("ktorLogger")) {
+            object : Logger {
+                override fun log(message: String) {
+                    Log.d("KtorLogger", message)
+                }
+            }
+        }
     }
 
     single<TokenStorage> {

@@ -11,16 +11,20 @@ import ComposeApp
 
 struct ProductListContent: View {
     let categories: [UiCategoryRow]
+    let favoritedProductIds: Set<String>
     let onProductClick: (String) -> Void
+    let onToggleFavorite: (String) -> Void
     let onScrollOffsetChange: (CGFloat) -> Void
-    
+
     var body: some View {
         ScrollableVStack(onScroll: onScrollOffsetChange) {
             LazyVStack(alignment: .leading, spacing: 16, pinnedViews: []) {
                 ForEach(categories, id: \.category) { categoryRow in
                     CategorySection(
                         categoryRow: categoryRow,
-                        onProductClick: onProductClick
+                        favoritedProductIds: favoritedProductIds,
+                        onProductClick: onProductClick,
+                        onToggleFavorite: onToggleFavorite
                     )
                 }
             }

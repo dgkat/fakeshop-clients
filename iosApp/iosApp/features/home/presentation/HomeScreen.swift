@@ -30,10 +30,14 @@ struct HomeView: View {
             } else {
                 ProductListContent(
                     categories: productListViewModel.state.categories,
+                    favoritedProductIds: Set(productListViewModel.state.favoritedProductIds),
                     onProductClick: { productId in
                         navigationPath.append(productId)
                     },
-                    onScrollOffsetChange: onScrollOffsetChange 
+                    onToggleFavorite: { productId in
+                        productListViewModel.toggleFavorite(productId: productId)
+                    },
+                    onScrollOffsetChange: onScrollOffsetChange
                 )
             }
         }

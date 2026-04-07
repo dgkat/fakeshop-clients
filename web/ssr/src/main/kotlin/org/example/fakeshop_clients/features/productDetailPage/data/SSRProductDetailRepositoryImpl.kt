@@ -35,10 +35,24 @@ class SSRProductDetailRepositoryImpl(
         }
     }
 
-    override suspend fun toggleLike(
+    override suspend fun addFavorite(
         productId: String,
         cookies: Cookies
     ): Result<Unit, NetworkError> {
-        return productDetailDatasource.toggleLike(productId, cookies)
+        return productDetailDatasource.addFavorite(productId, cookies)
+    }
+
+    override suspend fun removeFavorite(
+        productId: String,
+        cookies: Cookies
+    ): Result<Unit, NetworkError> {
+        return productDetailDatasource.removeFavorite(productId, cookies)
+    }
+
+    override suspend fun checkFavorite(
+        productId: String,
+        cookies: Cookies
+    ): Result<Boolean, NetworkError> {
+        return productDetailDatasource.checkFavorite(productId, cookies)
     }
 }

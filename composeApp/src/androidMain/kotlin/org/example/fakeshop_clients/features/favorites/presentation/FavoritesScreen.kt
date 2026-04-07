@@ -1,49 +1,175 @@
 package org.example.fakeshop_clients.features.favorites.presentation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import fakeshop_clients.composeapp.generated.resources.Res
-import fakeshop_clients.composeapp.generated.resources.favorites_empty
 import fakeshop_clients.composeapp.generated.resources.tab_favorites
+import fakeshop_clients.composeapp.generated.resources.tab_recently_seen
+import org.example.fakeshop_clients.features.favorites.presentation.components.ErrorContent
+import org.example.fakeshop_clients.features.favorites.presentation.components.FavoritesEmptyContent
+import org.example.fakeshop_clients.features.favorites.presentation.components.LoadingContent
+import org.example.fakeshop_clients.features.favorites.presentation.components.LoginRequiredContent
+import org.example.fakeshop_clients.features.favorites.presentation.components.ProductGrid
+import org.example.fakeshop_clients.features.favorites.presentation.components.RecentsEmptyContent
+import org.example.fakeshop_clients.features.recents.presentation.RecentsEvent
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun FavoritesScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+fun FavoritesScreen(
+    onProductClick: (String) -> Unit,
+    onGoToProfile: () -> Unit,
+    contentPadding: PaddingValues,
+    viewModel: FavoritesViewModel = koinViewModel()
+) {
+    val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
+
+    when (isLoggedIn) {
+        null -> LoadingContent(modifier = Modifier.padding(contentPadding))
+        false -> LoginRequiredContent(
+            onGoToProfile = onGoToProfile,
+            modifier = Modifier.padding(contentPadding)
+        )
+        true -> FavoritesTabbedContent(
+            viewModel = viewModel,
+            onProductClick = onProductClick,
+            contentPadding = contentPadding
+        )
+    }
+}
+
+@Composable
+private fun FavoritesTabbedContent(
+    viewModel: FavoritesViewModel,
+    onProductClick: (String) -> Unit,
+    contentPadding: PaddingValues
+) {
+    val tabs = listOf(
+        stringResource(Res.string.tab_favorites),
+        stringResource(Res.string.tab_recently_seen)
+    )
+    val pagerState = rememberPagerState { tabs.size }
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = contentPadding.calculateTopPadding())
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        TabRow(
+            selectedTabIndex = pagerState.currentPage,
+            containerColor = MaterialTheme.colorScheme.surface
         ) {
-            Icon(
-                imageVector = Icons.Filled.Favorite,
-                contentDescription = null,
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = stringResource(Res.string.tab_favorites),
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Text(
-                text = stringResource(Res.string.favorites_empty),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    },
+                    text = { Text(title) }
+                )
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            when (page) {
+                0 -> FavoritesTabContent(
+                    viewModel = viewModel,
+                    onProductClick = onProductClick
+                )
+                1 -> RecentsTabContent(
+                    viewModel = viewModel,
+                    onProductClick = onProductClick
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun FavoritesTabContent(
+    viewModel: FavoritesViewModel,
+    onProductClick: (String) -> Unit
+) {
+    val state by viewModel.favoritesState.collectAsStateWithLifecycle()
+
+    state.error?.let {
+        ErrorContent(
+            onRetry = { viewModel.onFavoritesEvent(FavoritesEvent.Retry) }
+        )
+        return
+    }
+
+    if (state.isLoading) {
+        LoadingContent()
+        return
+    }
+
+    if (state.products.isEmpty()) {
+        FavoritesEmptyContent()
+        return
+    }
+
+    ProductGrid(
+        products = state.products,
+        onProductClick = onProductClick,
+        onRemoveFavorite = { productId ->
+            viewModel.onFavoritesEvent(FavoritesEvent.RemoveFavorite(productId))
+        }
+    )
+}
+
+@Composable
+private fun RecentsTabContent(
+    viewModel: FavoritesViewModel,
+    onProductClick: (String) -> Unit
+) {
+    val state by viewModel.recentsState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.onRecentsEvent(RecentsEvent.LoadRecents)
+    }
+
+    state.error?.let {
+        ErrorContent(
+            onRetry = { viewModel.onRecentsEvent(RecentsEvent.Retry) }
+        )
+        return
+    }
+
+    if (state.isLoading) {
+        LoadingContent()
+        return
+    }
+
+    if (state.products.isEmpty()) {
+        RecentsEmptyContent()
+        return
+    }
+
+    ProductGrid(
+        products = state.products,
+        onProductClick = onProductClick,
+        onRemoveFavorite = null
+    )
 }

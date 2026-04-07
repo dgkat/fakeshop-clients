@@ -67,6 +67,7 @@ kotlin {
                 implementation(libs.ktor.client.content)
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.ktor.client.auth)
+                implementation(libs.ktor.client.logging)
             }
         }
 
@@ -122,8 +123,14 @@ android {
     }
     buildFeatures { buildConfig = true }
     buildTypes {
-        debug   { buildConfigField("String", "BASE_URL", "\"https://api.dgkat.com\"") }
-        release { buildConfigField("String", "BASE_URL", "\"https://api.dgkat.com\"") }
+        debug   {
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080\"")
+            buildConfigField("Boolean", "IS_DEBUG", "true")
+        }
+        release {
+            buildConfigField("String", "BASE_URL", "\"https://api.dgkat.com\"")
+            buildConfigField("Boolean", "IS_DEBUG", "false")
+        }
     }
 }
 

@@ -54,6 +54,10 @@ val ProductListView = FC<ProductListProps> { props ->
                 CategoriesView {
                     categories = state.categories
                     onProductClick = { }
+                    favoritedProductIds = state.favoritedProductIds
+                    onToggleFavorite = props.viewModel?.let { vm ->
+                        { productId: String -> vm.toggleFavorite(productId) }
+                    }
                 }
             }
         }

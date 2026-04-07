@@ -9,6 +9,8 @@ import web.cssom.ClassName
 external interface CategoriesViewProps : Props {
     var categories: List<UiCategoryRow>
     var onProductClick: (String) -> Unit
+    var favoritedProductIds: Set<String>
+    var onToggleFavorite: ((String) -> Unit)?
 }
 
 val CategoriesView = FC<CategoriesViewProps> { props ->
@@ -20,6 +22,8 @@ val CategoriesView = FC<CategoriesViewProps> { props ->
                 key = categoryRow.category
                 category = categoryRow
                 onProductClick = props.onProductClick
+                favoritedProductIds = props.favoritedProductIds
+                onToggleFavorite = props.onToggleFavorite
             }
         }
     }

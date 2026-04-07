@@ -23,11 +23,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Button
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -98,6 +105,9 @@ fun ErrorContent(
 fun ProductContent(
     briefProduct: UiBriefProduct,
     detailedState: DetailedProductState,
+    isFavorited: Boolean,
+    isFavoriteLoading: Boolean,
+    onToggleFavorite: () -> Unit,
     scrollState: SearchBarScrollState,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier
@@ -116,25 +126,36 @@ fun ProductContent(
                 end = contentPadding.calculateEndPadding(layoutDirection)
             )
     ) {
-        // Image Gallery or Single Image
-        when (detailedState) {
-            is DetailedProductState.Success -> {
-                val galleryUrls = detailedState.product.galleryUrls
-                if (!galleryUrls.isNullOrEmpty()) {
-                    ImageGallery(imageUrls = galleryUrls)
-                } else {
+        // Image Gallery or Single Image with favorite button overlay
+        Box(modifier = Modifier.fillMaxWidth()) {
+            when (detailedState) {
+                is DetailedProductState.Success -> {
+                    val galleryUrls = detailedState.product.galleryUrls
+                    if (!galleryUrls.isNullOrEmpty()) {
+                        ImageGallery(imageUrls = galleryUrls)
+                    } else {
+                        SingleProductImage(
+                            imageUrl = briefProduct.imageUrl,
+                            contentDescription = briefProduct.name
+                        )
+                    }
+                }
+                else -> {
                     SingleProductImage(
                         imageUrl = briefProduct.imageUrl,
                         contentDescription = briefProduct.name
                     )
                 }
             }
-            else -> {
-                SingleProductImage(
-                    imageUrl = briefProduct.imageUrl,
-                    contentDescription = briefProduct.name
-                )
-            }
+
+            FavoriteButton(
+                isFavorited = isFavorited,
+                isLoading = isFavoriteLoading,
+                onClick = onToggleFavorite,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -375,6 +396,39 @@ private fun PageIndicator(
                         else
                             MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                     )
+            )
+        }
+    }
+}
+
+@Composable
+private fun FavoriteButton(
+    isFavorited: Boolean,
+    isLoading: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    IconButton(
+        onClick = onClick,
+        enabled = !isLoading,
+        modifier = modifier
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            // Blurred shadow layer
+            Icon(
+                imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                contentDescription = null,
+                tint = Color.Black.copy(alpha = 0.25f),
+                modifier = Modifier
+                    .size(36.dp)
+                    .blur(6.dp)
+            )
+            // Actual icon
+            Icon(
+                imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                contentDescription = if (isFavorited) "Remove from favorites" else "Add to favorites",
+                tint = if (isFavorited) MaterialTheme.colorScheme.error else Color.White,
+                modifier = Modifier.size(30.dp)
             )
         }
     }

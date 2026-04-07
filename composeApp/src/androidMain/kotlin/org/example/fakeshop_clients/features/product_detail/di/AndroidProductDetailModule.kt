@@ -15,6 +15,7 @@ val androidProductDetailModule = module {
         ProductDetailViewStore(
             scope = scope,
             productDetailService = get(),
+            favoritesService = get(),
             briefProductMapper = get(),
             detailedProductMapper = get()
         )

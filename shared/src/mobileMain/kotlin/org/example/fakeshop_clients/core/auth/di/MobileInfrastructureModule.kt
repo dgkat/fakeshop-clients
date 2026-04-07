@@ -7,6 +7,9 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -27,12 +30,15 @@ import org.example.fakeshop_clients.core.data.SafeAuthenticatedApiClient
 import org.example.fakeshop_clients.core.data.SafePublicApiClient
 import org.example.fakeshop_clients.core.data.post
 import org.example.fakeshop_clients.core.error_handling.fold
+import org.example.fakeshop_clients.core.favorites.di.mobileFavoritesCacheModule
 import org.example.fakeshop_clients.core.network.MobileUrlProvider
 import org.example.fakeshop_clients.core.network.UrlProvider
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val mobileInfrastructureModule = module {
+
+    includes(mobileFavoritesCacheModule)
 
     single<UrlProvider> { MobileUrlProvider() }
 
@@ -41,6 +47,7 @@ val mobileInfrastructureModule = module {
     // Public HttpClient (no auth)
     single<HttpClient>(named("publicHttpClient")) {
         val parsedUrl: Url = get(named("parsedUrl"))
+        val ktorLogger = getOrNull<Logger>(named("ktorLogger"))
 
         HttpClient(get<HttpClientEngine>()) {
             install(ContentNegotiation) {
@@ -49,7 +56,12 @@ val mobileInfrastructureModule = module {
                     isLenient = true
                 })
             }
-
+            ktorLogger?.let {
+                install(Logging) {
+                    logger = it
+                    level = LogLevel.ALL
+                }
+            }
             defaultRequest {
                 url.protocol = parsedUrl.protocol
                 url.host = parsedUrl.host
@@ -63,6 +75,7 @@ val mobileInfrastructureModule = module {
         val parsedUrl: Url = get(named("parsedUrl"))
         val tokenStorage: TokenStorage = get()
         val publicApiClient: SafePublicApiClient = get()
+        val ktorLogger = getOrNull<Logger>(named("ktorLogger"))
 
         HttpClient(get<HttpClientEngine>()) {
             install(ContentNegotiation) {
@@ -70,6 +83,12 @@ val mobileInfrastructureModule = module {
                     ignoreUnknownKeys = true
                     isLenient = true
                 })
+            }
+            ktorLogger?.let {
+                install(Logging) {
+                    logger = it
+                    level = LogLevel.ALL
+                }
             }
             install(Auth) {
                 bearer {
