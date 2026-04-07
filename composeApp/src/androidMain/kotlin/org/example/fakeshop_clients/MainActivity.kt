@@ -16,13 +16,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        val notificationProductId = intent.getStringExtra("productId")
+
         setContent {
             FakeShopTheme(dynamicColor = false) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.surface
                 ) {
-                    MainNavigation()
+                    MainNavigation(initialProductId = notificationProductId)
                 }
             }
         }

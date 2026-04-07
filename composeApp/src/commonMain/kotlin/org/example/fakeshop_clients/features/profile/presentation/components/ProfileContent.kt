@@ -39,6 +39,7 @@ fun ProfileContent(
     profileState: ProfileState,
     onEvent: (ProfileEvent) -> Unit,
     modifier: Modifier = Modifier,
+    notificationPrefsSection: @Composable (() -> Unit)? = null,
     languageSection: @Composable (() -> Unit)? = null
 ) {
     Box(
@@ -57,6 +58,7 @@ fun ProfileContent(
                     isProcessing = profileState.isProcessing,
                     error = "Logged in error",
                     onEvent = onEvent,
+                    notificationPrefsSection = notificationPrefsSection,
                     languageSection = languageSection
                 )
             }
@@ -79,6 +81,7 @@ fun LoggedInContent(
     isProcessing: Boolean,
     error: String?,
     onEvent: (ProfileEvent) -> Unit,
+    notificationPrefsSection: @Composable (() -> Unit)? = null,
     languageSection: @Composable (() -> Unit)? = null
 ) {
     Column(
@@ -112,6 +115,8 @@ fun LoggedInContent(
                 Text(stringResource(Res.string.logout))
             }
         }
+
+        notificationPrefsSection?.invoke()
 
         languageSection?.invoke()
     }

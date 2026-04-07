@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.skieLibrary)
+    alias(libs.plugins.googleServices)
 }
 
 kotlin {
@@ -44,6 +45,7 @@ kotlin {
 
             //Koin
             implementation(libs.koin.android)
+
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -109,6 +111,10 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 }
 
 skie {

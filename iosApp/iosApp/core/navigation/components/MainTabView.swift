@@ -8,7 +8,8 @@ import SwiftUI
 
 struct MainTabView: View {
     @StateObject private var searchViewModel = SearchViewModel()
-    
+    @StateObject private var notificationRouter = NotificationRouter.shared
+
     @State private var selectedTab: Tab = .home
     @State private var homePath = NavigationPath()
     @State private var favoritesPath = NavigationPath()
@@ -154,6 +155,13 @@ struct MainTabView: View {
         }
         .onChange(of: profilePath) { oldValue, newValue in
             handleNavigationChange(oldPath: oldValue, newPath: newValue, tab: .profile)
+        }
+        .onChange(of: notificationRouter.productIdToNavigate) { _, productId in
+            if let productId {
+                selectedTab = .home
+                homePath.append(productId)
+                notificationRouter.clearNavigation()
+            }
         }
     }
 

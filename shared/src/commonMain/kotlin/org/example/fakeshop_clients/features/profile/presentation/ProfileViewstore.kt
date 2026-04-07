@@ -8,12 +8,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
+import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
 import org.example.fakeshop_clients.features.profile.domain.ProfileService
 
 class ProfileViewStore(
     private val scope: CoroutineScope,
     private val profileService: ProfileService,
-    private val favoritesService: FavoritesService
+    private val favoritesService: FavoritesService,
+    private val notificationsService: NotificationsService,
+    private val pushTokenProvider: PushTokenProvider
 ) {
     private val _profileState = MutableStateFlow(ProfileState(isLoading = true))
     val profileState: StateFlow<ProfileState> = _profileState.asStateFlow()
@@ -133,6 +137,9 @@ class ProfileViewStore(
         profileService.logout().fold(
             onSuccess = {
                 favoritesService.clearCache()
+                pushTokenProvider.getCurrentToken()?.let { token ->
+                    notificationsService.removeDeviceToken(token)
+                }
                 _profileState.update {
                     it.copy(
                         isLoggedIn = false,

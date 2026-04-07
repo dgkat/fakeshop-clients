@@ -19,6 +19,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ProfileScreen(
     profileViewModel: ProfileViewModel = koinViewModel(),
+    notificationPrefsSection: @Composable (() -> Unit)? = null,
     languageSection: @Composable (() -> Unit)? = null
 ) {
     val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
@@ -34,6 +35,7 @@ fun ProfileScreen(
             profileState = uiState,
             onEvent = profileViewModel::onEvent,
             modifier = Modifier.padding(paddingValues),
+            notificationPrefsSection = notificationPrefsSection,
             languageSection = languageSection
         )
     }

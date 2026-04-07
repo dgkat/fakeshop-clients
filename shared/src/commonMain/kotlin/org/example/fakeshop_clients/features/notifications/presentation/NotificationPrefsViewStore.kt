@@ -1,0 +1,78 @@
+package org.example.fakeshop_clients.features.notifications.presentation
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.error_handling.fold
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
+
+class NotificationPrefsViewStore(
+    private val scope: CoroutineScope,
+    private val notificationsService: NotificationsService
+) {
+    private val _state = MutableStateFlow(NotificationPrefsState())
+    val state: StateFlow<NotificationPrefsState> = _state.asStateFlow()
+
+    fun onEvent(event: NotificationPrefsEvent) {
+        when (event) {
+            is NotificationPrefsEvent.LoadPreferences -> loadPreferences()
+            is NotificationPrefsEvent.TogglePriceDrop -> togglePriceDrop(event.enabled)
+        }
+    }
+
+    private fun loadPreferences() {
+        _state.update { it.copy(isLoading = true, error = null) }
+        scope.launch {
+            notificationsService.getPreferences().fold(
+                onSuccess = { prefs ->
+                    _state.update {
+                        it.copy(
+                            priceDropEnabled = prefs.priceDropEnabled,
+                            isLoading = false,
+                            error = null
+                        )
+                    }
+                },
+                onError = { networkError ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = NotificationPrefsError.Network(networkError)
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    private fun togglePriceDrop(enabled: Boolean) {
+        val previousValue = _state.value.priceDropEnabled
+        _state.update { it.copy(priceDropEnabled = enabled, isToggling = true, error = null) }
+
+        scope.launch {
+            notificationsService.togglePriceDrop(enabled).fold(
+                onSuccess = { prefs ->
+                    _state.update {
+                        it.copy(
+                            priceDropEnabled = prefs.priceDropEnabled,
+                            isToggling = false,
+                            error = null
+                        )
+                    }
+                },
+                onError = { networkError ->
+                    _state.update {
+                        it.copy(
+                            priceDropEnabled = previousValue,
+                            isToggling = false,
+                            error = NotificationPrefsError.Network(networkError)
+                        )
+                    }
+                }
+            )
+        }
+    }
+}

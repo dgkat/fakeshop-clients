@@ -51,5 +51,15 @@
 
   "language": "Language",
   "language_english": "English",
-  "language_spanish": "Spanish"
+  "language_spanish": "Spanish",
+
+  "notification_permission_title": "Stay updated on price drops",
+  "notification_permission_message": "Get notified when products you love go on sale",
+  "notification_permission_enable": "Enable Notifications",
+  "notification_permission_denied": "Notifications are disabled. Enable them in Settings.",
+  "notification_permission_settings": "Open Settings",
+  "notification_prefs_title": "Notifications",
+  "notification_prefs_price_drop": "Price drop alerts",
+  "notification_prefs_price_drop_desc": "Get notified when favorited products drop in price",
+  "price_drop_snackbar_action": "View"
 }

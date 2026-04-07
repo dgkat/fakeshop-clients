@@ -7,6 +7,11 @@ import org.example.fakeshop_clients.features.favorites.di.favoritesModule
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesViewStore
 import org.example.fakeshop_clients.features.home.di.homeModule
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListViewStore
+import org.example.fakeshop_clients.features.notifications.IosPushTokenProvider
+import org.example.fakeshop_clients.features.notifications.di.notificationsModule
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
+import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
+import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
 import org.example.fakeshop_clients.features.productDetail.di.productDetailModule
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailViewStore
 import org.example.fakeshop_clients.features.profile.di.profileModule
@@ -22,6 +27,8 @@ import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val iosModule = module {
+    single<PushTokenProvider> { IosPushTokenProvider() }
+
     factory { (scope: CoroutineScope) ->
         ProductListViewStore(
             scope = scope,
@@ -63,6 +70,13 @@ val iosModule = module {
             mapper = get()
         )
     }
+
+    factory { (scope: CoroutineScope) ->
+        NotificationPrefsViewStore(
+            scope = scope,
+            notificationsService = get()
+        )
+    }
 }
 
 fun initKoinIos(baseUrl: String) = startKoin {
@@ -75,6 +89,7 @@ fun initKoinIos(baseUrl: String) = startKoin {
         profileModule,
         favoritesModule,
         recentsModule,
+        notificationsModule,
         iosModule
     )
 }
@@ -102,5 +117,13 @@ class IOSKoinHelper : KoinComponent {
 
     fun getProfileService(): ProfileService {
         return get()
+    }
+
+    fun getNotificationsService(): NotificationsService {
+        return get()
+    }
+
+    fun getNotificationPrefsViewStore(scope: CoroutineScope): NotificationPrefsViewStore {
+        return get { parametersOf(scope) }
     }
 }

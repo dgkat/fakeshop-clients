@@ -44,5 +44,7 @@ val LoggedInView = FC<LoggedInViewProps> { props ->
                 +getString("logout")
             }
         }
+
+        NotificationPrefsSection()
     }
 }

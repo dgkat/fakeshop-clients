@@ -24,6 +24,7 @@ import org.example.fakeshop_clients.features.favorites.presentation.components.E
 import org.example.fakeshop_clients.features.favorites.presentation.components.FavoritesEmptyContent
 import org.example.fakeshop_clients.features.favorites.presentation.components.LoadingContent
 import org.example.fakeshop_clients.features.favorites.presentation.components.LoginRequiredContent
+import org.example.fakeshop_clients.features.favorites.presentation.components.NotificationPermissionBanner
 import org.example.fakeshop_clients.features.favorites.presentation.components.ProductGrid
 import org.example.fakeshop_clients.features.favorites.presentation.components.RecentsEmptyContent
 import org.example.fakeshop_clients.features.recents.presentation.RecentsEvent
@@ -71,6 +72,8 @@ private fun FavoritesTabbedContent(
             .fillMaxSize()
             .padding(top = contentPadding.calculateTopPadding())
     ) {
+        NotificationPermissionBanner()
+
         TabRow(
             selectedTabIndex = pagerState.currentPage,
             containerColor = MaterialTheme.colorScheme.surface

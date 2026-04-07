@@ -42,6 +42,8 @@ private struct FavoritesTabbedContent: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            NotificationPermissionBanner()
+
             Picker("", selection: $selectedTab) {
                 Text(String(localized: "tab_favorites")).tag(0)
                 Text(String(localized: "tab_recently_seen")).tag(1)
