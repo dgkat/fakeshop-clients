@@ -30,12 +30,15 @@ import org.example.fakeshop_clients.core.data.SafeAuthenticatedApiClient
 import org.example.fakeshop_clients.core.data.SafePublicApiClient
 import org.example.fakeshop_clients.core.data.post
 import org.example.fakeshop_clients.core.error_handling.fold
+import org.example.fakeshop_clients.core.favorites.di.mobileFavoritesCacheModule
 import org.example.fakeshop_clients.core.network.MobileUrlProvider
 import org.example.fakeshop_clients.core.network.UrlProvider
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val mobileInfrastructureModule = module {
+
+    includes(mobileFavoritesCacheModule)
 
     single<UrlProvider> { MobileUrlProvider() }
 

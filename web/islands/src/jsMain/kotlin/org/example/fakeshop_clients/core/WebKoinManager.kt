@@ -2,6 +2,7 @@ package org.example.fakeshop_clients.core
 
 import org.example.fakeshop_clients.core.di.webCoroutineModule
 import org.example.fakeshop_clients.core.di.webInfrastructureModule
+import org.example.fakeshop_clients.core.favorites.di.webFavoritesCacheModule
 import org.example.fakeshop_clients.features.favorites.di.favoritesModule
 import org.example.fakeshop_clients.features.home.di.homeModule
 import org.example.fakeshop_clients.features.product_list.di.productListModule
@@ -25,6 +26,7 @@ object WebKoinManager {
                     productListModule,
                     webSearchModule,
                     favoritesModule,
+                    webFavoritesCacheModule,
                     recentsModule,
                 )
             }

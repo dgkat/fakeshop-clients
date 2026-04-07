@@ -19,6 +19,20 @@ class FavoritesViewStore(
     private val _state = MutableStateFlow(FavoritesState())
     val state: StateFlow<FavoritesState> = _state.asStateFlow()
 
+    init {
+        scope.launch {
+            favoritesService.favoritedIds.collect { ids ->
+                _state.update { current ->
+                    if (current.products.isNotEmpty()) {
+                        current.copy(products = current.products.filter { it.id in ids })
+                    } else {
+                        current
+                    }
+                }
+            }
+        }
+    }
+
     fun onEvent(event: FavoritesEvent) {
         when (event) {
             FavoritesEvent.LoadFavorites -> loadFavorites()

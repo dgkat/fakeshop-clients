@@ -7,4 +7,7 @@ class ProductListViewmodel(
 ) {
     val uiState = store.productListState
 
+    fun toggleFavorite(productId: String) {
+        store.toggleFavorite(productId)
+    }
 }

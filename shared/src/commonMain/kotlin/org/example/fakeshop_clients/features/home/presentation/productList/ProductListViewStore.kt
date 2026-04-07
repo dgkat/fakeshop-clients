@@ -25,6 +25,11 @@ class ProductListViewStore(
         scope.launch {
             loadCategories()
         }
+        scope.launch {
+            favoritesService.favoritedIds.collect { ids ->
+                _productListState.update { it.copy(favoritedProductIds = ids) }
+            }
+        }
     }
 
     suspend fun loadCategories() {
@@ -69,34 +74,15 @@ class ProductListViewStore(
 
         if (allProductIds.isEmpty()) return
 
-        favoritesService.checkBulkFavorites(allProductIds).fold(
-            onSuccess = { favoritedIds ->
-                _productListState.update { it.copy(favoritedProductIds = favoritedIds) }
-            },
-            onError = { }
-        )
+        favoritesService.checkBulkFavorites(allProductIds)
     }
 
     fun toggleFavorite(productId: String) {
-        val currentlyFavorited = productId in _productListState.value.favoritedProductIds
-        val updatedIds = if (currentlyFavorited) {
-            _productListState.value.favoritedProductIds - productId
-        } else {
-            _productListState.value.favoritedProductIds + productId
-        }
-        _productListState.update { it.copy(favoritedProductIds = updatedIds) }
-
+        val currentlyFavorited = productId in favoritesService.favoritedIds.value
         scope.launch {
             favoritesService.toggleFavorite(productId, currentlyFavorited).fold(
                 onSuccess = { },
-                onError = {
-                    _productListState.update {
-                        it.copy(favoritedProductIds = it.favoritedProductIds.let { ids ->
-                            if (currentlyFavorited) ids + productId else ids - productId
-                        })
-                    }
-                    checkBulkFavorites()
-                }
+                onError = { checkBulkFavorites() }
             )
         }
     }

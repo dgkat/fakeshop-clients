@@ -24,9 +24,10 @@ val favoritesModule = module {
         )
     }
 
-    factory<FavoritesService> {
+    single<FavoritesService> {
         FavoritesServiceImpl(
-            repository = get()
+            repository = get(),
+            cache = get()
         )
     }
 }

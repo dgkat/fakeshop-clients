@@ -26,6 +26,15 @@ class ProductDetailViewStore(
 
     private var currentProductId: String? = null
 
+    init {
+        scope.launch {
+            favoritesService.favoritedIds.collect { ids ->
+                val productId = currentProductId ?: return@collect
+                _state.update { it.copy(isFavorited = productId in ids) }
+            }
+        }
+    }
+
     fun onEvent(event: ProductDetailEvent) {
         when (event) {
             is ProductDetailEvent.LoadProduct -> loadProduct(event.productId)
@@ -39,7 +48,8 @@ class ProductDetailViewStore(
         _state.update {
             it.copy(
                 briefState = BriefProductState.Loading,
-                detailedState = DetailedProductState.Loading
+                detailedState = DetailedProductState.Loading,
+                isFavorited = productId in favoritesService.favoritedIds.value
             )
         }
 
@@ -47,7 +57,7 @@ class ProductDetailViewStore(
             coroutineScope {
                 launch { loadBriefProduct(productId) }
                 launch { loadDetailedProduct(productId) }
-                launch { checkFavoriteStatus(productId) }
+                launch { favoritesService.checkFavorite(productId) }
             }
         }
     }
@@ -98,26 +108,18 @@ class ProductDetailViewStore(
         )
     }
 
-    private suspend fun checkFavoriteStatus(productId: String) {
-        favoritesService.checkFavorite(productId).fold(
-            onSuccess = { isFavorited ->
-                _state.update { it.copy(isFavorited = isFavorited) }
-            },
-            onError = { }
-        )
-    }
-
     private fun toggleFavorite() {
+        val productId = currentProductId ?: return
         val currentlyFavorited = _state.value.isFavorited
-        _state.update { it.copy(isFavorited = !currentlyFavorited, isFavoriteLoading = true) }
+        _state.update { it.copy(isFavoriteLoading = true) }
 
         scope.launch {
-            favoritesService.toggleFavorite(currentProductId ?: return@launch, currentlyFavorited).fold(
+            favoritesService.toggleFavorite(productId, currentlyFavorited).fold(
                 onSuccess = {
                     _state.update { it.copy(isFavoriteLoading = false) }
                 },
                 onError = {
-                    _state.update { it.copy(isFavorited = currentlyFavorited, isFavoriteLoading = false) }
+                    _state.update { it.copy(isFavoriteLoading = false) }
                 }
             )
         }
