@@ -54,10 +54,10 @@ class NotificationPrefsViewStore(
 
         scope.launch {
             notificationsService.togglePriceDrop(enabled).fold(
-                onSuccess = { prefs ->
+                onSuccess = {
                     _state.update {
                         it.copy(
-                            priceDropEnabled = prefs.priceDropEnabled,
+                            priceDropEnabled = enabled,
                             isToggling = false,
                             error = null
                         )

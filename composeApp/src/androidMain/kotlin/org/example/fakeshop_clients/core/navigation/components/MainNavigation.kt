@@ -69,6 +69,10 @@ fun MainNavigation(initialProductId: String? = null) {
                         navController.navigate(Route.ProductDetail.createRoute(event.productId))
                     }
                 }
+
+                is PushNotificationEvent.OpenProduct -> {
+                    navController.navigate(Route.ProductDetail.createRoute(event.productId))
+                }
             }
         }
     }

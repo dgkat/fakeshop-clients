@@ -175,6 +175,15 @@ class AxiosClient(
         axios.post("$baseUrl$path", bodyObject).await()
     }
 
+    @OptIn(InternalSerializationApi::class)
+    override suspend fun <B : Any> putNoContent(path: String, body: B, bodyType: KClass<B>) {
+        @Suppress("UNCHECKED_CAST")
+        val bodySerializer = bodyType.serializer() as SerializationStrategy<B>
+        val bodyJson = jsonParser.encodeToString(bodySerializer, body)
+        val bodyObject = JSON.parse<dynamic>(bodyJson)
+        axios.put("$baseUrl$path", bodyObject).await()
+    }
+
     override suspend fun deleteNoContent(path: String) {
         axios.delete("$baseUrl$path").await()
     }

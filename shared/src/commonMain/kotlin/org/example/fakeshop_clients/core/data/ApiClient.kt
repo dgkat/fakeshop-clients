@@ -8,6 +8,7 @@ interface ApiClient {
     suspend fun <T : Any, B : Any> put(path: String, body: B, responseType: KClass<T>): T
     suspend fun <T : Any> delete(path: String, responseType: KClass<T>): T
     suspend fun <B : Any> postNoContent(path: String, body: B, bodyType: KClass<B>)
+    suspend fun <B : Any> putNoContent(path: String, body: B, bodyType: KClass<B>)
     suspend fun deleteNoContent(path: String)
 
     fun clearTokenCache() {}
@@ -31,4 +32,8 @@ suspend inline fun <reified T : Any> ApiClient.delete(path: String): T {
 
 suspend inline fun <reified B : Any> ApiClient.postNoContent(path: String, body: B) {
     return postNoContent(path, body, B::class)
+}
+
+suspend inline fun <reified B : Any> ApiClient.putNoContent(path: String, body: B) {
+    return putNoContent(path, body, B::class)
 }

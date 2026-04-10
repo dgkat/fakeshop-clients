@@ -4,7 +4,7 @@ import org.example.fakeshop_clients.core.data.SafeAuthenticatedApiClient
 import org.example.fakeshop_clients.core.data.deleteNoContent
 import org.example.fakeshop_clients.core.data.get
 import org.example.fakeshop_clients.core.data.postNoContent
-import org.example.fakeshop_clients.core.data.put
+import org.example.fakeshop_clients.core.data.putNoContent
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.network.UrlProvider
@@ -29,7 +29,7 @@ class NotificationsDatasourceImpl(
         return authClient.get("${baseUrl()}/notification-preferences")
     }
 
-    override suspend fun updatePreferences(request: NotificationPreferencesRequest): Result<NotificationPreferencesResponse, NetworkError> {
-        return authClient.put("${baseUrl()}/notification-preferences", request)
+    override suspend fun updatePreferences(request: NotificationPreferencesRequest): Result<Unit, NetworkError> {
+        return authClient.putNoContent("${baseUrl()}/notification-preferences", request)
     }
 }

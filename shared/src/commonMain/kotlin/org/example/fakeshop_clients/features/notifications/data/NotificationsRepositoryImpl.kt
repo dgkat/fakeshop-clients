@@ -26,8 +26,8 @@ class NotificationsRepositoryImpl(
     }
 
     override suspend fun updatePreferences(priceDropEnabled: Boolean): Result<NotificationPreferences, NetworkError> {
-        return datasource.updatePreferences(NotificationPreferencesRequest(priceDropEnabled)).map { response ->
-            NotificationPreferences(priceDropEnabled = response.priceDropEnabled)
+        return datasource.updatePreferences(NotificationPreferencesRequest(priceDropEnabled)).map {
+            NotificationPreferences(priceDropEnabled = priceDropEnabled)
         }
     }
 }

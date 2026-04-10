@@ -9,7 +9,9 @@ import org.example.fakeshop_clients.features.home.di.homeModule
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListViewStore
 import org.example.fakeshop_clients.features.notifications.IosPushTokenProvider
 import org.example.fakeshop_clients.features.notifications.di.notificationsModule
+import org.example.fakeshop_clients.features.notifications.domain.NoOpPendingDeviceTokenCache
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
+import org.example.fakeshop_clients.features.notifications.domain.PendingDeviceTokenCache
 import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
 import org.example.fakeshop_clients.features.productDetail.di.productDetailModule
@@ -28,6 +30,8 @@ import org.koin.dsl.module
 
 val iosModule = module {
     single<PushTokenProvider> { IosPushTokenProvider() }
+
+    single<PendingDeviceTokenCache> { NoOpPendingDeviceTokenCache() }
 
     factory { (scope: CoroutineScope) ->
         ProductListViewStore(

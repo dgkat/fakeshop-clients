@@ -62,6 +62,15 @@ suspend inline fun <reified B : Any> BaseSafeApiClient.postNoContent(path: Strin
     }
 }
 
+suspend inline fun <reified B : Any> BaseSafeApiClient.putNoContent(path: String, body: B): Result<Unit, NetworkError> {
+    return try {
+        client.putNoContent(path, body)
+        Result.Success(Unit)
+    } catch (e: Exception) {
+        Result.Error(exceptionMapper.map(e))
+    }
+}
+
 suspend fun BaseSafeApiClient.deleteNoContent(path: String): Result<Unit, NetworkError> {
     return try {
         client.deleteNoContent(path)

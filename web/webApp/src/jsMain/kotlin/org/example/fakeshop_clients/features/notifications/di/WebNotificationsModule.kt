@@ -2,7 +2,9 @@ package org.example.fakeshop_clients.features.notifications.di
 
 import org.example.fakeshop_clients.features.notifications.WebNotificationPermissionManager
 import org.example.fakeshop_clients.features.notifications.WebPushTokenProvider
+import org.example.fakeshop_clients.features.notifications.domain.NoOpPendingDeviceTokenCache
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
+import org.example.fakeshop_clients.features.notifications.domain.PendingDeviceTokenCache
 import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
 import org.koin.core.qualifier.named
@@ -15,6 +17,8 @@ val webNotificationsModule = module {
     single<PushTokenProvider> {
         WebPushTokenProvider(vapidKey = "YOUR_VAPID_KEY_HERE")
     }
+
+    single<PendingDeviceTokenCache> { NoOpPendingDeviceTokenCache() }
 
     single<NotificationPermissionManager> {
         WebNotificationPermissionManager()

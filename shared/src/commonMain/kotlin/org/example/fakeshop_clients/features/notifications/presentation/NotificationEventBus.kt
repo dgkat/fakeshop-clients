@@ -17,4 +17,6 @@ sealed class PushNotificationEvent {
         val title: String,
         val body: String
     ) : PushNotificationEvent()
+
+    data class OpenProduct(val productId: String) : PushNotificationEvent()
 }

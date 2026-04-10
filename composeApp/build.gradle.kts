@@ -46,6 +46,8 @@ kotlin {
             //Koin
             implementation(libs.koin.android)
 
+            // DataStore (used by pending device token cache)
+            implementation(libs.androidx.datastore.preferences)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
