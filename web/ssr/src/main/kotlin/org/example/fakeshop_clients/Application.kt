@@ -11,6 +11,9 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.example.fakeshop_clients.core.di.jvmInfrastructureModule
 import org.example.fakeshop_clients.core.i18n.WebStrings
 import org.example.fakeshop_clients.features.homePage.presentation.homeRoute
@@ -38,7 +41,30 @@ fun Application.configureKoin() {
     }
 }
 
+private data class FirebaseWebConfig(
+    val configJson: String,
+    val vapidKeyJson: String,
+)
+
+private fun Application.loadFirebaseWebConfig(): FirebaseWebConfig {
+    val cfg = environment.config.config("firebase")
+    val configMap = mapOf(
+        "apiKey" to cfg.property("apiKey").getString(),
+        "authDomain" to cfg.property("authDomain").getString(),
+        "projectId" to cfg.property("projectId").getString(),
+        "storageBucket" to cfg.property("storageBucket").getString(),
+        "messagingSenderId" to cfg.property("messagingSenderId").getString(),
+        "appId" to cfg.property("appId").getString(),
+    )
+    val mapSerializer = MapSerializer(String.serializer(), String.serializer())
+    return FirebaseWebConfig(
+        configJson = Json.encodeToString(mapSerializer, configMap),
+        vapidKeyJson = Json.encodeToString(String.serializer(), cfg.property("vapidKey").getString()),
+    )
+}
+
 fun Application.configureRouting() {
+    val firebase = loadFirebaseWebConfig()
     routing {
         // Serve static files (CSS, images, etc.)
         staticResources("/common", "common") {
@@ -83,7 +109,7 @@ fun Application.configureRouting() {
             // Product routes
             productRoutes()
             // Spa routes
-            spaRoutes()
+            spaRoutes(firebase.configJson, firebase.vapidKeyJson)
         }
     }
 }

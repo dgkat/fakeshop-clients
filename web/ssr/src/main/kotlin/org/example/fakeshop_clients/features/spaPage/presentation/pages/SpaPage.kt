@@ -14,7 +14,13 @@ import kotlinx.html.unsafe
 import org.example.fakeshop_clients.core.assets.AssetManifest
 import org.example.fakeshop_clients.core.i18n.WebStrings
 
-fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: String) {
+fun HTML.spaPage(
+    locale: String,
+    strings: Map<String, String>,
+    stringsJson: String,
+    firebaseConfigJson: String,
+    firebaseVapidKeyJson: String,
+) {
     lang = locale
     head {
         meta(charset = "UTF-8")
@@ -52,22 +58,12 @@ fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: Stri
             }
         }
 
-        // Firebase Cloud Messaging config. Replace placeholder values with
-        // your project's config from Firebase Console (Project settings → Web app),
-        // and the VAPID public key from Project settings → Cloud Messaging → Web Push certificates.
+        // Firebase Cloud Messaging config — injected from application.conf / env vars.
+        // These values are public (they ship to every browser); prod overrides are set
+        // via FIREBASE_* env vars to point at a different Firebase project than dev.
         script {
             unsafe {
-                +"""
-                window.__FIREBASE_CONFIG__ = {
-                    apiKey: "AIzaSyD9SCsHb9x0cQzmv-E9heCkj1kg36Bf_68",
-                    authDomain: "fakeshop-dev.firebaseapp.com",
-                    projectId: "fakeshop-dev",
-                    storageBucket: "fakeshop-dev.firebasestorage.app",
-                    messagingSenderId: "606435380761",
-                    appId: "1:606435380761:web:db13728b8ee53a4e2fa488"
-                };
-                window.__FIREBASE_VAPID_KEY__ = "BOcWNVeCZGwz7_CFGRAkdZ8UkU0H9y6S6U99-FJbEErgZf8nC1wZ1z3kttIofT032n_0cL6k1LEPi3NKpSsSzuc";
-                """.trimIndent()
+                +"window.__FIREBASE_CONFIG__ = $firebaseConfigJson; window.__FIREBASE_VAPID_KEY__ = $firebaseVapidKeyJson;"
             }
         }
     }

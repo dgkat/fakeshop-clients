@@ -3,21 +3,15 @@
 // Uses raw Web Push (no Firebase SDK in SW) — FCM delivers standard web push
 // payloads that the browser decrypts before handing to the push event.
 
-console.log('[fakeshop-sw] script loaded');
-
 self.addEventListener('install', function(event) {
-    console.log('[fakeshop-sw] install');
     self.skipWaiting();
 });
 
 self.addEventListener('activate', function(event) {
-    console.log('[fakeshop-sw] activate');
     event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('push', function(event) {
-    console.log('[fakeshop-sw] push event received', event);
-
     var title = 'FakeShop';
     var options = {
         body: '',
@@ -29,7 +23,6 @@ self.addEventListener('push', function(event) {
     if (event.data) {
         try {
             var data = event.data.json();
-            console.log('[fakeshop-sw] push payload', data);
             var notification = data.notification || {};
             var payload = data.data || {};
             title = notification.title || title;
@@ -44,15 +37,11 @@ self.addEventListener('push', function(event) {
             }
         }
     } else {
-        console.log('[fakeshop-sw] push event had no data — showing placeholder');
         options.body = 'Test push (no payload)';
     }
 
     event.waitUntil(
         self.registration.showNotification(title, options)
-            .then(function() {
-                console.log('[fakeshop-sw] showNotification resolved');
-            })
             .catch(function(err) {
                 console.error('[fakeshop-sw] showNotification rejected', err);
             })
@@ -60,7 +49,6 @@ self.addEventListener('push', function(event) {
 });
 
 self.addEventListener('notificationclick', function(event) {
-    console.log('[fakeshop-sw] notificationclick', event.notification.data);
     event.notification.close();
 
     var data = event.notification.data || {};
