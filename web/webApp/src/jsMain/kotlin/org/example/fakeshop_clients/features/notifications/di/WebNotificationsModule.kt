@@ -14,9 +14,7 @@ val webNotificationsModule = module {
 
     includes(notificationsModule)
 
-    single<PushTokenProvider> {
-        WebPushTokenProvider(vapidKey = "YOUR_VAPID_KEY_HERE")
-    }
+    single<PushTokenProvider> { WebPushTokenProvider() }
 
     single<PendingDeviceTokenCache> { NoOpPendingDeviceTokenCache() }
 

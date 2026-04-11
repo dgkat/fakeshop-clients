@@ -21,6 +21,7 @@ import react.useMemo
 import react.useState
 import web.cssom.ClassName
 import web.html.InputType
+import web.html.checkbox
 
 val NotificationPrefsSection = FC<Props> {
     val store = useMemo { getKoin().get<NotificationPrefsViewStore>() }

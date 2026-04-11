@@ -10,6 +10,10 @@ import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.core.i18n.getString
 import org.example.fakeshop_clients.core.presentation.components.ProductCardWithHeart
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
+import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
+import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
+import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
 import org.example.fakeshop_clients.features.recents.presentation.RecentsEvent
 import org.example.fakeshop_clients.features.recents.presentation.RecentsState
 import org.koin.core.context.GlobalContext
@@ -32,6 +36,7 @@ val FavoritesPage = FC<Props> {
     var favoritesState by useState(FavoritesState())
     var recentsState by useState(RecentsState())
     var selectedTab by useState(0)
+    var showNotificationBanner by useState(false)
 
     // Check login and observe states
     useEffectWithCleanup(viewModel) {
@@ -44,6 +49,8 @@ val FavoritesPage = FC<Props> {
                 isLoggedIn = result.data
                 if (result.data) {
                     viewModel.onFavoritesEvent(FavoritesEvent.LoadFavorites)
+                    val permission = (window.asDynamic().Notification?.permission as? String) ?: "default"
+                    showNotificationBanner = permission == "default"
                 }
             } else {
                 isLoggedIn = false
@@ -82,6 +89,12 @@ val FavoritesPage = FC<Props> {
                 LoginRequiredContent {}
             }
             true -> {
+                if (showNotificationBanner) {
+                    NotificationEnableBanner {
+                        this.onDismiss = { showNotificationBanner = false }
+                    }
+                }
+
                 // Tabs
                 div {
                     className = ClassName("favorites-tabs")
@@ -263,6 +276,60 @@ val ErrorContent = FC<ErrorContentProps> { props ->
             className = ClassName("btn-primary")
             onClick = { props.onRetry() }
             +getString("retry")
+        }
+    }
+}
+
+// MARK: - Notification Permission Banner
+
+external interface NotificationEnableBannerProps : Props {
+    var onDismiss: () -> Unit
+}
+
+val NotificationEnableBanner = FC<NotificationEnableBannerProps> { props ->
+    val koin = GlobalContext.get()
+    val permissionManager = useMemo { koin.get<NotificationPermissionManager>() }
+    val pushTokenProvider = useMemo { koin.get<PushTokenProvider>() }
+    val notificationsService = useMemo { koin.get<NotificationsService>() }
+    var isEnabling by useState(false)
+
+    div {
+        className = ClassName("notification-enable-banner")
+
+        div {
+            className = ClassName("notification-enable-banner-text")
+            p {
+                className = ClassName("notification-enable-banner-title")
+                +getString("notification_permission_title")
+            }
+            p {
+                className = ClassName("notification-enable-banner-message")
+                +getString("notification_permission_message")
+            }
+        }
+
+        button {
+            className = ClassName("btn-primary")
+            disabled = isEnabling
+            onClick = {
+                if (!isEnabling) {
+                    isEnabling = true
+                    MainScope().launch {
+                        try {
+                            val status = permissionManager.requestPermission()
+                            if (status == NotificationPermissionStatus.GRANTED) {
+                                val token = pushTokenProvider.getCurrentToken()
+                                if (token != null) {
+                                    notificationsService.registerDeviceToken(token, "web")
+                                }
+                            }
+                        } finally {
+                            props.onDismiss()
+                        }
+                    }
+                }
+            }
+            +if (isEnabling) getString("processing") else getString("notification_permission_enable")
         }
     }
 }
