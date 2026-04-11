@@ -65,66 +65,67 @@ struct ProductCard: View {
     let onClick: () -> Void
     let onToggleFavorite: () -> Void
 
+    @State private var isPressed: Bool = false
+
     var body: some View {
-        Button(action: onClick) {
-            VStack(alignment: .leading, spacing: 0) {
-                ZStack(alignment: .topTrailing) {
-                    // Product Image
-                    AsyncImage(url: URL(string: product.imageUrl)) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Rectangle()
-                            .fill(FakeShopColors.surfaceVariant)
-                            .overlay(
-                                ProgressView()
-                            )
-                    }
-                    .frame(width: 160, height: 160)
-                    .clipped()
-
-                    // Favorite button
-                    Button(action: onToggleFavorite) {
-                        Image(systemName: isFavorited ? "heart.fill" : "heart")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(isFavorited ? FakeShopColors.error : .white)
-                            .shadow(color: .black.opacity(0.35), radius: 4, x: 0, y: 1)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .padding(8)
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack(alignment: .topTrailing) {
+                // Product Image
+                AsyncImage(url: URL(string: product.imageUrl)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Rectangle()
+                        .fill(FakeShopColors.surfaceVariant)
+                        .overlay(
+                            ProgressView()
+                        )
                 }
+                .frame(width: 160, height: 160)
+                .clipped()
 
-                // Product Info
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(product.name)
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-
-                    Text(String(format: "$%.2f", product.price))
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(FakeShopColors.primary)
+                // Favorite button
+                Button(action: onToggleFavorite) {
+                    Image(systemName: isFavorited ? "heart.fill" : "heart")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(isFavorited ? FakeShopColors.error : .white)
+                        .shadow(color: .black.opacity(0.35), radius: 4, x: 0, y: 1)
                 }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .buttonStyle(PlainButtonStyle())
+                .padding(8)
             }
-            .frame(width: 160)
-            .background(FakeShopColors.surface)
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-        }
-        .buttonStyle(CardButtonStyle())
-    }
-}
 
-struct CardButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+            // Product Info
+            VStack(alignment: .leading, spacing: 4) {
+                Text(product.name)
+                    .font(.body)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+
+                Text(String(format: "$%.2f", product.price))
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(FakeShopColors.primary)
+            }
+            .padding(12)
+        }
+        .frame(width: 160)
+        .background(FakeShopColors.surface)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .contentShape(Rectangle())
+        .scaleEffect(isPressed ? 0.97 : 1.0)
+        .animation(.easeInOut(duration: 0.1), value: isPressed)
+        .onTapGesture {
+            onClick()
+        }
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
     }
 }
