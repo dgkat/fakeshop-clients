@@ -157,6 +157,170 @@ Required repository secrets:
 
 ---
 
+### Push Notifications
+
+Price-drop push notifications are wired up on Android and Web. iOS is **not yet implemented** — the shared module is ready, but the `iosApp` target still needs Firebase SDK integration and an `AppDelegate` (see `FEATURE_NOTIFICATIONS_CLIENT.md` Step 8).
+
+#### Architecture
+
+| Platform | Delivery | SDK | Token source |
+|---|---|---|---|
+| Android | FCM (native) | `firebase-messaging` via `google-services` plugin | `FirebaseMessaging.getInstance().token` |
+| iOS | FCM → APNs (pending) | `firebase-ios-sdk` (pending) | `Messaging.messaging().token` (pending) |
+| Web | Firebase JS SDK (compat) + Service Worker + VAPID | Lazy-loaded from `gstatic.com` on first use | `firebase.messaging().getToken({ vapidKey, serviceWorkerRegistration })` |
+
+**Shared module** (`shared/.../features/notifications`) owns the datasource, repository, service, `PushTokenProvider` + `NotificationPermissionManager` interfaces, and the `NotificationPrefsViewStore`. Each platform provides its own implementations of the two interfaces and wires them into Koin.
+
+**Token lifecycle** — token is obtained once permission is granted, cached locally (Android uses `AndroidPendingDeviceTokenCache` to hold the token until the user is logged in), then POSTed to `/api/{mobile|web}/device-tokens`. On logout, `ProfileViewStore.handleLogout()` DELETEs the current token. Token refresh (Android `onNewToken`, web re-subscribe) re-registers automatically.
+
+**Foreground delivery** — messages arriving while the app is open are surfaced via `NotificationEventBus` (emits `PushNotificationEvent.PriceDrop`). Android shows a snackbar with a "View" action; web shows an OS notification (the service worker always displays, regardless of foreground state).
+
+**Deep-link on tap** — the push payload carries `data.productId`. Tapping navigates to the product detail screen on each platform (Android: `MainActivity` intent extra → `navController.navigate`; web: service worker `notificationclick` → `clients.openWindow('/{locale}/product/{productId}')`).
+
+#### Firebase projects: dev vs prod
+
+**Use two separate Firebase projects** — one for local development, one for production. This keeps test pushes out of real users' devices and lets you rotate keys independently.
+
+| Value | Dev source | Prod source |
+|---|---|---|
+| Android `google-services.json` | `composeApp/google-services.json` (gitignored, hand-placed) | Same path, but pulled from a CI secret at build time |
+| Web Firebase config (`apiKey`, `appId`, …) | Defaults hardcoded in `web/ssr/src/main/resources/application.conf` | `FIREBASE_*` env vars on the SSR container (override the conf defaults) |
+| Web VAPID public key | `firebase.vapidKey` default in `application.conf` | `FIREBASE_VAPID_KEY` env var |
+
+The Firebase web config values (`apiKey`, `projectId`, etc.) **are public** — they ship to every browser. The real security boundary is API key restrictions in the Google Cloud Console (restrict to your prod domain) and Firebase Security Rules. Injecting via env vars is about project separation, not secrecy.
+
+#### Dev setup
+
+**Android** — download `google-services.json` from your dev Firebase project (Project settings → Your apps → Android app) and drop it at `composeApp/google-services.json`. The file is already in `.gitignore`. Build + run as normal:
+
+```shell
+./gradlew :composeApp:assembleDebug
+```
+
+**Web** — nothing to do. `application.conf` ships with dev Firebase config baked in, and the VAPID key is preconfigured. Run the SSR server normally:
+
+```shell
+./gradlew :web:common:runWeb
+```
+
+Open `/favorites`, accept the notification permission when prompted (or from the Profile page), and send a test push via Firebase Console → Cloud Messaging → "Send test message" (using the token printed in the backend logs after registration).
+
+#### Prod setup
+
+**Android prod build** — replace `composeApp/google-services.json` with the one from your prod Firebase project before running `assembleRelease`. In CI this is done by decoding a base64-encoded secret into the file path just before the Gradle build.
+
+**Web prod build** — the SSR container reads Firebase config from env vars. Set these on the container (via `docker-compose.yml` `environment:` or an `.env` file on the VPS):
+
+```shell
+FIREBASE_API_KEY=...
+FIREBASE_AUTH_DOMAIN=<prod-project>.firebaseapp.com
+FIREBASE_PROJECT_ID=<prod-project>
+FIREBASE_STORAGE_BUCKET=<prod-project>.firebasestorage.app
+FIREBASE_MESSAGING_SENDER_ID=...
+FIREBASE_APP_ID=...
+FIREBASE_VAPID_KEY=...
+```
+
+Each overrides the corresponding default in `application.conf`. Missing values fall back to the dev defaults — if you forget to set one, you'll ship dev Firebase config to prod users. **Double-check all seven are set before the first prod deploy.**
+
+The service worker (`/firebase-messaging-sw.js`) does not need any config — it uses raw Web Push and the browser decrypts FCM payloads before handing them to the `push` event.
+
+#### Wiring prod secrets
+
+**Web — `.env` file on the VPS**
+
+The seven `FIREBASE_*` values live in an `.env` file on the VPS, next to `docker-compose.yml`. They never touch GitHub Actions, never appear in CI logs, and never traverse SSH. Rotating a key is a one-line edit on the box plus a `docker compose up -d`.
+
+**First-time setup** — one-shot, performed manually on the VPS:
+
+1. Grab the values from Firebase Console → Project settings → Your apps → Web app (for `apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`) and Project settings → Cloud Messaging → Web Push certificates (for `vapidKey`). Use the **prod** Firebase project, not dev.
+
+2. SSH into the VPS and open the compose directory:
+   ```shell
+   ssh <user>@<vps-host>
+   cd /opt/fakeshop/prod_env
+   ```
+
+3. Create `.env` next to `docker-compose.yml` with the seven values:
+   ```shell
+   cat > .env <<'EOF'
+   FIREBASE_API_KEY=AIza...
+   FIREBASE_AUTH_DOMAIN=fakeshop-prod.firebaseapp.com
+   FIREBASE_PROJECT_ID=fakeshop-prod
+   FIREBASE_STORAGE_BUCKET=fakeshop-prod.firebasestorage.app
+   FIREBASE_MESSAGING_SENDER_ID=123456789012
+   FIREBASE_APP_ID=1:123456789012:web:abcdef1234567890
+   FIREBASE_VAPID_KEY=B...
+   EOF
+   ```
+
+4. Lock it down so only the deploy user can read it:
+   ```shell
+   chmod 600 .env
+   ```
+
+5. Edit `docker-compose.yml` and add an `env_file:` entry under the `fakeshop-web` service (Compose reads the file at `up` time and injects every line as an env var into the container):
+   ```yaml
+   services:
+     fakeshop-web:
+       image: ghcr.io/<owner>/fakeshop-web:latest
+       env_file:
+         - .env
+       # ...existing config (ports, restart policy, BACKEND_BASE_URL, etc.)
+   ```
+   If `BACKEND_BASE_URL` is currently set inline under `environment:`, leave it there — `env_file:` and `environment:` merge, with `environment:` taking precedence.
+
+6. Restart the container to pick up the new env:
+   ```shell
+   docker compose up -d fakeshop-web
+   ```
+
+7. Verify the prod project is actually being served: open `https://<your-domain>/en/favorites` in a browser, open DevTools → Console, and run:
+   ```js
+   window.__FIREBASE_CONFIG__
+   ```
+   The `projectId` should be your prod project. If it's still `fakeshop-dev`, the env vars didn't reach the container — check `docker compose config` on the VPS to see the merged config and confirm `.env` is being read.
+
+**Rotating a key later** — SSH in, edit `.env`, `docker compose up -d fakeshop-web`. Nothing else to do. The next deploy from `web/prod/deploy/**` picks up the new values automatically because the env file is read on every `up`.
+
+**Backup** — this `.env` is the only place these values exist outside Firebase Console. If you rebuild the VPS, you'll need to recreate it from scratch or restore it from a secure backup (e.g. 1Password, encrypted tarball). Add it to whatever disaster-recovery checklist you keep for the VPS.
+
+**Android — GitHub Actions secret (when a release workflow is added)**
+
+Android's `google-services.json` is a file, not env vars, so the VPS-`.env` pattern doesn't apply. Store it as a base64-encoded GitHub secret and decode it before the Gradle build:
+
+| Secret | Notes |
+|---|---|
+| `GOOGLE_SERVICES_JSON_PROD` | Base64-encoded `google-services.json` from the prod Firebase project |
+
+Encode locally:
+```shell
+base64 -i composeApp/google-services.json | pbcopy
+```
+
+Decode in the release workflow:
+```yaml
+- name: Restore google-services.json
+  run: echo "${{ secrets.GOOGLE_SERVICES_JSON_PROD }}" | base64 -d > composeApp/google-services.json
+- run: ./gradlew :composeApp:assembleRelease
+```
+
+#### iOS — remaining work
+
+The shared module already exposes everything iOS needs (`NotificationsService`, `NotificationPrefsViewStore`, `NotificationEventBus`). To finish the iOS side:
+
+1. Add `firebase-ios-sdk` via SPM (FirebaseMessaging product) in Xcode
+2. Add `GoogleService-Info.plist` (dev + prod variants managed per scheme)
+3. Enable **Push Notifications** capability and **Background Modes → Remote notifications**
+4. Create `AppDelegate.swift` with `FirebaseApp.configure()` + `MessagingDelegate` + `UNUserNotificationCenterDelegate`
+5. Implement `IOSPushTokenProvider` and `IOSNotificationPermissionManager` in `iosMain`
+6. Wire them into `iosModule.kt` and expose via `IOSKoinHelper`
+7. Add a `NotificationRouter` `ObservableObject` and observe it from `MainTabView` for deep-linking
+
+Full breakdown in `FEATURE_NOTIFICATIONS_CLIENT.md` → Step 8.
+
+---
+
 ### Production Hardening
 
 The following changes are in place to make production builds safe and performant. Some introduce new **required steps** when upgrading dependencies or building for release.
