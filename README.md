@@ -157,6 +157,83 @@ Required repository secrets:
 
 ---
 
+### Favorites & Recently Viewed
+
+Users can heart products to save them as favorites and the backend records every product detail view as a "recently seen" entry (max 50, 7-day TTL). Both lists live behind a single **Favorites** tab in the app (Favorites / Recently Seen segmented tabs).
+
+#### Backend endpoints
+
+All routes require authentication. Web uses `/api/web/...`, mobile uses `/api/mobile/...`.
+
+| Method | Path | Purpose |
+|---|---|---|
+| `POST` | `/favorites/{productId}` | Add to favorites (201, empty body) |
+| `DELETE` | `/favorites/{productId}` | Remove from favorites (204, empty body) |
+| `GET` | `/favorites` | Enriched `BriefProduct` list |
+| `GET` | `/favorites/check?productId={id}` | `{ "isFavorited": bool }` |
+| `POST` | `/favorites/check-bulk` | `{ favoritedProductIds: [...] }` from a list of ids |
+| `GET` | `/recents` | Enriched `BriefProduct` list, most-recent first |
+
+Recents are recorded automatically by the gateway on `GET /products/{id}` — no client write needed.
+
+#### Screens that use favorites
+
+| Screen | Interaction |
+|---|---|
+| **Home / product list** (Android, iOS, Web islands, SPA home) | Calls `checkBulkFavorites` after products load, renders filled hearts on each card, `toggleFavorite` on tap |
+| **Product detail** (all platforms) | Calls `checkFavorite(id)` on load, toggles via heart button, state reflected immediately across other screens |
+| **Favorites tab** (`/favorites` on web, Favorites tab on mobile) | Calls `getFavorites()` on mount, supports swipe-to-remove / heart-tap to remove |
+| **Recently Seen tab** (same screen, second tab) | Lazy-loads via `getRecentlyViewed()` the first time the user switches to the tab |
+
+#### Shared module architecture
+
+```
+shared/…/features/favorites/
+├── data/
+│   ├── FavoritesCache.kt              ← interface — in-memory StateFlow<Set<String>>
+│   ├── FavoritesDatasource(Impl).kt   ← Ktor/Axios HTTP calls
+│   ├── FavoritesRepositoryImpl.kt     ← maps DTOs → domain, updates cache on every response
+│   ├── models/                        ← BulkFavoriteCheck{Request,Response}, FavoriteCheckResponse
+│   └── MobileFavoritesCache.kt        ← mobileMain impl (plain MutableStateFlow)
+├── domain/
+│   ├── FavoritesRepository.kt
+│   ├── FavoritesService(Impl).kt      ← exposes favoritedIds: StateFlow<Set<String>>
+└── presentation/
+    ├── FavoritesError.kt              ← sealed interface (Network only)
+    ├── FavoritesState / Event
+    └── FavoritesViewStore.kt          ← collects service.favoritedIds, filters on removal
+
+shared/…/features/recents/             ← read-only mirror of favorites, no cache, just fetch + state
+shared/src/jsMain/…/features/favorites/data/WebFavoritesCache.kt   ← sessionStorage-backed cache
+```
+
+**The `FavoritesCache` singleton is the source of truth for heart state.** Every ViewStore that cares about favorites (`ProductListViewStore`, `ProductDetailViewStore`, `FavoritesViewStore`) observes `favoritesService.favoritedIds` and reacts to changes — so liking a product anywhere instantly updates every other screen without re-fetching. The repository writes the cache after every API response (`getFavorites`, `checkFavorite`, `checkBulkFavorites`) and toggles it optimistically on `toggleFavorite`, reverting if the HTTP call fails.
+
+`ProfileViewStore.handleLogout()` calls `favoritesService.clearCache()` after a successful logout so the next user starts clean.
+
+#### Per-platform state wiring
+
+| Platform | Cache impl | How the UI observes state |
+|---|---|---|
+| **Android** | `MobileFavoritesCache` (singleton via `mobileFavoritesCacheModule`) | `FavoritesViewModel` wraps `FavoritesViewStore` + `RecentsViewStore` with `viewModelScope`, exposes their `StateFlow`s directly; Compose uses `collectAsStateWithLifecycle()` |
+| **iOS** | `MobileFavoritesCache` (same mobileMain singleton) | `FavoritesViewModel: ObservableObject` creates a `CoroutineScope` via `ScopeHelper`, resolves the ViewStores from Koin, bridges their `StateFlow` to `@Published` via `for try await` tasks in `init`, cancels the scope in `deinit` |
+| **Web islands** (home page) | `WebFavoritesCache` (sessionStorage-backed) registered in `WebKoinManager` via `webFavoritesCacheModule` | Islands `ProductListViewmodel` delegates to `ProductListViewStore`; `ProductCard` reads `isFavorited = product.id in state.favoritedProductIds` and calls `vm.toggleFavorite(id)` |
+| **Web SPA** (`/favorites`) | `WebFavoritesCache` (same jsMain singleton, but a **new Koin context** per page load) | `FavoritesPage` FC resolves `FavoritesViewModel` from Koin, uses `useEffectWithCleanup` to collect both state flows via `launchIn(MainScope())`, cancels jobs on unmount |
+
+**Why web needs sessionStorage** — islands (home) and SPA (`/favorites`) are separate webpack bundles with separate Koin contexts. A full-page navigation from `/` to `/favorites` tears down one Koin graph and starts another. `WebFavoritesCache` persists the id set to `sessionStorage["favorited_ids"]` on every mutation and reads it back in `init`, so the SPA sees the user's up-to-date favorite set instantly (a fresh `checkBulkFavorites` / `getFavorites` call still runs in the background to reconcile with the backend).
+
+#### DI graph
+
+- `favoritesModule` (commonMain) — datasource, repository, service. `FavoritesService` is a `single` so the observable `StateFlow` is shared across all consumers.
+- `mobileFavoritesCacheModule` (mobileMain) — binds `FavoritesCache` to `MobileFavoritesCache`, included from `mobileInfrastructureModule`.
+- `webFavoritesCacheModule` (jsMain) — binds `FavoritesCache` to `WebFavoritesCache`, wired into both `WebKoinManager` (islands) and `WebCoreModule` (SPA).
+- `recentsModule` (commonMain) — datasource + repository + service. No cache: recents are a pure read model.
+- Platform UI modules (`androidFavoritesModule`, `webFavoritesModule`, iOS's `iosModule`) provide the ViewStore / ViewModel factories and inject `CoroutineScope` appropriately.
+
+See `FEATURE_INTERACTIONS_CLIENT.md` for the original implementation plan and `FAVORITES_STATE_SYNC_PLAN.md` for the cache-based cross-screen sync design.
+
+---
+
 ### Push Notifications
 
 Price-drop push notifications are wired up on Android and Web. iOS is **not yet implemented** — the shared module is ready, but the `iosApp` target still needs Firebase SDK integration and an `AppDelegate` (see `FEATURE_NOTIFICATIONS_CLIENT.md` Step 8).
