@@ -8,9 +8,9 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.SvgDecoder
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.androidCoreModule
+import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
@@ -40,7 +40,7 @@ class FakeShopApp : Application() , ImageLoaderFactory{
     }
 
     private fun registerDeviceTokenIfNeeded() {
-        val appScope = CoroutineScope(SupervisorJob())
+        val appScope = getKoin().get<CoroutineScope>(AppScopeQualifier)
         appScope.launch {
             val permissionManager = getKoin().get<NotificationPermissionManager>()
             if (permissionManager.getPermissionStatus() != NotificationPermissionStatus.GRANTED) return@launch

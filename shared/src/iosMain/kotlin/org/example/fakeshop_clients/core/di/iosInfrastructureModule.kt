@@ -3,7 +3,10 @@ package org.example.fakeshop_clients.core.di
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.http.Url
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
+import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
 import org.example.fakeshop_clients.core.concurrency.IosDispatcherProvider
 import org.example.fakeshop_clients.core.data.KeychainTokenStorage
@@ -25,5 +28,9 @@ fun iosInfrastructureModule(baseUrl: String) = module {
 
     single<DispatcherProvider> {
         IosDispatcherProvider()
+    }
+
+    single<CoroutineScope>(AppScopeQualifier) {
+        CoroutineScope(SupervisorJob() + get<DispatcherProvider>().default)
     }
 }

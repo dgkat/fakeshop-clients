@@ -8,7 +8,6 @@ import org.example.fakeshop_clients.features.notifications.di.webNotificationsMo
 import org.example.fakeshop_clients.features.search.di.webSearchModule
 
 val webCoreModule = listOf(
-    webCoroutineModule,
     webInfrastructureModule,
     homeModule,
     webFavoritesCacheModule,
