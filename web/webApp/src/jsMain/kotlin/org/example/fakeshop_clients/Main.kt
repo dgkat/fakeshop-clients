@@ -54,6 +54,17 @@ fun main() {
 
     window.addEventListener("load", { refreshDeviceTokenIfNeeded() })
 
+    // Re-initialize Koin when restored from bfcache (back-forward cache).
+    // The beforeunload handler stops Koin, but if the browser caches the page
+    // and the user navigates back, main() won't re-run — so we restart here.
+    window.addEventListener("pageshow", { event ->
+        if (event.asDynamic().persisted == true) {
+            startKoin {
+                modules(webCoreModule)
+            }
+        }
+    })
+
     window.addEventListener("beforeunload", {
         stopKoin()
     })
