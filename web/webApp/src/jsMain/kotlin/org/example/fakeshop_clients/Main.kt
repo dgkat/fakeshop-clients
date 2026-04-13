@@ -2,12 +2,21 @@ package org.example.fakeshop_clients
 
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.di.webCoreModule
+import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.core.navigation.mobile.BottomNav
 import org.example.fakeshop_clients.core.presentation.components.Header
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesPage
+import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
+import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
+import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsPage
+import org.example.fakeshop_clients.features.profile.domain.ProfileService
 import org.example.fakeshop_clients.features.profile.presentation.ProfilePage
 import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
 import org.example.fakeshop_clients.features.search.presentation.components.SearchBar
@@ -36,14 +45,53 @@ fun main() {
         modules(webCoreModule)
     }
 
+    registerServiceWorker()
+
     val rootElement = document.getElementById("spa-root") as? Element
         ?: error("Root element not found")
 
     createRoot(rootElement).render(SpaApp.create())
 
+    window.addEventListener("load", { refreshDeviceTokenIfNeeded() })
+
     window.addEventListener("beforeunload", {
         stopKoin()
     })
+}
+
+/**
+ * Registers the Firebase Cloud Messaging service worker on every page load.
+ * This is cheap, idempotent, and ensures the browser can handle incoming
+ * push notifications even if the Firebase SDK hasn't been lazily loaded yet.
+ */
+private fun registerServiceWorker() {
+    val sw = window.navigator.asDynamic().serviceWorker ?: return
+    sw.register("/firebase-messaging-sw.js")
+}
+
+/**
+ * Mirrors Android's [FakeShopApp.registerDeviceTokenIfNeeded].
+ * On return visits with a valid session, lazily loads Firebase and re-registers
+ * the FCM token so the backend always has a fresh token for this browser.
+ * Only runs when the user has already granted notification permission.
+ */
+private fun refreshDeviceTokenIfNeeded() {
+    val koin = getKoin()
+    val appScope = koin.get<CoroutineScope>(AppScopeQualifier)
+    appScope.launch {
+        val permissionManager = koin.get<NotificationPermissionManager>()
+        if (permissionManager.getPermissionStatus() != NotificationPermissionStatus.GRANTED) return@launch
+
+        val profileService = koin.get<ProfileService>()
+        val isLoggedIn = (profileService.checkLoginStatus() as? Result.Success)?.data ?: false
+        if (!isLoggedIn) return@launch
+
+        val tokenProvider = koin.get<PushTokenProvider>()
+        val service = koin.get<NotificationsService>()
+        tokenProvider.getCurrentToken()?.let { token ->
+            service.registerDeviceToken(token, tokenProvider.getPlatformName())
+        }
+    }
 }
 
 private fun createRoute(

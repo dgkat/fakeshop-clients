@@ -81,11 +81,10 @@ class WebPushTokenProvider : PushTokenProvider {
     private suspend fun ensureServiceWorkerRegistered(): dynamic {
         val existing = cachedSwRegistration
         if (existing != null) return existing
-        val regPromise = window.navigator.asDynamic()
-            .serviceWorker
-            .register("/firebase-messaging-sw.js")
-            .unsafeCast<Promise<dynamic>>()
-        val reg = regPromise.await()
+        // .ready resolves to the already-active registration (e.g. from Main.kt),
+        // avoiding a duplicate register() call and potential race conditions.
+        val sw = window.navigator.asDynamic().serviceWorker
+        val reg = (sw.ready as Promise<dynamic>).await()
         cachedSwRegistration = reg
         return reg
     }
