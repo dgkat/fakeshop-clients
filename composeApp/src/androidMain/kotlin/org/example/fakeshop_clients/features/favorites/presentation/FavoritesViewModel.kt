@@ -42,6 +42,7 @@ class FavoritesViewModel : ViewModel() {
                     _isLoggedIn.value = loggedIn
                     if (loggedIn) {
                         favoritesStore.onEvent(FavoritesEvent.LoadFavorites)
+                        favoritesStore.checkNotificationPermission()
                     }
                 },
                 onError = {

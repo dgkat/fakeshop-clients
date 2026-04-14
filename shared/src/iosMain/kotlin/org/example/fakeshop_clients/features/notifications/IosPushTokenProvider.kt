@@ -1,6 +1,6 @@
 package org.example.fakeshop_clients.features.notifications
 
-import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
+import org.example.fakeshop_clients.features.notifications.data.PushTokenProvider
 
 class IosPushTokenProvider : PushTokenProvider {
 

@@ -42,7 +42,13 @@ private struct FavoritesTabbedContent: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            NotificationPermissionBanner()
+            NotificationPermissionBanner(
+                permissionStatus: viewModel.favoritesState.notificationPermissionStatus,
+                showBanner: viewModel.favoritesState.showNotificationBanner,
+                onPermissionResult: { granted in
+                    viewModel.onFavoritesEvent(FavoritesEvent.NotificationPermissionResult(granted: granted))
+                }
+            )
 
             Picker("", selection: $selectedTab) {
                 Text(String(localized: "tab_favorites")).tag(0)

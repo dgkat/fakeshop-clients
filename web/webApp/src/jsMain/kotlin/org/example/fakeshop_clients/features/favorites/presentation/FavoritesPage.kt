@@ -2,6 +2,7 @@ package org.example.fakeshop_clients.features.favorites.presentation
 
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.await
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -10,10 +11,6 @@ import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.core.i18n.getString
 import org.example.fakeshop_clients.core.presentation.components.ProductCardWithHeart
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
-import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
-import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
-import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
-import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
 import org.example.fakeshop_clients.features.recents.presentation.RecentsEvent
 import org.example.fakeshop_clients.features.recents.presentation.RecentsState
 import org.koin.core.context.GlobalContext
@@ -27,6 +24,7 @@ import react.useEffectWithCleanup
 import react.useMemo
 import react.useState
 import web.cssom.ClassName
+import kotlin.js.Promise
 
 val FavoritesPage = FC<Props> {
     val koin = GlobalContext.get()
@@ -36,7 +34,6 @@ val FavoritesPage = FC<Props> {
     var favoritesState by useState(FavoritesState())
     var recentsState by useState(RecentsState())
     var selectedTab by useState(0)
-    var showNotificationBanner by useState(false)
 
     // Check login and observe states
     useEffectWithCleanup(viewModel) {
@@ -49,8 +46,7 @@ val FavoritesPage = FC<Props> {
                 isLoggedIn = result.data
                 if (result.data) {
                     viewModel.onFavoritesEvent(FavoritesEvent.LoadFavorites)
-                    val permission = (window.asDynamic().Notification?.permission as? String) ?: "default"
-                    showNotificationBanner = permission == "default"
+                    viewModel.checkNotificationPermission()
                 }
             } else {
                 isLoggedIn = false
@@ -89,9 +85,11 @@ val FavoritesPage = FC<Props> {
                 LoginRequiredContent {}
             }
             true -> {
-                if (showNotificationBanner) {
+                if (favoritesState.showNotificationBanner) {
                     NotificationEnableBanner {
-                        this.onDismiss = { showNotificationBanner = false }
+                        this.onPermissionResult = { granted ->
+                            viewModel.onFavoritesEvent(FavoritesEvent.NotificationPermissionResult(granted))
+                        }
                     }
                 }
 
@@ -283,14 +281,10 @@ val ErrorContent = FC<ErrorContentProps> { props ->
 // MARK: - Notification Permission Banner
 
 external interface NotificationEnableBannerProps : Props {
-    var onDismiss: () -> Unit
+    var onPermissionResult: (Boolean) -> Unit
 }
 
 val NotificationEnableBanner = FC<NotificationEnableBannerProps> { props ->
-    val koin = GlobalContext.get()
-    val permissionManager = useMemo { koin.get<NotificationPermissionManager>() }
-    val pushTokenProvider = useMemo { koin.get<PushTokenProvider>() }
-    val notificationsService = useMemo { koin.get<NotificationsService>() }
     var isEnabling by useState(false)
 
     div {
@@ -316,15 +310,11 @@ val NotificationEnableBanner = FC<NotificationEnableBannerProps> { props ->
                     isEnabling = true
                     MainScope().launch {
                         try {
-                            val status = permissionManager.requestPermission()
-                            if (status == NotificationPermissionStatus.GRANTED) {
-                                val token = pushTokenProvider.getCurrentToken()
-                                if (token != null) {
-                                    notificationsService.registerDeviceToken(token, "web")
-                                }
-                            }
-                        } finally {
-                            props.onDismiss()
+                            val result = js("Notification.requestPermission()")
+                                .unsafeCast<Promise<String>>().await()
+                            props.onPermissionResult(result == "granted")
+                        } catch (e: Throwable) {
+                            props.onPermissionResult(false)
                         }
                     }
                 }

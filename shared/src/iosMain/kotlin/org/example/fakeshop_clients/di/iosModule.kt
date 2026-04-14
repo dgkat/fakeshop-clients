@@ -8,11 +8,13 @@ import org.example.fakeshop_clients.features.favorites.presentation.FavoritesVie
 import org.example.fakeshop_clients.features.home.di.homeModule
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListViewStore
 import org.example.fakeshop_clients.features.notifications.IosPushTokenProvider
+import org.example.fakeshop_clients.features.notifications.data.NoOpPendingDeviceTokenCache
+import org.example.fakeshop_clients.features.notifications.data.NotificationPermissionManager
+import org.example.fakeshop_clients.features.notifications.data.PendingDeviceTokenCache
+import org.example.fakeshop_clients.features.notifications.data.PushTokenProvider
 import org.example.fakeshop_clients.features.notifications.di.notificationsModule
-import org.example.fakeshop_clients.features.notifications.domain.NoOpPendingDeviceTokenCache
+import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
-import org.example.fakeshop_clients.features.notifications.domain.PendingDeviceTokenCache
-import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
 import org.example.fakeshop_clients.features.productDetail.di.productDetailModule
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailViewStore
@@ -32,6 +34,13 @@ val iosModule = module {
     single<PushTokenProvider> { IosPushTokenProvider() }
 
     single<PendingDeviceTokenCache> { NoOpPendingDeviceTokenCache() }
+
+    single<NotificationPermissionManager> {
+        object : NotificationPermissionManager {
+            override fun getPermissionStatus() = NotificationPermissionStatus.NOT_DETERMINED
+            override suspend fun requestPermission() = NotificationPermissionStatus.NOT_DETERMINED
+        }
+    }
 
     factory { (scope: CoroutineScope) ->
         ProductListViewStore(
@@ -63,7 +72,8 @@ val iosModule = module {
         FavoritesViewStore(
             scope = scope,
             favoritesService = get(),
-            mapper = get()
+            mapper = get(),
+            notificationsService = get()
         )
     }
 

@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
-import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
+import org.example.fakeshop_clients.features.notifications.data.NotificationPermissionManager
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
 
 class AndroidNotificationPermissionManager(
@@ -34,7 +34,11 @@ class AndroidNotificationPermissionManager(
         return getPermissionStatus()
     }
 
-    fun markPermissionRequested() {
+    override fun onPermissionResult(granted: Boolean) {
+        markPermissionRequested()
+    }
+
+    private fun markPermissionRequested() {
         val prefs = context.getSharedPreferences("notification_prefs", Context.MODE_PRIVATE)
         prefs.edit().putBoolean("permission_requested", true).apply()
     }

@@ -11,10 +11,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.androidCoreModule
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
-import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
-import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
 import org.example.fakeshop_clients.features.profile.domain.ProfileService
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -42,8 +40,8 @@ class FakeShopApp : Application() , ImageLoaderFactory{
     private fun registerDeviceTokenIfNeeded() {
         val appScope = getKoin().get<CoroutineScope>(AppScopeQualifier)
         appScope.launch {
-            val permissionManager = getKoin().get<NotificationPermissionManager>()
-            if (permissionManager.getPermissionStatus() != NotificationPermissionStatus.GRANTED) return@launch
+            val service = getKoin().get<NotificationsService>()
+            if (service.getPermissionStatus() != NotificationPermissionStatus.GRANTED) return@launch
 
             val profileService = getKoin().get<ProfileService>()
             val isLoggedIn = profileService.checkLoginStatus()
@@ -52,11 +50,7 @@ class FakeShopApp : Application() , ImageLoaderFactory{
                 }
             if (!isLoggedIn) return@launch
 
-            val tokenProvider = getKoin().get<PushTokenProvider>()
-            val service = getKoin().get<NotificationsService>()
-            tokenProvider.getCurrentToken()?.let { token ->
-                service.registerDeviceToken(token, tokenProvider.getPlatformName())
-            }
+            service.registerDeviceAfterAuth()
         }
     }
 

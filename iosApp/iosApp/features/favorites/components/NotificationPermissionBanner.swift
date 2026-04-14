@@ -1,26 +1,25 @@
 import SwiftUI
 import UIKit
 import UserNotifications
+import ComposeApp
 
 struct NotificationPermissionBanner: View {
-    @State private var permissionStatus: UNAuthorizationStatus = .notDetermined
-    @State private var hasChecked = false
+    let permissionStatus: NotificationPermissionStatus
+    let showBanner: Bool
+    let onPermissionResult: (Bool) -> Void
 
     var body: some View {
         Group {
-            if hasChecked {
-                switch permissionStatus {
-                case .notDetermined:
+            switch permissionStatus {
+            case .notDetermined:
+                if showBanner {
                     enableBanner
-                case .denied:
-                    deniedBanner
-                default:
-                    EmptyView()
                 }
+            case .denied:
+                deniedBanner
+            default:
+                EmptyView()
             }
-        }
-        .task {
-            await checkPermissionStatus()
         }
     }
 
@@ -75,18 +74,10 @@ struct NotificationPermissionBanner: View {
         .padding(.vertical, 4)
     }
 
-    private func checkPermissionStatus() async {
-        let settings = await UNUserNotificationCenter.current().notificationSettings()
-        await MainActor.run {
-            permissionStatus = settings.authorizationStatus
-            hasChecked = true
-        }
-    }
-
     private func requestPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
             Task { @MainActor in
-                permissionStatus = granted ? .authorized : .denied
+                onPermissionResult(granted)
             }
         }
     }

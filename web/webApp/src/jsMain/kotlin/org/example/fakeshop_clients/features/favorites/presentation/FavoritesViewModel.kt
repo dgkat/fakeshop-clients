@@ -18,4 +18,8 @@ class FavoritesViewModel(
     fun onRecentsEvent(event: org.example.fakeshop_clients.features.recents.presentation.RecentsEvent) {
         recentsStore.onEvent(event)
     }
+
+    fun checkNotificationPermission() {
+        favoritesStore.checkNotificationPermission()
+    }
 }

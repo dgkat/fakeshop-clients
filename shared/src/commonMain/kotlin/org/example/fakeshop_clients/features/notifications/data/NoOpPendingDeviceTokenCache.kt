@@ -1,4 +1,4 @@
-package org.example.fakeshop_clients.features.notifications.domain
+package org.example.fakeshop_clients.features.notifications.data
 
 class NoOpPendingDeviceTokenCache : PendingDeviceTokenCache {
     override suspend fun save(token: String) = Unit

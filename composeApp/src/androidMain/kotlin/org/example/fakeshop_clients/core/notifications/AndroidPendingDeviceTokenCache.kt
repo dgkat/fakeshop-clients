@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import org.example.fakeshop_clients.features.notifications.domain.PendingDeviceTokenCache
+import org.example.fakeshop_clients.features.notifications.data.PendingDeviceTokenCache
 
 private val Context.pendingDeviceTokenStore: DataStore<Preferences> by preferencesDataStore(
     name = "pending_device_token"

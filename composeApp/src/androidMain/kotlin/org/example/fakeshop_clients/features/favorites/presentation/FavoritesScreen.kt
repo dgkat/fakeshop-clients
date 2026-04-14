@@ -72,7 +72,14 @@ private fun FavoritesTabbedContent(
             .fillMaxSize()
             .padding(top = contentPadding.calculateTopPadding())
     ) {
-        NotificationPermissionBanner()
+        val favState by viewModel.favoritesState.collectAsStateWithLifecycle()
+        NotificationPermissionBanner(
+            permissionStatus = favState.notificationPermissionStatus,
+            showBanner = favState.showNotificationBanner,
+            onPermissionResult = { granted ->
+                viewModel.onFavoritesEvent(FavoritesEvent.NotificationPermissionResult(granted))
+            }
+        )
 
         TabRow(
             selectedTabIndex = pagerState.currentPage,

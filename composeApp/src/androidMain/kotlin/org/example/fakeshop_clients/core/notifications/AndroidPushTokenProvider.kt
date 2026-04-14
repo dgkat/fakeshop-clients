@@ -2,7 +2,7 @@ package org.example.fakeshop_clients.core.notifications
 
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
-import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
+import org.example.fakeshop_clients.features.notifications.data.PushTokenProvider
 
 class AndroidPushTokenProvider : PushTokenProvider {
 

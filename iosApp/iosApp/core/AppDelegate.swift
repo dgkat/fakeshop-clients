@@ -68,9 +68,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 //
 //         let koinHelper = IOSKoinHelper()
 //         let service = koinHelper.getNotificationsService()
+//         let profileService = koinHelper.getProfileService()
 //
 //         Task {
-//             try? await service.registerDeviceToken(token: token, platform: "ios")
+//             let result = try? await profileService.checkLoginStatus()
+//             let isLoggedIn = (result as? ResultSuccess<KotlinBoolean>)?.data?.boolValue ?? false
+//             try? await service.handleNewToken(token: token, isLoggedIn: isLoggedIn)
 //         }
 //     }
 // }

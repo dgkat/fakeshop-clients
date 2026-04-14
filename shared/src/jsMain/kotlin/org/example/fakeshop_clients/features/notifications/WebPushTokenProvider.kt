@@ -4,7 +4,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.await
-import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
+import org.example.fakeshop_clients.features.notifications.data.PushTokenProvider
 import org.w3c.dom.HTMLScriptElement
 import kotlin.js.Promise
 
@@ -14,7 +14,7 @@ import kotlin.js.Promise
  * Behavior follows a "middle-ground" permission policy: this provider never
  * prompts the user. It only returns a token when `Notification.permission` is
  * already `"granted"`. The explicit permission prompt is triggered elsewhere
- * (e.g. the favorites-page banner) via [org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager].
+ * (e.g. the favorites-page banner) via [org.example.fakeshop_clients.features.notifications.data.NotificationPermissionManager].
  *
  * Firebase compat SDK is lazy-loaded from the gstatic CDN on first use, so
  * users who never enable notifications pay zero bundle cost.

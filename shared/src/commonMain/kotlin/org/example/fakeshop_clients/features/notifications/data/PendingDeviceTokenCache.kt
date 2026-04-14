@@ -1,4 +1,4 @@
-package org.example.fakeshop_clients.features.notifications.domain
+package org.example.fakeshop_clients.features.notifications.data
 
 interface PendingDeviceTokenCache {
     suspend fun save(token: String)

@@ -8,6 +8,6 @@ import org.koin.dsl.module
 val webProfileModule = module {
     includes(profileModule)
 
-    factory { ProfileViewStore(scope = get(qualifier = named("appScope")), profileService = get(), favoritesService = get(), notificationsService = get(), pushTokenProvider = get(), pendingDeviceTokenCache = get()) }
+    factory { ProfileViewStore(scope = get(qualifier = named("appScope")), profileService = get(), favoritesService = get(), notificationsService = get()) }
     factory { ProfileViewModel(store = get()) }
 }

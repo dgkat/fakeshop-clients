@@ -15,9 +15,7 @@ val mobileProfileModule = module {
             scope = scope,
             profileService = get(),
             favoritesService = get(),
-            notificationsService = get(),
-            pushTokenProvider = get(),
-            pendingDeviceTokenCache = get()
+            notificationsService = get()
         )
     }
 

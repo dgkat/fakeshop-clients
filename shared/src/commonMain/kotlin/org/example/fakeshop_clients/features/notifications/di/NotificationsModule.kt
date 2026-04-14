@@ -25,7 +25,10 @@ val notificationsModule = module {
 
     single<NotificationsService> {
         NotificationsServiceImpl(
-            repository = get()
+            repository = get(),
+            pushTokenProvider = get(),
+            pendingDeviceTokenCache = get(),
+            permissionManager = get()
         )
     }
 }

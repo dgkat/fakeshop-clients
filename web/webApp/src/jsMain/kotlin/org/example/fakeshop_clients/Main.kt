@@ -11,10 +11,8 @@ import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.core.navigation.mobile.BottomNav
 import org.example.fakeshop_clients.core.presentation.components.Header
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesPage
-import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
-import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsPage
 import org.example.fakeshop_clients.features.profile.domain.ProfileService
 import org.example.fakeshop_clients.features.profile.presentation.ProfilePage
@@ -90,18 +88,14 @@ private fun refreshDeviceTokenIfNeeded() {
     val koin = getKoin()
     val appScope = koin.get<CoroutineScope>(AppScopeQualifier)
     appScope.launch {
-        val permissionManager = koin.get<NotificationPermissionManager>()
-        if (permissionManager.getPermissionStatus() != NotificationPermissionStatus.GRANTED) return@launch
+        val service = koin.get<NotificationsService>()
+        if (service.getPermissionStatus() != NotificationPermissionStatus.GRANTED) return@launch
 
         val profileService = koin.get<ProfileService>()
         val isLoggedIn = (profileService.checkLoginStatus() as? Result.Success)?.data ?: false
         if (!isLoggedIn) return@launch
 
-        val tokenProvider = koin.get<PushTokenProvider>()
-        val service = koin.get<NotificationsService>()
-        tokenProvider.getCurrentToken()?.let { token ->
-            service.registerDeviceToken(token, tokenProvider.getPlatformName())
-        }
+        service.registerDeviceAfterAuth()
     }
 }
 

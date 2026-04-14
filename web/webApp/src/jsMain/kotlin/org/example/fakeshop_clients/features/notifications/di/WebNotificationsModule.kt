@@ -2,10 +2,10 @@ package org.example.fakeshop_clients.features.notifications.di
 
 import org.example.fakeshop_clients.features.notifications.WebNotificationPermissionManager
 import org.example.fakeshop_clients.features.notifications.WebPushTokenProvider
-import org.example.fakeshop_clients.features.notifications.domain.NoOpPendingDeviceTokenCache
-import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
-import org.example.fakeshop_clients.features.notifications.domain.PendingDeviceTokenCache
-import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
+import org.example.fakeshop_clients.features.notifications.data.NoOpPendingDeviceTokenCache
+import org.example.fakeshop_clients.features.notifications.data.NotificationPermissionManager
+import org.example.fakeshop_clients.features.notifications.data.PendingDeviceTokenCache
+import org.example.fakeshop_clients.features.notifications.data.PushTokenProvider
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
 import org.koin.core.qualifier.named
 import org.koin.dsl.module

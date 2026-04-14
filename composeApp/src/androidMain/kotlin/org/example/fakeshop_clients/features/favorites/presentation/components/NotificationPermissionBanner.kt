@@ -19,12 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -34,47 +28,24 @@ import fakeshop_clients.composeapp.generated.resources.notification_permission_e
 import fakeshop_clients.composeapp.generated.resources.notification_permission_message
 import fakeshop_clients.composeapp.generated.resources.notification_permission_settings
 import fakeshop_clients.composeapp.generated.resources.notification_permission_title
-import kotlinx.coroutines.launch
-import org.example.fakeshop_clients.core.notifications.AndroidNotificationPermissionManager
-import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
-import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
-import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
 import org.jetbrains.compose.resources.stringResource
-import org.koin.mp.KoinPlatform.getKoin
 
 @Composable
-fun NotificationPermissionBanner() {
+fun NotificationPermissionBanner(
+    permissionStatus: NotificationPermissionStatus,
+    showBanner: Boolean,
+    onPermissionResult: (Boolean) -> Unit
+) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+    if (!showBanner && permissionStatus != NotificationPermissionStatus.DENIED) return
 
-    val permissionManager = remember { getKoin().get<NotificationPermissionManager>() }
-    var permissionStatus by remember { mutableStateOf(permissionManager.getPermissionStatus()) }
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        (permissionManager as? AndroidNotificationPermissionManager)?.markPermissionRequested()
-        permissionStatus = if (isGranted) {
-            NotificationPermissionStatus.GRANTED
-        } else {
-            NotificationPermissionStatus.DENIED
-        }
-
-        if (isGranted) {
-            scope.launch {
-                val tokenProvider = getKoin().get<PushTokenProvider>()
-                val service = getKoin().get<NotificationsService>()
-                tokenProvider.getCurrentToken()?.let { token ->
-                    service.registerDeviceToken(token, tokenProvider.getPlatformName())
-                }
-            }
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        permissionStatus = permissionManager.getPermissionStatus()
+        onPermissionResult(isGranted)
     }
 
     when (permissionStatus) {

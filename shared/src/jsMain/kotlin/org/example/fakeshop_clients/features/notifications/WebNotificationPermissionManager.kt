@@ -1,7 +1,7 @@
 package org.example.fakeshop_clients.features.notifications
 
 import kotlinx.coroutines.await
-import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
+import org.example.fakeshop_clients.features.notifications.data.NotificationPermissionManager
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
 import kotlin.js.Promise
 

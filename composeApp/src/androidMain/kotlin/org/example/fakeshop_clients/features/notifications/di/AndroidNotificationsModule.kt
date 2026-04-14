@@ -3,9 +3,9 @@ package org.example.fakeshop_clients.features.notifications.di
 import org.example.fakeshop_clients.core.notifications.AndroidNotificationPermissionManager
 import org.example.fakeshop_clients.core.notifications.AndroidPendingDeviceTokenCache
 import org.example.fakeshop_clients.core.notifications.AndroidPushTokenProvider
-import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionManager
-import org.example.fakeshop_clients.features.notifications.domain.PendingDeviceTokenCache
-import org.example.fakeshop_clients.features.notifications.domain.PushTokenProvider
+import org.example.fakeshop_clients.features.notifications.data.NotificationPermissionManager
+import org.example.fakeshop_clients.features.notifications.data.PendingDeviceTokenCache
+import org.example.fakeshop_clients.features.notifications.data.PushTokenProvider
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewModel
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
 import org.koin.android.ext.koin.androidContext

@@ -65,6 +65,7 @@ class FavoritesViewModel: ObservableObject {
                     self.isLoggedIn = loggedIn
                     if loggedIn {
                         favoritesStore.onEvent(event: FavoritesEvent.LoadFavorites())
+                        favoritesStore.checkNotificationPermission()
                     }
                 } else {
                     self.isLoggedIn = false
