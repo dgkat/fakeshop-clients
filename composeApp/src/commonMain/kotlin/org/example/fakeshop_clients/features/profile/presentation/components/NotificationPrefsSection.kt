@@ -12,26 +12,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fakeshop_clients.composeapp.generated.resources.Res
 import fakeshop_clients.composeapp.generated.resources.notification_prefs_price_drop
 import fakeshop_clients.composeapp.generated.resources.notification_prefs_price_drop_desc
 import fakeshop_clients.composeapp.generated.resources.notification_prefs_title
-import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsEvent
-import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewModel
+import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsState
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun NotificationPrefsSection(
-    viewModel: NotificationPrefsViewModel = koinViewModel()
+    state: NotificationPrefsState,
+    onTogglePriceDrop: (Boolean) -> Unit
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
     Column(modifier = Modifier.fillMaxWidth()) {
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
@@ -63,9 +58,7 @@ fun NotificationPrefsSection(
 
                 Switch(
                     checked = state.priceDropEnabled,
-                    onCheckedChange = { enabled ->
-                        viewModel.onEvent(NotificationPrefsEvent.TogglePriceDrop(enabled))
-                    },
+                    onCheckedChange = onTogglePriceDrop,
                     enabled = !state.isToggling
                 )
             }

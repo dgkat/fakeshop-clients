@@ -1,13 +1,7 @@
 package org.example.fakeshop_clients.features.profile.presentation.components
 
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import org.example.fakeshop_clients.core.i18n.getString
-import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsEvent
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsState
-import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
-import org.koin.mp.KoinPlatform.getKoin
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
@@ -16,25 +10,20 @@ import react.dom.html.ReactHTML.input
 import react.dom.html.ReactHTML.label
 import react.dom.html.ReactHTML.p
 import react.dom.html.ReactHTML.span
-import react.useEffectWithCleanup
-import react.useMemo
-import react.useState
+import react.useEffect
 import web.cssom.ClassName
 import web.html.InputType
 import web.html.checkbox
 
-val NotificationPrefsSection = FC<Props> {
-    val store = useMemo { getKoin().get<NotificationPrefsViewStore>() }
-    var state by useState(NotificationPrefsState())
+external interface NotificationPrefsSectionProps : Props {
+    var state: NotificationPrefsState
+    var onLoad: () -> Unit
+    var onTogglePriceDrop: (Boolean) -> Unit
+}
 
-    useEffectWithCleanup(store) {
-        store.onEvent(NotificationPrefsEvent.LoadPreferences)
-        val scope = MainScope()
-        val job = store.state
-            .onEach { newState -> state = newState }
-            .launchIn(scope)
-
-        onCleanup { job::cancel }
+val NotificationPrefsSection = FC<NotificationPrefsSectionProps> { props ->
+    useEffect(Unit) {
+        props.onLoad()
     }
 
     div {
@@ -45,7 +34,7 @@ val NotificationPrefsSection = FC<Props> {
             +getString("notification_prefs_title")
         }
 
-        if (!state.isLoading) {
+        if (!props.state.isLoading) {
             div {
                 className = ClassName("pref-toggle")
 
@@ -65,10 +54,10 @@ val NotificationPrefsSection = FC<Props> {
 
                     input {
                         type = InputType.checkbox
-                        checked = state.priceDropEnabled
-                        disabled = state.isToggling
+                        checked = props.state.priceDropEnabled
+                        disabled = props.state.isToggling
                         onChange = { event ->
-                            store.onEvent(NotificationPrefsEvent.TogglePriceDrop(event.target.checked))
+                            props.onTogglePriceDrop(event.target.checked)
                         }
                     }
                 }

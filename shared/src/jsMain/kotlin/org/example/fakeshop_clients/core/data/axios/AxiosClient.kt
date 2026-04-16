@@ -1,6 +1,6 @@
 package org.example.fakeshop_clients.core.data.axios
 
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.promise
 import kotlinx.serialization.InternalSerializationApi
@@ -15,7 +15,8 @@ import kotlin.reflect.KClass
 
 class AxiosClient(
     private val baseUrl: String,
-    private val webAuthDatasource: WebAuthDatasource
+    private val webAuthDatasource: WebAuthDatasource,
+    private val scope: CoroutineScope
 ) : ApiClient {
 
     private val jsonParser = Json {
@@ -25,8 +26,6 @@ class AxiosClient(
 
     private var isRefreshing = false
     private var refreshSubscribers: MutableList<(Throwable?) -> Unit> = mutableListOf()
-
-    private val scope = MainScope()
 
     init {
         axios.defaults.withCredentials = true
@@ -72,7 +71,6 @@ class AxiosClient(
 
                     return@use scope.promise {
                         try {
-                            //TODO clean up try/catch ( already in .refreshSession) and else + Result.Error (duplicate)
                             val refreshResult = webAuthDatasource.refreshSession()
 
                             when (refreshResult) {

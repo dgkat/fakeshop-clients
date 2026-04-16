@@ -31,7 +31,6 @@ import org.example.fakeshop_clients.features.profile.presentation.ProfileScreen
 import org.example.fakeshop_clients.features.profile.presentation.components.LanguagePickerSection
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationEventBus
 import org.example.fakeshop_clients.features.notifications.presentation.PushNotificationEvent
-import org.example.fakeshop_clients.features.profile.presentation.components.NotificationPrefsSection
 import org.example.fakeshop_clients.features.search.presentation.SearchBarBehavior
 import org.example.fakeshop_clients.features.search.presentation.SearchEvent
 import org.example.fakeshop_clients.features.search_bar.presentation.SearchViewModel
@@ -160,7 +159,6 @@ fun MainNavigation(initialProductId: String? = null) {
 
                 composable(Route.Profile.route) {
                     ProfileScreen(
-                        notificationPrefsSection = { NotificationPrefsSection() },
                         languageSection = { LanguagePickerSection() }
                     )
                 }

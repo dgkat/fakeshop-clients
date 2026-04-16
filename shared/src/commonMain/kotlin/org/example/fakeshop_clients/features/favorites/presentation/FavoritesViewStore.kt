@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.error_handling.fold
+import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.home.domain.mappers.DomainToPresentationBriefProductMapper
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
@@ -34,6 +35,7 @@ class FavoritesViewStore(
                 }
             }
         }
+        loadFavorites()
     }
 
     fun onEvent(event: FavoritesEvent) {
@@ -42,13 +44,14 @@ class FavoritesViewStore(
             is FavoritesEvent.RemoveFavorite -> removeFavorite(event.productId)
             FavoritesEvent.Retry -> loadFavorites()
             is FavoritesEvent.NotificationPermissionResult -> handlePermissionResult(event.granted)
+            FavoritesEvent.RequestNotificationPermission -> requestNotificationPermission()
             FavoritesEvent.DismissNotificationBanner -> {
                 _state.update { it.copy(showNotificationBanner = false) }
             }
         }
     }
 
-    fun checkNotificationPermission() {
+    private fun checkNotificationPermission() {
         val status = notificationsService.getPermissionStatus()
         _state.update {
             it.copy(
@@ -71,23 +74,44 @@ class FavoritesViewStore(
         }
     }
 
+    private fun requestNotificationPermission() {
+        scope.launch {
+            val status = notificationsService.requestPermissionAndRegister()
+            _state.update {
+                it.copy(
+                    notificationPermissionStatus = status,
+                    showNotificationBanner = status == NotificationPermissionStatus.NOT_DETERMINED
+                )
+            }
+        }
+    }
+
     private fun loadFavorites() {
         _state.update { it.copy(isLoading = true, error = null) }
         scope.launch {
             favoritesService.getFavorites().fold(
                 onSuccess = { products ->
+                    checkNotificationPermission()
                     _state.update {
                         it.copy(products = mapper.map(products), isLoading = false, error = null)
                     }
                 },
                 onError = { networkError ->
                     _state.update {
-                        it.copy(isLoading = false, error = FavoritesError.Network(networkError))
+                        it.copy(
+                            isLoading = false,
+                            error = networkError.toFavoritesError(),
+                            showNotificationBanner = false
+                        )
                     }
                 }
             )
         }
     }
+
+    private fun NetworkError.toFavoritesError(): FavoritesError =
+        if (this is NetworkError.HttpError && code == 401) FavoritesError.NotLoggedIn
+        else FavoritesError.Network(this)
 
     private fun removeFavorite(productId: String) {
         val previousProducts = _state.value.products
@@ -100,7 +124,7 @@ class FavoritesViewStore(
                     _state.update {
                         it.copy(
                             products = previousProducts,
-                            error = FavoritesError.Network(networkError)
+                            error = networkError.toFavoritesError()
                         )
                     }
                     loadFavorites()

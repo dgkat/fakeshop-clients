@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.features.profile.presentation.components
 
 import org.example.fakeshop_clients.core.i18n.getString
+import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsState
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.button
@@ -13,6 +14,9 @@ external interface LoggedInViewProps : Props {
     var isProcessing: Boolean
     var error: String?
     var onLogout: () -> Unit
+    var prefsState: NotificationPrefsState
+    var onLoadPrefs: () -> Unit
+    var onTogglePriceDrop: (Boolean) -> Unit
 }
 
 val LoggedInView = FC<LoggedInViewProps> { props ->
@@ -45,6 +49,10 @@ val LoggedInView = FC<LoggedInViewProps> { props ->
             }
         }
 
-        NotificationPrefsSection()
+        NotificationPrefsSection {
+            state = props.prefsState
+            onLoad = props.onLoadPrefs
+            onTogglePriceDrop = props.onTogglePriceDrop
+        }
     }
 }

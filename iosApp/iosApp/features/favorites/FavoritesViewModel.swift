@@ -10,11 +10,9 @@ import ComposeApp
 class FavoritesViewModel: ObservableObject {
     @Published var favoritesState: FavoritesState
     @Published var recentsState: RecentsState
-    @Published var isLoggedIn: Bool? = nil
 
     private let favoritesStore: FavoritesViewStore
     private let recentsStore: RecentsViewStore
-    private let profileService: ProfileService
     private let scope: Kotlinx_coroutines_coreCoroutineScope
     private var favoritesObservationTask: Task<Void, Never>?
     private var recentsObservationTask: Task<Void, Never>?
@@ -24,12 +22,10 @@ class FavoritesViewModel: ObservableObject {
         let helper = KoinHelper.shared.iosHelper
         self.favoritesStore = helper.getFavoritesViewStore(scope: scope)
         self.recentsStore = helper.getRecentsViewStore(scope: scope)
-        self.profileService = helper.getProfileService()
         self.favoritesState = favoritesStore.state.value
         self.recentsState = recentsStore.state.value
         observeFavoritesState()
         observeRecentsState()
-        checkLoginAndLoad()
     }
 
     private func observeFavoritesState() {
@@ -52,26 +48,6 @@ class FavoritesViewModel: ObservableObject {
                 }
             } catch {
                 print("Error observing recents state: \(error)")
-            }
-        }
-    }
-
-    private func checkLoginAndLoad() {
-        Task {
-            do {
-                let result = try await profileService.checkLoginStatus()
-                if let success = result as? ResultSuccess<KotlinBoolean>,
-                   let loggedIn = success.data?.boolValue {
-                    self.isLoggedIn = loggedIn
-                    if loggedIn {
-                        favoritesStore.onEvent(event: FavoritesEvent.LoadFavorites())
-                        favoritesStore.checkNotificationPermission()
-                    }
-                } else {
-                    self.isLoggedIn = false
-                }
-            } catch {
-                self.isLoggedIn = false
             }
         }
     }

@@ -1,12 +1,11 @@
 package org.example.fakeshop_clients.features.favorites.presentation
 
-import org.example.fakeshop_clients.features.profile.domain.ProfileService
+import org.example.fakeshop_clients.features.recents.presentation.RecentsEvent
 import org.example.fakeshop_clients.features.recents.presentation.RecentsViewStore
 
 class FavoritesViewModel(
-    val favoritesStore: FavoritesViewStore,
-    val recentsStore: RecentsViewStore,
-    val profileService: ProfileService
+    private val favoritesStore: FavoritesViewStore,
+    private val recentsStore: RecentsViewStore
 ) {
     val favoritesState = favoritesStore.state
     val recentsState = recentsStore.state
@@ -15,11 +14,7 @@ class FavoritesViewModel(
         favoritesStore.onEvent(event)
     }
 
-    fun onRecentsEvent(event: org.example.fakeshop_clients.features.recents.presentation.RecentsEvent) {
+    fun onRecentsEvent(event: RecentsEvent) {
         recentsStore.onEvent(event)
-    }
-
-    fun checkNotificationPermission() {
-        favoritesStore.checkNotificationPermission()
     }
 }

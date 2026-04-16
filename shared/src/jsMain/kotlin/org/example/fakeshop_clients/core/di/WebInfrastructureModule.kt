@@ -50,7 +50,11 @@ val webInfrastructureModule = module {
     // Main AxiosClient (with auth interceptor)
     single<ApiClient>(named("axiosClient")) {
         val webAuthDatasource: WebAuthDatasource = get()
-        AxiosClient(baseUrl, webAuthDatasource)
+        AxiosClient(
+            baseUrl = baseUrl,
+            webAuthDatasource = webAuthDatasource,
+            scope = get(AppScopeQualifier)
+        )
     }
 
     // Default ApiClient points to AxiosClient

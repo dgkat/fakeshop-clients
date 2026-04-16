@@ -38,15 +38,16 @@ fun FavoritesScreen(
     contentPadding: PaddingValues,
     viewModel: FavoritesViewModel = koinViewModel()
 ) {
-    val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
+    val favoritesState by viewModel.favoritesState.collectAsStateWithLifecycle()
 
-    when (isLoggedIn) {
-        null -> LoadingContent(modifier = Modifier.padding(contentPadding))
-        false -> LoginRequiredContent(
+    when {
+        favoritesState.error is FavoritesError.NotLoggedIn -> LoginRequiredContent(
             onGoToProfile = onGoToProfile,
             modifier = Modifier.padding(contentPadding)
         )
-        true -> FavoritesTabbedContent(
+        favoritesState.isLoading && favoritesState.products.isEmpty() && favoritesState.error == null ->
+            LoadingContent(modifier = Modifier.padding(contentPadding))
+        else -> FavoritesTabbedContent(
             viewModel = viewModel,
             onProductClick = onProductClick,
             contentPadding = contentPadding

@@ -6,6 +6,7 @@ import org.example.fakeshop_clients.features.notifications.data.NoOpPendingDevic
 import org.example.fakeshop_clients.features.notifications.data.NotificationPermissionManager
 import org.example.fakeshop_clients.features.notifications.data.PendingDeviceTokenCache
 import org.example.fakeshop_clients.features.notifications.data.PushTokenProvider
+import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewModel
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -28,4 +29,6 @@ val webNotificationsModule = module {
             notificationsService = get()
         )
     }
+
+    factory { NotificationPrefsViewModel(store = get()) }
 }

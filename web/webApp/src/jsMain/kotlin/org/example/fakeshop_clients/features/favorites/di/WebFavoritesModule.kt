@@ -12,5 +12,5 @@ val webFavoritesModule = module {
 
     factory { FavoritesViewStore(scope = get(qualifier = named("appScope")), favoritesService = get(), mapper = get(), notificationsService = get()) }
     factory { RecentsViewStore(scope = get(qualifier = named("appScope")), recentsService = get(), mapper = get()) }
-    factory { FavoritesViewModel(favoritesStore = get(), recentsStore = get(), profileService = get()) }
+    factory { FavoritesViewModel(favoritesStore = get(), recentsStore = get()) }
 }

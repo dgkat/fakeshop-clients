@@ -14,18 +14,17 @@ struct FavoritesView: View {
 
     var body: some View {
         Group {
-            if let isLoggedIn = viewModel.isLoggedIn {
-                if isLoggedIn {
-                    FavoritesTabbedContent(
-                        viewModel: viewModel,
-                        navigationPath: $navigationPath,
-                        onScrollOffsetChange: onScrollOffsetChange
-                    )
-                } else {
-                    LoginRequiredContent(onGoToProfile: {})
-                }
-            } else {
+            let state = viewModel.favoritesState
+            if state.error is FavoritesError.NotLoggedIn {
+                LoginRequiredContent(onGoToProfile: {})
+            } else if state.isLoading && state.products.isEmpty && state.error == nil {
                 ProgressView()
+            } else {
+                FavoritesTabbedContent(
+                    viewModel: viewModel,
+                    navigationPath: $navigationPath,
+                    onScrollOffsetChange: onScrollOffsetChange
+                )
             }
         }
         .navigationBarTitleDisplayMode(.inline)

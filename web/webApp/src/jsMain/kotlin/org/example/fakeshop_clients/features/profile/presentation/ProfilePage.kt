@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.features.profile.presentation
 
+import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewModel
 import org.example.fakeshop_clients.features.profile.presentation.components.ProfileView
 import org.koin.core.context.GlobalContext
 import react.FC
@@ -11,8 +12,12 @@ val ProfilePage = FC<Props> {
     val viewModel = useMemo {
         koin.get<ProfileViewModel>()
     }
+    val notificationPrefsViewModel = useMemo {
+        koin.get<NotificationPrefsViewModel>()
+    }
 
     ProfileView {
         this.viewModel = viewModel
+        this.notificationPrefsViewModel = notificationPrefsViewModel
     }
 }
