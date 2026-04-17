@@ -25,7 +25,7 @@ class AxiosClient(
     }
 
     private var isRefreshing = false
-    private var refreshSubscribers: MutableList<(Throwable?) -> Unit> = mutableListOf()
+    private var refreshSubscribers: MutableList<(Boolean) -> Unit> = mutableListOf()
 
     init {
         axios.defaults.withCredentials = true
@@ -53,14 +53,14 @@ class AxiosClient(
 
                 if (status == 401 && originalRequest._retry != true) {
                     if (isRefreshing) {
-                        return@use Promise { resolve, reject ->
-                            refreshSubscribers.add { refreshError ->
-                                if (refreshError != null) {
-                                    reject(refreshError)
-                                } else {
+                        return@use Promise<AxiosResponse> { resolve, reject ->
+                            refreshSubscribers.add { success ->
+                                if (success) {
                                     retryRequest(originalRequest)
                                         .then { resolve(it) }
-                                        .catch { reject(it) }
+                                        .catch { reject(wrapAxiosError(it.asDynamic())) }
+                                } else {
+                                    reject(wrapAxiosError(error))
                                 }
                             }
                         }
@@ -69,37 +69,31 @@ class AxiosClient(
                     originalRequest._retry = true
                     isRefreshing = true
 
-                    return@use scope.promise {
-                        try {
-                            val refreshResult = webAuthDatasource.refreshSession()
-
-                            when (refreshResult) {
-                                is Result.Success -> {
-                                    if (refreshResult.data) {
-                                        onSessionRefreshed()
-                                        retryRequest(originalRequest).await()
-                                    } else {
-                                        val error = Exception("Session refresh returned false")
-                                        onSessionRefreshFailed(error)
-                                        throw error
-                                    }
-                                }
-                                is Result.Error -> {
-                                    val error = Exception("Session refresh failed: ${refreshResult.error}")
-                                    onSessionRefreshFailed(error)
-                                    throw error
-                                }
+                    return@use Promise<AxiosResponse> { resolve, reject ->
+                        scope.promise {
+                            val refreshSucceeded = try {
+                                val refreshResult = webAuthDatasource.refreshSession()
+                                refreshResult is Result.Success && refreshResult.data
+                            } catch (_: Throwable) {
+                                false
+                            } finally {
+                                isRefreshing = false
                             }
-                        } catch (refreshError: Throwable) {
-                            onSessionRefreshFailed(refreshError)
-                            throw refreshError
-                        } finally {
-                            isRefreshing = false
+
+                            if (refreshSucceeded) {
+                                onSessionRefreshed()
+                                retryRequest(originalRequest)
+                                    .then { resolve(it) }
+                                    .catch { reject(wrapAxiosError(it.asDynamic())) }
+                            } else {
+                                onSessionRefreshFailed()
+                                reject(wrapAxiosError(error))
+                            }
                         }
                     }
                 }
 
-                Promise.reject(error)
+                Promise.reject(wrapAxiosError(error))
             }
         )
     }
@@ -114,13 +108,21 @@ class AxiosClient(
         }
     }
 
+    private fun wrapAxiosError(error: dynamic): Exception {
+        val message = error?.message?.toString() ?: "Request failed"
+        val wrapped = Exception(message)
+        wrapped.asDynamic().response = error?.response
+        wrapped.asDynamic().code = error?.code
+        return wrapped
+    }
+
     private fun onSessionRefreshed() {
-        refreshSubscribers.forEach { callback -> callback(null) }
+        refreshSubscribers.forEach { callback -> callback(true) }
         refreshSubscribers.clear()
     }
 
-    private fun onSessionRefreshFailed(error: Throwable) {
-        refreshSubscribers.forEach { callback -> callback(error) }
+    private fun onSessionRefreshFailed() {
+        refreshSubscribers.forEach { callback -> callback(false) }
         refreshSubscribers.clear()
     }
 

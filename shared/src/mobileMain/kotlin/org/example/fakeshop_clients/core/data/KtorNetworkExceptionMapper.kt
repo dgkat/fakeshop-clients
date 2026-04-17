@@ -4,6 +4,7 @@ import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.ResponseException
+import io.ktor.serialization.JsonConvertException
 import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.io.IOException
 import org.example.fakeshop_clients.core.error_handling.NetworkError
@@ -26,6 +27,7 @@ class KtorNetworkExceptionMapper : NetworkExceptionMapper {
             is SocketTimeoutException -> NetworkError.Timeout
             is UnresolvedAddressException -> NetworkError.NoConnection
             is IOException -> NetworkError.NoConnection
+            is JsonConvertException -> NetworkError.Unknown(exception.message)
             else -> NetworkError.Unknown(exception.message)
         }
     }

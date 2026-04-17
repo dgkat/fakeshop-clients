@@ -50,6 +50,7 @@ val mobileInfrastructureModule = module {
         val ktorLogger = getOrNull<Logger>(named("ktorLogger"))
 
         HttpClient(get<HttpClientEngine>()) {
+            expectSuccess = true
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true
@@ -78,6 +79,7 @@ val mobileInfrastructureModule = module {
         val ktorLogger = getOrNull<Logger>(named("ktorLogger"))
 
         HttpClient(get<HttpClientEngine>()) {
+            expectSuccess = true
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true
