@@ -4,6 +4,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.example.fakeshop_clients.core.auth.data.LogoutUser
 import org.example.fakeshop_clients.core.auth.domain.AuthRepository
+import org.example.fakeshop_clients.core.auth.domain.SessionMutator
+import org.example.fakeshop_clients.core.auth.domain.SessionObserver
+import org.example.fakeshop_clients.core.auth.domain.SessionStore
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
 import org.example.fakeshop_clients.core.concurrency.WebDispatcherProvider
@@ -22,6 +25,7 @@ import org.example.fakeshop_clients.core.data.fetchClient.PublicFetchClient
 import org.example.fakeshop_clients.core.network.UrlProvider
 import org.example.fakeshop_clients.core.network.WebUrlProvider
 import org.koin.core.qualifier.named
+import org.koin.dsl.binds
 import org.koin.dsl.module
 
 @JsName("__BACKEND_BASE_URL__")
@@ -31,6 +35,8 @@ val webInfrastructureModule = module {
     val baseUrl = BACKEND_BASE_URL
 
     single<UrlProvider> { WebUrlProvider() }
+
+    single { SessionStore() } binds arrayOf(SessionObserver::class, SessionMutator::class)
 
     single<NetworkExceptionMapper> { AxiosNetworkExceptionMapper() }
 
@@ -53,6 +59,7 @@ val webInfrastructureModule = module {
         AxiosClient(
             baseUrl = baseUrl,
             webAuthDatasource = webAuthDatasource,
+            sessionMutator = get(),
             scope = get(AppScopeQualifier)
         )
     }

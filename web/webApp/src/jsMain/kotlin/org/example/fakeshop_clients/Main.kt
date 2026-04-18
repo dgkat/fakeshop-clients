@@ -4,6 +4,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.di.webCoreModule
 import org.example.fakeshop_clients.core.error_handling.Result
@@ -50,7 +51,7 @@ fun main() {
 
     createRoot(rootElement).render(SpaApp.create())
 
-    window.addEventListener("load", { refreshDeviceTokenIfNeeded() })
+    window.addEventListener("load", { bootstrapSession() })
 
     // Re-initialize Koin when restored from bfcache (back-forward cache).
     // The beforeunload handler stops Koin, but if the browser caches the page
@@ -79,23 +80,24 @@ private fun registerServiceWorker() {
 }
 
 /**
- * Mirrors Android's [FakeShopApp.registerDeviceTokenIfNeeded].
- * On return visits with a valid session, lazily loads Firebase and re-registers
- * the FCM token so the backend always has a fresh token for this browser.
- * Only runs when the user has already granted notification permission.
+ * Seeds [SessionStore] from the backend on app load and, if the user is
+ * logged in and has granted notification permission, re-registers the FCM
+ * token so the backend always has a fresh token for this browser.
  */
-private fun refreshDeviceTokenIfNeeded() {
+private fun bootstrapSession() {
     val koin = getKoin()
     val appScope = koin.get<CoroutineScope>(AppScopeQualifier)
     appScope.launch {
-        val service = koin.get<NotificationsService>()
-        if (service.getPermissionStatus() != NotificationPermissionStatus.GRANTED) return@launch
-
         val profileService = koin.get<ProfileService>()
-        val isLoggedIn = (profileService.checkLoginStatus() as? Result.Success)?.data ?: false
-        if (!isLoggedIn) return@launch
+        val sessionMutator = koin.get<SessionMutator>()
 
-        service.registerDeviceAfterAuth()
+        val isLoggedIn = (profileService.checkLoginStatus() as? Result.Success)?.data ?: false
+        if (isLoggedIn) sessionMutator.setLoggedIn() else sessionMutator.setLoggedOut()
+
+        val service = koin.get<NotificationsService>()
+        if (isLoggedIn && service.getPermissionStatus() == NotificationPermissionStatus.GRANTED) {
+            service.registerDeviceAfterAuth()
+        }
     }
 }
 

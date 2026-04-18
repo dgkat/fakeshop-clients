@@ -4,17 +4,34 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.auth.domain.SessionObserver
+import org.example.fakeshop_clients.core.auth.domain.SessionState
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
 
 class NotificationPrefsViewStore(
     private val scope: CoroutineScope,
-    private val notificationsService: NotificationsService
+    private val notificationsService: NotificationsService,
+    private val sessionObserver: SessionObserver
 ) {
     private val _state = MutableStateFlow(NotificationPrefsState())
     val state: StateFlow<NotificationPrefsState> = _state.asStateFlow()
+
+    init {
+        sessionObserver.state
+            .onEach { session ->
+                when (session) {
+                    SessionState.LoggedIn -> loadPreferences()
+                    SessionState.LoggedOut -> _state.value = NotificationPrefsState(isLoading = false)
+                    SessionState.Unknown -> Unit
+                }
+            }
+            .launchIn(scope)
+    }
 
     fun onEvent(event: NotificationPrefsEvent) {
         when (event) {

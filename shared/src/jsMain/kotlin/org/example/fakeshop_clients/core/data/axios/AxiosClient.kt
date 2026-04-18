@@ -7,6 +7,7 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.WebAuthDatasource
 import org.example.fakeshop_clients.core.error_handling.Result
@@ -16,6 +17,7 @@ import kotlin.reflect.KClass
 class AxiosClient(
     private val baseUrl: String,
     private val webAuthDatasource: WebAuthDatasource,
+    private val sessionMutator: SessionMutator,
     private val scope: CoroutineScope
 ) : ApiClient {
 
@@ -122,6 +124,7 @@ class AxiosClient(
     }
 
     private fun onSessionRefreshFailed() {
+        sessionMutator.setLoggedOut()
         refreshSubscribers.forEach { callback -> callback(false) }
         refreshSubscribers.clear()
     }

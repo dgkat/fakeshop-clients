@@ -26,7 +26,8 @@ val webNotificationsModule = module {
     factory {
         NotificationPrefsViewStore(
             scope = get(qualifier = named("appScope")),
-            notificationsService = get()
+            notificationsService = get(),
+            sessionObserver = get()
         )
     }
 

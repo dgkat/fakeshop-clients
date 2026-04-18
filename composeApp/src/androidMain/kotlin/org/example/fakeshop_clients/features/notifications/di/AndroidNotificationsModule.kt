@@ -36,7 +36,8 @@ val androidNotificationsModule = module {
     factory { (scope: kotlinx.coroutines.CoroutineScope) ->
         NotificationPrefsViewStore(
             scope = scope,
-            notificationsService = get()
+            notificationsService = get(),
+            sessionObserver = get()
         )
     }
 

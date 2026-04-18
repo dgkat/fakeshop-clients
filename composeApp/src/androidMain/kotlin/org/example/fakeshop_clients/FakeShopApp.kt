@@ -10,6 +10,7 @@ import coil.decode.SvgDecoder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.androidCoreModule
+import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
@@ -34,23 +35,25 @@ class FakeShopApp : Application() , ImageLoaderFactory{
         }
 
         createNotificationChannels()
-        registerDeviceTokenIfNeeded()
+        bootstrapSession()
     }
 
-    private fun registerDeviceTokenIfNeeded() {
+    private fun bootstrapSession() {
         val appScope = getKoin().get<CoroutineScope>(AppScopeQualifier)
         appScope.launch {
-            val service = getKoin().get<NotificationsService>()
-            if (service.getPermissionStatus() != NotificationPermissionStatus.GRANTED) return@launch
-
             val profileService = getKoin().get<ProfileService>()
+            val sessionMutator = getKoin().get<SessionMutator>()
+
             val isLoggedIn = profileService.checkLoginStatus()
                 .let { result ->
                     (result as? org.example.fakeshop_clients.core.error_handling.Result.Success)?.data ?: false
                 }
-            if (!isLoggedIn) return@launch
+            if (isLoggedIn) sessionMutator.setLoggedIn() else sessionMutator.setLoggedOut()
 
-            service.registerDeviceAfterAuth()
+            val service = getKoin().get<NotificationsService>()
+            if (isLoggedIn && service.getPermissionStatus() == NotificationPermissionStatus.GRANTED) {
+                service.registerDeviceAfterAuth()
+            }
         }
     }
 

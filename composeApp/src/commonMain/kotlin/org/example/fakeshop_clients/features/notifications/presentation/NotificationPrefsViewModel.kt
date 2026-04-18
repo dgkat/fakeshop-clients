@@ -14,9 +14,5 @@ class NotificationPrefsViewModel : ViewModel() {
 
     val state: StateFlow<NotificationPrefsState> = store.state
 
-    init {
-        store.onEvent(NotificationPrefsEvent.LoadPreferences)
-    }
-
     fun onEvent(event: NotificationPrefsEvent) = store.onEvent(event)
 }

@@ -2,6 +2,8 @@ package org.example.fakeshop_clients.di
 
 import kotlinx.coroutines.CoroutineScope
 import org.example.fakeshop_clients.core.auth.di.mobileInfrastructureModule
+import org.example.fakeshop_clients.core.auth.domain.SessionMutator
+import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.di.iosInfrastructureModule
 import org.example.fakeshop_clients.features.favorites.di.favoritesModule
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesViewStore
@@ -87,7 +89,8 @@ val iosModule = module {
     factory { (scope: CoroutineScope) ->
         NotificationPrefsViewStore(
             scope = scope,
-            notificationsService = get()
+            notificationsService = get(),
+            sessionObserver = get()
         )
     }
 }
@@ -138,5 +141,13 @@ class IOSKoinHelper : KoinComponent {
 
     fun getNotificationPrefsViewStore(scope: CoroutineScope): NotificationPrefsViewStore {
         return get { parametersOf(scope) }
+    }
+
+    fun getSessionMutator(): SessionMutator {
+        return get()
+    }
+
+    fun getSessionObserver(): SessionObserver {
+        return get()
     }
 }
