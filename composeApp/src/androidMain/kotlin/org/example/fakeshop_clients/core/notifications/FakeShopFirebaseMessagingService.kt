@@ -15,6 +15,7 @@ import org.koin.android.ext.android.inject
 class FakeShopFirebaseMessagingService : FirebaseMessagingService() {
 
     private val notificationsService: NotificationsService by inject()
+    private val pendingDeviceTokenCache: AndroidPendingDeviceTokenCache by inject()
     private val profileService: ProfileService by inject()
     private val appScope: CoroutineScope by inject(AppScopeQualifier)
 
@@ -22,7 +23,11 @@ class FakeShopFirebaseMessagingService : FirebaseMessagingService() {
         super.onNewToken(token)
         appScope.launch {
             val isLoggedIn = (profileService.checkLoginStatus() as? Result.Success)?.data ?: false
-            notificationsService.handleNewToken(token, isLoggedIn)
+            if (isLoggedIn) {
+                notificationsService.registerDeviceToken(token)
+            } else {
+                pendingDeviceTokenCache.save(token)
+            }
         }
     }
 

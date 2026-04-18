@@ -8,13 +8,12 @@ import org.example.fakeshop_clients.features.favorites.presentation.FavoritesVie
 import org.example.fakeshop_clients.features.home.di.homeModule
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListViewStore
 import org.example.fakeshop_clients.features.notifications.IosPushTokenProvider
-import org.example.fakeshop_clients.features.notifications.data.NoOpPendingDeviceTokenCache
 import org.example.fakeshop_clients.features.notifications.data.NotificationPermissionManager
-import org.example.fakeshop_clients.features.notifications.data.PendingDeviceTokenCache
 import org.example.fakeshop_clients.features.notifications.data.PushTokenProvider
 import org.example.fakeshop_clients.features.notifications.di.notificationsModule
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsServiceImpl
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
 import org.example.fakeshop_clients.features.productDetail.di.productDetailModule
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailViewStore
@@ -33,7 +32,7 @@ import org.koin.dsl.module
 val iosModule = module {
     single<PushTokenProvider> { IosPushTokenProvider() }
 
-    single<PendingDeviceTokenCache> { NoOpPendingDeviceTokenCache() }
+    single<NotificationsService> { get<NotificationsServiceImpl>() }
 
     single<NotificationPermissionManager> {
         object : NotificationPermissionManager {

@@ -3,14 +3,12 @@ package org.example.fakeshop_clients.features.notifications.domain
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.features.notifications.data.NotificationPermissionManager
-import org.example.fakeshop_clients.features.notifications.data.PendingDeviceTokenCache
 import org.example.fakeshop_clients.features.notifications.data.PushTokenProvider
 import org.example.fakeshop_clients.features.notifications.domain.models.NotificationPreferences
 
 class NotificationsServiceImpl(
     private val repository: NotificationsRepository,
     private val pushTokenProvider: PushTokenProvider,
-    private val pendingDeviceTokenCache: PendingDeviceTokenCache,
     private val permissionManager: NotificationPermissionManager
 ) : NotificationsService {
 
@@ -23,26 +21,16 @@ class NotificationsServiceImpl(
     }
 
     override suspend fun registerDeviceAfterAuth() {
-        val platform = pushTokenProvider.getPlatformName()
-        pendingDeviceTokenCache.consume()?.let { pending ->
-            repository.registerDeviceToken(pending, platform)
-        }
-        pushTokenProvider.getCurrentToken()?.let { token ->
-            repository.registerDeviceToken(token, platform)
-        }
+        registerCurrentDevice()
+    }
+
+    override suspend fun registerDeviceToken(token: String) {
+        repository.registerDeviceToken(token, pushTokenProvider.getPlatformName())
     }
 
     override suspend fun unregisterDevice() {
         pushTokenProvider.getCurrentToken()?.let { token ->
             repository.removeDeviceToken(token)
-        }
-    }
-
-    override suspend fun handleNewToken(token: String, isLoggedIn: Boolean) {
-        if (isLoggedIn) {
-            repository.registerDeviceToken(token, pushTokenProvider.getPlatformName())
-        } else {
-            pendingDeviceTokenCache.save(token)
         }
     }
 

@@ -2,10 +2,10 @@ package org.example.fakeshop_clients.features.notifications.di
 
 import org.example.fakeshop_clients.features.notifications.WebNotificationPermissionManager
 import org.example.fakeshop_clients.features.notifications.WebPushTokenProvider
-import org.example.fakeshop_clients.features.notifications.data.NoOpPendingDeviceTokenCache
 import org.example.fakeshop_clients.features.notifications.data.NotificationPermissionManager
-import org.example.fakeshop_clients.features.notifications.data.PendingDeviceTokenCache
 import org.example.fakeshop_clients.features.notifications.data.PushTokenProvider
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsServiceImpl
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewModel
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
 import org.koin.core.qualifier.named
@@ -17,7 +17,7 @@ val webNotificationsModule = module {
 
     single<PushTokenProvider> { WebPushTokenProvider() }
 
-    single<PendingDeviceTokenCache> { NoOpPendingDeviceTokenCache() }
+    single<NotificationsService> { get<NotificationsServiceImpl>() }
 
     single<NotificationPermissionManager> {
         WebNotificationPermissionManager()

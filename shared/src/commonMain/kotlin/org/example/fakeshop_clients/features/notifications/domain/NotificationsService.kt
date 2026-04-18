@@ -12,8 +12,8 @@ interface NotificationsService {
 
     // Device registration
     suspend fun registerDeviceAfterAuth()
+    suspend fun registerDeviceToken(token: String)
     suspend fun unregisterDevice()
-    suspend fun handleNewToken(token: String, isLoggedIn: Boolean)
 
     // Permission
     fun getPermissionStatus(): NotificationPermissionStatus
