@@ -101,7 +101,7 @@ class ProfileViewStore(
                 _profileState.update {
                     it.copy(
                         isProcessing = false,
-                        error = ProfileError.Network(networkError)
+                        error = networkError.toProfileError()
                     )
                 }
             }
@@ -130,7 +130,7 @@ class ProfileViewStore(
                 _profileState.update {
                     it.copy(
                         isProcessing = false,
-                        error = ProfileError.Network(networkError)
+                        error = networkError.toProfileError()
                     )
                 }
             }

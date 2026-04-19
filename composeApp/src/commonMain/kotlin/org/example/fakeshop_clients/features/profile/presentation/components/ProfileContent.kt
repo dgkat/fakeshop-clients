@@ -28,8 +28,22 @@ import fakeshop_clients.composeapp.generated.resources.logged_in
 import fakeshop_clients.composeapp.generated.resources.login
 import fakeshop_clients.composeapp.generated.resources.logout
 import fakeshop_clients.composeapp.generated.resources.password
+import fakeshop_clients.composeapp.generated.resources.profile_error_account_locked
+import fakeshop_clients.composeapp.generated.resources.profile_error_account_not_verified
+import fakeshop_clients.composeapp.generated.resources.profile_error_email_already_exists
+import fakeshop_clients.composeapp.generated.resources.profile_error_email_too_long
+import fakeshop_clients.composeapp.generated.resources.profile_error_invalid_credentials
+import fakeshop_clients.composeapp.generated.resources.profile_error_invalid_email_format
+import fakeshop_clients.composeapp.generated.resources.profile_error_network
+import fakeshop_clients.composeapp.generated.resources.profile_error_password_too_long
+import fakeshop_clients.composeapp.generated.resources.profile_error_password_too_short
+import fakeshop_clients.composeapp.generated.resources.profile_error_rate_limited
+import fakeshop_clients.composeapp.generated.resources.profile_error_server
+import fakeshop_clients.composeapp.generated.resources.profile_error_unknown
+import fakeshop_clients.composeapp.generated.resources.profile_error_weak_password
 import fakeshop_clients.composeapp.generated.resources.sign_up
 import fakeshop_clients.composeapp.generated.resources.welcome
+import org.example.fakeshop_clients.features.profile.presentation.ProfileError
 import org.example.fakeshop_clients.features.profile.presentation.ProfileEvent
 import org.example.fakeshop_clients.features.profile.presentation.ProfileState
 import org.jetbrains.compose.resources.stringResource
@@ -53,10 +67,9 @@ fun ProfileContent(
                 CircularProgressIndicator()
             }
             profileState.isLoggedIn -> {
-                //TODO handle errors
                 LoggedInContent(
                     isProcessing = profileState.isProcessing,
-                    error = "Logged in error",
+                    error = profileState.error?.let { profileErrorMessage(it) },
                     onEvent = onEvent,
                     notificationPrefsSection = notificationPrefsSection,
                     languageSection = languageSection
@@ -67,7 +80,7 @@ fun ProfileContent(
                     email = profileState.email,
                     password = profileState.password,
                     isProcessing = profileState.isProcessing,
-                    error = "Logged out error",
+                    error = profileState.error?.let { profileErrorMessage(it) },
                     onEvent = onEvent,
                     languageSection = languageSection
                 )
@@ -206,4 +219,21 @@ fun LoggedOutContent(
 
         languageSection?.invoke()
     }
+}
+
+@Composable
+private fun profileErrorMessage(error: ProfileError): String = when (error) {
+    ProfileError.InvalidCredentials -> stringResource(Res.string.profile_error_invalid_credentials)
+    ProfileError.AccountLocked -> stringResource(Res.string.profile_error_account_locked)
+    ProfileError.AccountNotVerified -> stringResource(Res.string.profile_error_account_not_verified)
+    ProfileError.EmailAlreadyExists -> stringResource(Res.string.profile_error_email_already_exists)
+    ProfileError.InvalidEmailFormat -> stringResource(Res.string.profile_error_invalid_email_format)
+    ProfileError.EmailTooLong -> stringResource(Res.string.profile_error_email_too_long)
+    ProfileError.WeakPassword -> stringResource(Res.string.profile_error_weak_password)
+    ProfileError.PasswordTooShort -> stringResource(Res.string.profile_error_password_too_short)
+    ProfileError.PasswordTooLong -> stringResource(Res.string.profile_error_password_too_long)
+    ProfileError.RateLimited -> stringResource(Res.string.profile_error_rate_limited)
+    ProfileError.ServerError -> stringResource(Res.string.profile_error_server)
+    is ProfileError.Network -> stringResource(Res.string.profile_error_network)
+    ProfileError.Unknown -> stringResource(Res.string.profile_error_unknown)
 }
