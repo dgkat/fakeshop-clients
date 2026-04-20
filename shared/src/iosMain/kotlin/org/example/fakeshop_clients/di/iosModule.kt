@@ -2,11 +2,21 @@ package org.example.fakeshop_clients.di
 
 import kotlinx.coroutines.CoroutineScope
 import org.example.fakeshop_clients.core.auth.di.mobileInfrastructureModule
+import org.example.fakeshop_clients.core.auth.domain.SessionMutator
+import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.di.iosInfrastructureModule
 import org.example.fakeshop_clients.features.favorites.di.favoritesModule
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesViewStore
 import org.example.fakeshop_clients.features.home.di.homeModule
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListViewStore
+import org.example.fakeshop_clients.features.notifications.IosPushTokenProvider
+import org.example.fakeshop_clients.features.notifications.data.NotificationPermissionManager
+import org.example.fakeshop_clients.features.notifications.data.PushTokenProvider
+import org.example.fakeshop_clients.features.notifications.di.notificationsModule
+import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsServiceImpl
+import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
 import org.example.fakeshop_clients.features.productDetail.di.productDetailModule
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailViewStore
 import org.example.fakeshop_clients.features.profile.di.profileModule
@@ -22,6 +32,17 @@ import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val iosModule = module {
+    single<PushTokenProvider> { IosPushTokenProvider() }
+
+    single<NotificationsService> { get<NotificationsServiceImpl>() }
+
+    single<NotificationPermissionManager> {
+        object : NotificationPermissionManager {
+            override fun getPermissionStatus() = NotificationPermissionStatus.NOT_DETERMINED
+            override suspend fun requestPermission() = NotificationPermissionStatus.NOT_DETERMINED
+        }
+    }
+
     factory { (scope: CoroutineScope) ->
         ProductListViewStore(
             scope = scope,
@@ -52,7 +73,8 @@ val iosModule = module {
         FavoritesViewStore(
             scope = scope,
             favoritesService = get(),
-            mapper = get()
+            mapper = get(),
+            notificationsService = get()
         )
     }
 
@@ -61,6 +83,14 @@ val iosModule = module {
             scope = scope,
             recentsService = get(),
             mapper = get()
+        )
+    }
+
+    factory { (scope: CoroutineScope) ->
+        NotificationPrefsViewStore(
+            scope = scope,
+            notificationsService = get(),
+            sessionObserver = get()
         )
     }
 }
@@ -75,6 +105,7 @@ fun initKoinIos(baseUrl: String) = startKoin {
         profileModule,
         favoritesModule,
         recentsModule,
+        notificationsModule,
         iosModule
     )
 }
@@ -101,6 +132,22 @@ class IOSKoinHelper : KoinComponent {
     }
 
     fun getProfileService(): ProfileService {
+        return get()
+    }
+
+    fun getNotificationsService(): NotificationsService {
+        return get()
+    }
+
+    fun getNotificationPrefsViewStore(scope: CoroutineScope): NotificationPrefsViewStore {
+        return get { parametersOf(scope) }
+    }
+
+    fun getSessionMutator(): SessionMutator {
+        return get()
+    }
+
+    fun getSessionObserver(): SessionObserver {
         return get()
     }
 }

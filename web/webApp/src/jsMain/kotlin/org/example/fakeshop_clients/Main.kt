@@ -2,12 +2,20 @@ package org.example.fakeshop_clients
 
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.auth.domain.SessionMutator
+import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.di.webCoreModule
+import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.core.navigation.mobile.BottomNav
 import org.example.fakeshop_clients.core.presentation.components.Header
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesPage
+import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsPage
+import org.example.fakeshop_clients.features.profile.domain.ProfileService
 import org.example.fakeshop_clients.features.profile.presentation.ProfilePage
 import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
 import org.example.fakeshop_clients.features.search.presentation.components.SearchBar
@@ -36,14 +44,61 @@ fun main() {
         modules(webCoreModule)
     }
 
+    registerServiceWorker()
+
     val rootElement = document.getElementById("spa-root") as? Element
         ?: error("Root element not found")
 
     createRoot(rootElement).render(SpaApp.create())
 
+    window.addEventListener("load", { bootstrapSession() })
+
+    // Re-initialize Koin when restored from bfcache (back-forward cache).
+    // The beforeunload handler stops Koin, but if the browser caches the page
+    // and the user navigates back, main() won't re-run — so we restart here.
+    window.addEventListener("pageshow", { event ->
+        if (event.asDynamic().persisted == true) {
+            startKoin {
+                modules(webCoreModule)
+            }
+        }
+    })
+
     window.addEventListener("beforeunload", {
         stopKoin()
     })
+}
+
+/**
+ * Registers the Firebase Cloud Messaging service worker on every page load.
+ * This is cheap, idempotent, and ensures the browser can handle incoming
+ * push notifications even if the Firebase SDK hasn't been lazily loaded yet.
+ */
+private fun registerServiceWorker() {
+    val sw = window.navigator.asDynamic().serviceWorker ?: return
+    sw.register("/firebase-messaging-sw.js")
+}
+
+/**
+ * Seeds [SessionStore] from the backend on app load and, if the user is
+ * logged in and has granted notification permission, re-registers the FCM
+ * token so the backend always has a fresh token for this browser.
+ */
+private fun bootstrapSession() {
+    val koin = getKoin()
+    val appScope = koin.get<CoroutineScope>(AppScopeQualifier)
+    appScope.launch {
+        val profileService = koin.get<ProfileService>()
+        val sessionMutator = koin.get<SessionMutator>()
+
+        val isLoggedIn = (profileService.checkLoginStatus() as? Result.Success)?.data ?: false
+        if (isLoggedIn) sessionMutator.setLoggedIn() else sessionMutator.setLoggedOut()
+
+        val service = koin.get<NotificationsService>()
+        if (isLoggedIn && service.getPermissionStatus() == NotificationPermissionStatus.GRANTED) {
+            service.registerDeviceAfterAuth()
+        }
+    }
 }
 
 private fun createRoute(

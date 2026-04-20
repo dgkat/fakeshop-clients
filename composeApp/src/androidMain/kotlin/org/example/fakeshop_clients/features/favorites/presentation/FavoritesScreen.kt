@@ -24,6 +24,7 @@ import org.example.fakeshop_clients.features.favorites.presentation.components.E
 import org.example.fakeshop_clients.features.favorites.presentation.components.FavoritesEmptyContent
 import org.example.fakeshop_clients.features.favorites.presentation.components.LoadingContent
 import org.example.fakeshop_clients.features.favorites.presentation.components.LoginRequiredContent
+import org.example.fakeshop_clients.features.favorites.presentation.components.NotificationPermissionBanner
 import org.example.fakeshop_clients.features.favorites.presentation.components.ProductGrid
 import org.example.fakeshop_clients.features.favorites.presentation.components.RecentsEmptyContent
 import org.example.fakeshop_clients.features.recents.presentation.RecentsEvent
@@ -37,15 +38,16 @@ fun FavoritesScreen(
     contentPadding: PaddingValues,
     viewModel: FavoritesViewModel = koinViewModel()
 ) {
-    val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
+    val favoritesState by viewModel.favoritesState.collectAsStateWithLifecycle()
 
-    when (isLoggedIn) {
-        null -> LoadingContent(modifier = Modifier.padding(contentPadding))
-        false -> LoginRequiredContent(
+    when {
+        favoritesState.error is FavoritesError.NotLoggedIn -> LoginRequiredContent(
             onGoToProfile = onGoToProfile,
             modifier = Modifier.padding(contentPadding)
         )
-        true -> FavoritesTabbedContent(
+        favoritesState.isLoading && favoritesState.products.isEmpty() && favoritesState.error == null ->
+            LoadingContent(modifier = Modifier.padding(contentPadding))
+        else -> FavoritesTabbedContent(
             viewModel = viewModel,
             onProductClick = onProductClick,
             contentPadding = contentPadding
@@ -71,6 +73,15 @@ private fun FavoritesTabbedContent(
             .fillMaxSize()
             .padding(top = contentPadding.calculateTopPadding())
     ) {
+        val favState by viewModel.favoritesState.collectAsStateWithLifecycle()
+        NotificationPermissionBanner(
+            permissionStatus = favState.notificationPermissionStatus,
+            showBanner = favState.showNotificationBanner,
+            onPermissionResult = { granted ->
+                viewModel.onFavoritesEvent(FavoritesEvent.NotificationPermissionResult(granted))
+            }
+        )
+
         TabRow(
             selectedTabIndex = pagerState.currentPage,
             containerColor = MaterialTheme.colorScheme.surface

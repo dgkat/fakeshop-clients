@@ -157,6 +157,247 @@ Required repository secrets:
 
 ---
 
+### Favorites & Recently Viewed
+
+Users can heart products to save them as favorites and the backend records every product detail view as a "recently seen" entry (max 50, 7-day TTL). Both lists live behind a single **Favorites** tab in the app (Favorites / Recently Seen segmented tabs).
+
+#### Backend endpoints
+
+All routes require authentication. Web uses `/api/web/...`, mobile uses `/api/mobile/...`.
+
+| Method | Path | Purpose |
+|---|---|---|
+| `POST` | `/favorites/{productId}` | Add to favorites (201, empty body) |
+| `DELETE` | `/favorites/{productId}` | Remove from favorites (204, empty body) |
+| `GET` | `/favorites` | Enriched `BriefProduct` list |
+| `GET` | `/favorites/check?productId={id}` | `{ "isFavorited": bool }` |
+| `POST` | `/favorites/check-bulk` | `{ favoritedProductIds: [...] }` from a list of ids |
+| `GET` | `/recents` | Enriched `BriefProduct` list, most-recent first |
+
+Recents are recorded automatically by the gateway on `GET /products/{id}` — no client write needed.
+
+#### Screens that use favorites
+
+| Screen | Interaction |
+|---|---|
+| **Home / product list** (Android, iOS, Web islands, SPA home) | Calls `checkBulkFavorites` after products load, renders filled hearts on each card, `toggleFavorite` on tap |
+| **Product detail** (all platforms) | Calls `checkFavorite(id)` on load, toggles via heart button, state reflected immediately across other screens |
+| **Favorites tab** (`/favorites` on web, Favorites tab on mobile) | Calls `getFavorites()` on mount, supports swipe-to-remove / heart-tap to remove |
+| **Recently Seen tab** (same screen, second tab) | Lazy-loads via `getRecentlyViewed()` the first time the user switches to the tab |
+
+#### Shared module architecture
+
+```
+shared/…/features/favorites/
+├── data/
+│   ├── FavoritesCache.kt              ← interface — in-memory StateFlow<Set<String>>
+│   ├── FavoritesDatasource(Impl).kt   ← Ktor/Axios HTTP calls
+│   ├── FavoritesRepositoryImpl.kt     ← maps DTOs → domain, updates cache on every response
+│   ├── models/                        ← BulkFavoriteCheck{Request,Response}, FavoriteCheckResponse
+│   └── MobileFavoritesCache.kt        ← mobileMain impl (plain MutableStateFlow)
+├── domain/
+│   ├── FavoritesRepository.kt
+│   ├── FavoritesService(Impl).kt      ← exposes favoritedIds: StateFlow<Set<String>>
+└── presentation/
+    ├── FavoritesError.kt              ← sealed interface (Network only)
+    ├── FavoritesState / Event
+    └── FavoritesViewStore.kt          ← collects service.favoritedIds, filters on removal
+
+shared/…/features/recents/             ← read-only mirror of favorites, no cache, just fetch + state
+shared/src/jsMain/…/features/favorites/data/WebFavoritesCache.kt   ← sessionStorage-backed cache
+```
+
+**The `FavoritesCache` singleton is the source of truth for heart state.** Every ViewStore that cares about favorites (`ProductListViewStore`, `ProductDetailViewStore`, `FavoritesViewStore`) observes `favoritesService.favoritedIds` and reacts to changes — so liking a product anywhere instantly updates every other screen without re-fetching. The repository writes the cache after every API response (`getFavorites`, `checkFavorite`, `checkBulkFavorites`) and toggles it optimistically on `toggleFavorite`, reverting if the HTTP call fails.
+
+`ProfileViewStore.handleLogout()` calls `favoritesService.clearCache()` after a successful logout so the next user starts clean.
+
+#### Per-platform state wiring
+
+| Platform | Cache impl | How the UI observes state |
+|---|---|---|
+| **Android** | `MobileFavoritesCache` (singleton via `mobileFavoritesCacheModule`) | `FavoritesViewModel` wraps `FavoritesViewStore` + `RecentsViewStore` with `viewModelScope`, exposes their `StateFlow`s directly; Compose uses `collectAsStateWithLifecycle()` |
+| **iOS** | `MobileFavoritesCache` (same mobileMain singleton) | `FavoritesViewModel: ObservableObject` creates a `CoroutineScope` via `ScopeHelper`, resolves the ViewStores from Koin, bridges their `StateFlow` to `@Published` via `for try await` tasks in `init`, cancels the scope in `deinit` |
+| **Web islands** (home page) | `WebFavoritesCache` (sessionStorage-backed) registered in `WebKoinManager` via `webFavoritesCacheModule` | Islands `ProductListViewmodel` delegates to `ProductListViewStore`; `ProductCard` reads `isFavorited = product.id in state.favoritedProductIds` and calls `vm.toggleFavorite(id)` |
+| **Web SPA** (`/favorites`) | `WebFavoritesCache` (same jsMain singleton, but a **new Koin context** per page load) | `FavoritesPage` FC resolves `FavoritesViewModel` from Koin, uses `useEffectWithCleanup` to collect both state flows via `launchIn(MainScope())`, cancels jobs on unmount |
+
+**Why web needs sessionStorage** — islands (home) and SPA (`/favorites`) are separate webpack bundles with separate Koin contexts. A full-page navigation from `/` to `/favorites` tears down one Koin graph and starts another. `WebFavoritesCache` persists the id set to `sessionStorage["favorited_ids"]` on every mutation and reads it back in `init`, so the SPA sees the user's up-to-date favorite set instantly (a fresh `checkBulkFavorites` / `getFavorites` call still runs in the background to reconcile with the backend).
+
+#### DI graph
+
+- `favoritesModule` (commonMain) — datasource, repository, service. `FavoritesService` is a `single` so the observable `StateFlow` is shared across all consumers.
+- `mobileFavoritesCacheModule` (mobileMain) — binds `FavoritesCache` to `MobileFavoritesCache`, included from `mobileInfrastructureModule`.
+- `webFavoritesCacheModule` (jsMain) — binds `FavoritesCache` to `WebFavoritesCache`, wired into both `WebKoinManager` (islands) and `WebCoreModule` (SPA).
+- `recentsModule` (commonMain) — datasource + repository + service. No cache: recents are a pure read model.
+- Platform UI modules (`androidFavoritesModule`, `webFavoritesModule`, iOS's `iosModule`) provide the ViewStore / ViewModel factories and inject `CoroutineScope` appropriately.
+
+See `FEATURE_INTERACTIONS_CLIENT.md` for the original implementation plan and `FAVORITES_STATE_SYNC_PLAN.md` for the cache-based cross-screen sync design.
+
+---
+
+### Push Notifications
+
+Price-drop push notifications are wired up on Android and Web. iOS is **not yet implemented** — the shared module is ready, but the `iosApp` target still needs Firebase SDK integration and an `AppDelegate` (see `FEATURE_NOTIFICATIONS_CLIENT.md` Step 8).
+
+#### Architecture
+
+| Platform | Delivery | SDK | Token source |
+|---|---|---|---|
+| Android | FCM (native) | `firebase-messaging` via `google-services` plugin | `FirebaseMessaging.getInstance().token` |
+| iOS | FCM → APNs (pending) | `firebase-ios-sdk` (pending) | `Messaging.messaging().token` (pending) |
+| Web | Firebase JS SDK (compat) + Service Worker + VAPID | Lazy-loaded from `gstatic.com` on first use | `firebase.messaging().getToken({ vapidKey, serviceWorkerRegistration })` |
+
+**Shared module** (`shared/.../features/notifications`) owns the datasource, repository, service, `PushTokenProvider` + `NotificationPermissionManager` interfaces, and the `NotificationPrefsViewStore`. Each platform provides its own implementations of the two interfaces and wires them into Koin.
+
+**Token lifecycle** — token is obtained once permission is granted, cached locally (Android uses `AndroidPendingDeviceTokenCache` to hold the token until the user is logged in), then POSTed to `/api/{mobile|web}/device-tokens`. On logout, `ProfileViewStore.handleLogout()` DELETEs the current token. Token refresh (Android `onNewToken`, web re-subscribe) re-registers automatically.
+
+**Foreground delivery** — messages arriving while the app is open are surfaced via `NotificationEventBus` (emits `PushNotificationEvent.PriceDrop`). Android shows a snackbar with a "View" action; web shows an OS notification (the service worker always displays, regardless of foreground state).
+
+**Deep-link on tap** — the push payload carries `data.productId`. Tapping navigates to the product detail screen on each platform (Android: `MainActivity` intent extra → `navController.navigate`; web: service worker `notificationclick` → `clients.openWindow('/{locale}/product/{productId}')`).
+
+#### Firebase projects: dev vs prod
+
+**Use two separate Firebase projects** — one for local development, one for production. This keeps test pushes out of real users' devices and lets you rotate keys independently.
+
+| Value | Dev source | Prod source |
+|---|---|---|
+| Android `google-services.json` | `composeApp/google-services.json` (gitignored, hand-placed) | Same path, but pulled from a CI secret at build time |
+| Web Firebase config (`apiKey`, `appId`, …) | Defaults hardcoded in `web/ssr/src/main/resources/application.conf` | `FIREBASE_*` env vars on the SSR container (override the conf defaults) |
+| Web VAPID public key | `firebase.vapidKey` default in `application.conf` | `FIREBASE_VAPID_KEY` env var |
+
+The Firebase web config values (`apiKey`, `projectId`, etc.) **are public** — they ship to every browser. The real security boundary is API key restrictions in the Google Cloud Console (restrict to your prod domain) and Firebase Security Rules. Injecting via env vars is about project separation, not secrecy.
+
+#### Dev setup
+
+**Android** — download `google-services.json` from your dev Firebase project (Project settings → Your apps → Android app) and drop it at `composeApp/google-services.json`. The file is already in `.gitignore`. Build + run as normal:
+
+```shell
+./gradlew :composeApp:assembleDebug
+```
+
+**Web** — nothing to do. `application.conf` ships with dev Firebase config baked in, and the VAPID key is preconfigured. Run the SSR server normally:
+
+```shell
+./gradlew :web:common:runWeb
+```
+
+Open `/favorites`, accept the notification permission when prompted (or from the Profile page), and send a test push via Firebase Console → Cloud Messaging → "Send test message" (using the token printed in the backend logs after registration).
+
+#### Prod setup
+
+**Android prod build** — replace `composeApp/google-services.json` with the one from your prod Firebase project before running `assembleRelease`. In CI this is done by decoding a base64-encoded secret into the file path just before the Gradle build.
+
+**Web prod build** — the SSR container reads Firebase config from env vars. Set these on the container (via `docker-compose.yml` `environment:` or an `.env` file on the VPS):
+
+```shell
+FIREBASE_API_KEY=...
+FIREBASE_AUTH_DOMAIN=<prod-project>.firebaseapp.com
+FIREBASE_PROJECT_ID=<prod-project>
+FIREBASE_STORAGE_BUCKET=<prod-project>.firebasestorage.app
+FIREBASE_MESSAGING_SENDER_ID=...
+FIREBASE_APP_ID=...
+FIREBASE_VAPID_KEY=...
+```
+
+Each overrides the corresponding default in `application.conf`. Missing values fall back to the dev defaults — if you forget to set one, you'll ship dev Firebase config to prod users. **Double-check all seven are set before the first prod deploy.**
+
+The service worker (`/firebase-messaging-sw.js`) does not need any config — it uses raw Web Push and the browser decrypts FCM payloads before handing them to the `push` event.
+
+#### Wiring prod secrets
+
+**Web — `.env` file on the VPS**
+
+The seven `FIREBASE_*` values live in an `.env` file on the VPS, next to `docker-compose.yml`. They never touch GitHub Actions, never appear in CI logs, and never traverse SSH. Rotating a key is a one-line edit on the box plus a `docker compose up -d`.
+
+**First-time setup** — one-shot, performed manually on the VPS:
+
+1. Grab the values from Firebase Console → Project settings → Your apps → Web app (for `apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`) and Project settings → Cloud Messaging → Web Push certificates (for `vapidKey`). Use the **prod** Firebase project, not dev.
+
+2. SSH into the VPS and open the compose directory:
+   ```shell
+   ssh <user>@<vps-host>
+   cd /opt/fakeshop/prod_env
+   ```
+
+3. Create `.env` next to `docker-compose.yml` with the seven values:
+   ```shell
+   cat > .env <<'EOF'
+   FIREBASE_API_KEY=AIza...
+   FIREBASE_AUTH_DOMAIN=fakeshop-prod.firebaseapp.com
+   FIREBASE_PROJECT_ID=fakeshop-prod
+   FIREBASE_STORAGE_BUCKET=fakeshop-prod.firebasestorage.app
+   FIREBASE_MESSAGING_SENDER_ID=123456789012
+   FIREBASE_APP_ID=1:123456789012:web:abcdef1234567890
+   FIREBASE_VAPID_KEY=B...
+   EOF
+   ```
+
+4. Lock it down so only the deploy user can read it:
+   ```shell
+   chmod 600 .env
+   ```
+
+5. Edit `docker-compose.yml` and add an `env_file:` entry under the `fakeshop-web` service (Compose reads the file at `up` time and injects every line as an env var into the container):
+   ```yaml
+   services:
+     fakeshop-web:
+       image: ghcr.io/<owner>/fakeshop-web:latest
+       env_file:
+         - .env
+       # ...existing config (ports, restart policy, BACKEND_BASE_URL, etc.)
+   ```
+   If `BACKEND_BASE_URL` is currently set inline under `environment:`, leave it there — `env_file:` and `environment:` merge, with `environment:` taking precedence.
+
+6. Restart the container to pick up the new env:
+   ```shell
+   docker compose up -d fakeshop-web
+   ```
+
+7. Verify the prod project is actually being served: open `https://<your-domain>/en/favorites` in a browser, open DevTools → Console, and run:
+   ```js
+   window.__FIREBASE_CONFIG__
+   ```
+   The `projectId` should be your prod project. If it's still `fakeshop-dev`, the env vars didn't reach the container — check `docker compose config` on the VPS to see the merged config and confirm `.env` is being read.
+
+**Rotating a key later** — SSH in, edit `.env`, `docker compose up -d fakeshop-web`. Nothing else to do. The next deploy from `web/prod/deploy/**` picks up the new values automatically because the env file is read on every `up`.
+
+**Backup** — this `.env` is the only place these values exist outside Firebase Console. If you rebuild the VPS, you'll need to recreate it from scratch or restore it from a secure backup (e.g. 1Password, encrypted tarball). Add it to whatever disaster-recovery checklist you keep for the VPS.
+
+**Android — GitHub Actions secret (when a release workflow is added)**
+
+Android's `google-services.json` is a file, not env vars, so the VPS-`.env` pattern doesn't apply. Store it as a base64-encoded GitHub secret and decode it before the Gradle build:
+
+| Secret | Notes |
+|---|---|
+| `GOOGLE_SERVICES_JSON_PROD` | Base64-encoded `google-services.json` from the prod Firebase project |
+
+Encode locally:
+```shell
+base64 -i composeApp/google-services.json | pbcopy
+```
+
+Decode in the release workflow:
+```yaml
+- name: Restore google-services.json
+  run: echo "${{ secrets.GOOGLE_SERVICES_JSON_PROD }}" | base64 -d > composeApp/google-services.json
+- run: ./gradlew :composeApp:assembleRelease
+```
+
+#### iOS — remaining work
+
+The shared module already exposes everything iOS needs (`NotificationsService`, `NotificationPrefsViewStore`, `NotificationEventBus`). To finish the iOS side:
+
+1. Add `firebase-ios-sdk` via SPM (FirebaseMessaging product) in Xcode
+2. Add `GoogleService-Info.plist` (dev + prod variants managed per scheme)
+3. Enable **Push Notifications** capability and **Background Modes → Remote notifications**
+4. Create `AppDelegate.swift` with `FirebaseApp.configure()` + `MessagingDelegate` + `UNUserNotificationCenterDelegate`
+5. Implement `IOSPushTokenProvider` and `IOSNotificationPermissionManager` in `iosMain`
+6. Wire them into `iosModule.kt` and expose via `IOSKoinHelper`
+7. Add a `NotificationRouter` `ObservableObject` and observe it from `MainTabView` for deep-linking
+
+Full breakdown in `FEATURE_NOTIFICATIONS_CLIENT.md` → Step 8.
+
+---
+
 ### Production Hardening
 
 The following changes are in place to make production builds safe and performant. Some introduce new **required steps** when upgrading dependencies or building for release.

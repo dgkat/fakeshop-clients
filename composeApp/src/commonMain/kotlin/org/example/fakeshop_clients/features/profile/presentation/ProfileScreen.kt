@@ -11,6 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fakeshop_clients.composeapp.generated.resources.Res
 import fakeshop_clients.composeapp.generated.resources.tab_profile
+import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsEvent
+import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewModel
+import org.example.fakeshop_clients.features.profile.presentation.components.NotificationPrefsSection
 import org.example.fakeshop_clients.features.profile.presentation.components.ProfileContent
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -19,9 +22,11 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ProfileScreen(
     profileViewModel: ProfileViewModel = koinViewModel(),
+    notificationPrefsViewModel: NotificationPrefsViewModel = koinViewModel(),
     languageSection: @Composable (() -> Unit)? = null
 ) {
     val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
+    val notificationPrefsState by notificationPrefsViewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -34,6 +39,16 @@ fun ProfileScreen(
             profileState = uiState,
             onEvent = profileViewModel::onEvent,
             modifier = Modifier.padding(paddingValues),
+            notificationPrefsSection = {
+                NotificationPrefsSection(
+                    state = notificationPrefsState,
+                    onTogglePriceDrop = { enabled ->
+                        notificationPrefsViewModel.onEvent(
+                            NotificationPrefsEvent.TogglePriceDrop(enabled)
+                        )
+                    }
+                )
+            },
             languageSection = languageSection
         )
     }

@@ -2,10 +2,9 @@ package org.example.fakeshop_clients.features.favorites.presentation
 
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.core.i18n.getString
 import org.example.fakeshop_clients.core.presentation.components.ProductCardWithHeart
@@ -28,49 +27,32 @@ val FavoritesPage = FC<Props> {
     val koin = GlobalContext.get()
     val viewModel = useMemo { koin.get<FavoritesViewModel>() }
 
-    var isLoggedIn by useState<Boolean?>(null)
     var favoritesState by useState(FavoritesState())
     var recentsState by useState(RecentsState())
     var selectedTab by useState(0)
 
-    // Check login and observe states
     useEffectWithCleanup(viewModel) {
         val scope = MainScope()
 
-        // Check login status
-        scope.launch {
-            val result = viewModel.profileService.checkLoginStatus()
-            if (result is Result.Success) {
-                isLoggedIn = result.data
-                if (result.data) {
-                    viewModel.onFavoritesEvent(FavoritesEvent.LoadFavorites)
-                }
-            } else {
-                isLoggedIn = false
-            }
-        }
-
-        // Observe favorites state
-        val favJob = viewModel.favoritesState
+        viewModel.favoritesState
             .onEach { newState -> favoritesState = newState }
             .launchIn(scope)
 
-        // Observe recents state
-        val recJob = viewModel.recentsState
+        viewModel.recentsState
             .onEach { newState -> recentsState = newState }
             .launchIn(scope)
 
-        onCleanup {
-            favJob.cancel()
-            recJob.cancel()
-        }
+        onCleanup { scope.cancel() }
     }
 
     div {
         className = ClassName("favorites-page")
 
-        when (isLoggedIn) {
-            null -> {
+        when {
+            favoritesState.error is FavoritesError.NotLoggedIn -> {
+                LoginRequiredContent {}
+            }
+            favoritesState.isLoading && favoritesState.products.isEmpty() && favoritesState.error == null -> {
                 div {
                     className = ClassName("favorites-loading")
                     span {
@@ -78,10 +60,15 @@ val FavoritesPage = FC<Props> {
                     }
                 }
             }
-            false -> {
-                LoginRequiredContent {}
-            }
-            true -> {
+            else -> {
+                if (favoritesState.showNotificationBanner) {
+                    NotificationEnableBanner {
+                        this.onEnableClick = {
+                            viewModel.onFavoritesEvent(FavoritesEvent.RequestNotificationPermission)
+                        }
+                    }
+                }
+
                 // Tabs
                 div {
                     className = ClassName("favorites-tabs")
@@ -263,6 +250,44 @@ val ErrorContent = FC<ErrorContentProps> { props ->
             className = ClassName("btn-primary")
             onClick = { props.onRetry() }
             +getString("retry")
+        }
+    }
+}
+
+// MARK: - Notification Permission Banner
+
+external interface NotificationEnableBannerProps : Props {
+    var onEnableClick: () -> Unit
+}
+
+val NotificationEnableBanner = FC<NotificationEnableBannerProps> { props ->
+    var isEnabling by useState(false)
+
+    div {
+        className = ClassName("notification-enable-banner")
+
+        div {
+            className = ClassName("notification-enable-banner-text")
+            p {
+                className = ClassName("notification-enable-banner-title")
+                +getString("notification_permission_title")
+            }
+            p {
+                className = ClassName("notification-enable-banner-message")
+                +getString("notification_permission_message")
+            }
+        }
+
+        button {
+            className = ClassName("btn-primary")
+            disabled = isEnabling
+            onClick = {
+                if (!isEnabling) {
+                    isEnabling = true
+                    props.onEnableClick()
+                }
+            }
+            +if (isEnabling) getString("processing") else getString("notification_permission_enable")
         }
     }
 }

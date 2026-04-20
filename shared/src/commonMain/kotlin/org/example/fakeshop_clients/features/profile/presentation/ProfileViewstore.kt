@@ -6,14 +6,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
+import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
 import org.example.fakeshop_clients.features.profile.domain.ProfileService
 
 class ProfileViewStore(
     private val scope: CoroutineScope,
     private val profileService: ProfileService,
-    private val favoritesService: FavoritesService
+    private val favoritesService: FavoritesService,
+    private val notificationsService: NotificationsService,
+    private val sessionMutator: SessionMutator
 ) {
     private val _profileState = MutableStateFlow(ProfileState(isLoading = true))
     val profileState: StateFlow<ProfileState> = _profileState.asStateFlow()
@@ -29,6 +33,7 @@ class ProfileViewStore(
 
         profileService.checkLoginStatus().fold(
             onSuccess = { isLoggedIn ->
+                if (isLoggedIn) sessionMutator.setLoggedIn() else sessionMutator.setLoggedOut()
                 _profileState.update {
                     it.copy(
                         isLoggedIn = isLoggedIn,
@@ -38,6 +43,7 @@ class ProfileViewStore(
                 }
             },
             onError = { networkError ->
+                sessionMutator.setLoggedOut()
                 _profileState.update {
                     it.copy(
                         isLoggedIn = false,
@@ -79,6 +85,8 @@ class ProfileViewStore(
 
         profileService.login(currentState.email, currentState.password).fold(
             onSuccess = {
+                registerDeviceTokenAfterAuth()
+                sessionMutator.setLoggedIn()
                 _profileState.update {
                     it.copy(
                         isLoggedIn = true,
@@ -93,7 +101,7 @@ class ProfileViewStore(
                 _profileState.update {
                     it.copy(
                         isProcessing = false,
-                        error = ProfileError.Network(networkError)
+                        error = networkError.toProfileError()
                     )
                 }
             }
@@ -106,6 +114,8 @@ class ProfileViewStore(
 
         profileService.signUp(currentState.email, currentState.password).fold(
             onSuccess = {
+                registerDeviceTokenAfterAuth()
+                sessionMutator.setLoggedIn()
                 _profileState.update {
                     it.copy(
                         isLoggedIn = true,
@@ -120,11 +130,15 @@ class ProfileViewStore(
                 _profileState.update {
                     it.copy(
                         isProcessing = false,
-                        error = ProfileError.Network(networkError)
+                        error = networkError.toProfileError()
                     )
                 }
             }
         )
+    }
+
+    private suspend fun registerDeviceTokenAfterAuth() {
+        notificationsService.registerDeviceAfterAuth()
     }
 
     private suspend fun handleLogout() {
@@ -133,6 +147,8 @@ class ProfileViewStore(
         profileService.logout().fold(
             onSuccess = {
                 favoritesService.clearCache()
+                notificationsService.unregisterDevice()
+                sessionMutator.setLoggedOut()
                 _profileState.update {
                     it.copy(
                         isLoggedIn = false,

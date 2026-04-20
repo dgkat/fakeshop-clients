@@ -2,6 +2,10 @@ package org.example.fakeshop_clients.core.navigation.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,6 +29,8 @@ import org.example.fakeshop_clients.features.notifications.presentation.Notifica
 import org.example.fakeshop_clients.features.product_detail.presentation.ProductDetailScreen
 import org.example.fakeshop_clients.features.profile.presentation.ProfileScreen
 import org.example.fakeshop_clients.features.profile.presentation.components.LanguagePickerSection
+import org.example.fakeshop_clients.features.notifications.presentation.NotificationEventBus
+import org.example.fakeshop_clients.features.notifications.presentation.PushNotificationEvent
 import org.example.fakeshop_clients.features.search.presentation.SearchBarBehavior
 import org.example.fakeshop_clients.features.search.presentation.SearchEvent
 import org.example.fakeshop_clients.features.search_bar.presentation.SearchViewModel
@@ -32,8 +38,14 @@ import org.example.fakeshop_clients.features.search_bar.presentation.components.
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun MainNavigation() {
+fun MainNavigation(initialProductId: String? = null) {
     val navController = rememberNavController()
+
+    LaunchedEffect(initialProductId) {
+        initialProductId?.let { productId ->
+            navController.navigate(Route.ProductDetail.createRoute(productId))
+        }
+    }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -41,6 +53,28 @@ fun MainNavigation() {
     val searchUiState by searchViewModel.state.collectAsStateWithLifecycle()
 
     var scrollOffset by remember { mutableFloatStateOf(0f) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        NotificationEventBus.events.collect { event ->
+            when (event) {
+                is PushNotificationEvent.PriceDrop -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = event.body,
+                        actionLabel = "View",
+                        duration = SnackbarDuration.Long
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        navController.navigate(Route.ProductDetail.createRoute(event.productId))
+                    }
+                }
+
+                is PushNotificationEvent.OpenProduct -> {
+                    navController.navigate(Route.ProductDetail.createRoute(event.productId))
+                }
+            }
+        }
+    }
 
     val activeTab = remember(currentRoute) {
         when {
@@ -76,6 +110,7 @@ fun MainNavigation() {
         }
     ) { contentPadding ->
         Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
                 BottomNavigationBar(
                     activeTab = activeTab,

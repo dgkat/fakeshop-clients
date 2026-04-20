@@ -1,12 +1,13 @@
 package org.example.fakeshop_clients.core.data.axios
 
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.promise
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.WebAuthDatasource
 import org.example.fakeshop_clients.core.error_handling.Result
@@ -15,7 +16,9 @@ import kotlin.reflect.KClass
 
 class AxiosClient(
     private val baseUrl: String,
-    private val webAuthDatasource: WebAuthDatasource
+    private val webAuthDatasource: WebAuthDatasource,
+    private val sessionMutator: SessionMutator,
+    private val scope: CoroutineScope
 ) : ApiClient {
 
     private val jsonParser = Json {
@@ -24,9 +27,7 @@ class AxiosClient(
     }
 
     private var isRefreshing = false
-    private var refreshSubscribers: MutableList<(Throwable?) -> Unit> = mutableListOf()
-
-    private val scope = MainScope()
+    private var refreshSubscribers: MutableList<(Boolean) -> Unit> = mutableListOf()
 
     init {
         axios.defaults.withCredentials = true
@@ -54,14 +55,14 @@ class AxiosClient(
 
                 if (status == 401 && originalRequest._retry != true) {
                     if (isRefreshing) {
-                        return@use Promise { resolve, reject ->
-                            refreshSubscribers.add { refreshError ->
-                                if (refreshError != null) {
-                                    reject(refreshError)
-                                } else {
+                        return@use Promise<AxiosResponse> { resolve, reject ->
+                            refreshSubscribers.add { success ->
+                                if (success) {
                                     retryRequest(originalRequest)
                                         .then { resolve(it) }
-                                        .catch { reject(it) }
+                                        .catch { reject(wrapAxiosError(it.asDynamic())) }
+                                } else {
+                                    reject(wrapAxiosError(error))
                                 }
                             }
                         }
@@ -70,38 +71,31 @@ class AxiosClient(
                     originalRequest._retry = true
                     isRefreshing = true
 
-                    return@use scope.promise {
-                        try {
-                            //TODO clean up try/catch ( already in .refreshSession) and else + Result.Error (duplicate)
-                            val refreshResult = webAuthDatasource.refreshSession()
-
-                            when (refreshResult) {
-                                is Result.Success -> {
-                                    if (refreshResult.data) {
-                                        onSessionRefreshed()
-                                        retryRequest(originalRequest).await()
-                                    } else {
-                                        val error = Exception("Session refresh returned false")
-                                        onSessionRefreshFailed(error)
-                                        throw error
-                                    }
-                                }
-                                is Result.Error -> {
-                                    val error = Exception("Session refresh failed: ${refreshResult.error}")
-                                    onSessionRefreshFailed(error)
-                                    throw error
-                                }
+                    return@use Promise<AxiosResponse> { resolve, reject ->
+                        scope.promise {
+                            val refreshSucceeded = try {
+                                val refreshResult = webAuthDatasource.refreshSession()
+                                refreshResult is Result.Success && refreshResult.data
+                            } catch (_: Throwable) {
+                                false
+                            } finally {
+                                isRefreshing = false
                             }
-                        } catch (refreshError: Throwable) {
-                            onSessionRefreshFailed(refreshError)
-                            throw refreshError
-                        } finally {
-                            isRefreshing = false
+
+                            if (refreshSucceeded) {
+                                onSessionRefreshed()
+                                retryRequest(originalRequest)
+                                    .then { resolve(it) }
+                                    .catch { reject(wrapAxiosError(it.asDynamic())) }
+                            } else {
+                                onSessionRefreshFailed()
+                                reject(wrapAxiosError(error))
+                            }
                         }
                     }
                 }
 
-                Promise.reject(error)
+                Promise.reject(wrapAxiosError(error))
             }
         )
     }
@@ -116,13 +110,22 @@ class AxiosClient(
         }
     }
 
+    private fun wrapAxiosError(error: dynamic): Exception {
+        val message = error?.message?.toString() ?: "Request failed"
+        val wrapped = Exception(message)
+        wrapped.asDynamic().response = error?.response
+        wrapped.asDynamic().code = error?.code
+        return wrapped
+    }
+
     private fun onSessionRefreshed() {
-        refreshSubscribers.forEach { callback -> callback(null) }
+        refreshSubscribers.forEach { callback -> callback(true) }
         refreshSubscribers.clear()
     }
 
-    private fun onSessionRefreshFailed(error: Throwable) {
-        refreshSubscribers.forEach { callback -> callback(error) }
+    private fun onSessionRefreshFailed() {
+        sessionMutator.setLoggedOut()
+        refreshSubscribers.forEach { callback -> callback(false) }
         refreshSubscribers.clear()
     }
 
@@ -173,6 +176,15 @@ class AxiosClient(
         val bodyJson = jsonParser.encodeToString(bodySerializer, body)
         val bodyObject = JSON.parse<dynamic>(bodyJson)
         axios.post("$baseUrl$path", bodyObject).await()
+    }
+
+    @OptIn(InternalSerializationApi::class)
+    override suspend fun <B : Any> putNoContent(path: String, body: B, bodyType: KClass<B>) {
+        @Suppress("UNCHECKED_CAST")
+        val bodySerializer = bodyType.serializer() as SerializationStrategy<B>
+        val bodyJson = jsonParser.encodeToString(bodySerializer, body)
+        val bodyObject = JSON.parse<dynamic>(bodyJson)
+        axios.put("$baseUrl$path", bodyObject).await()
     }
 
     override suspend fun deleteNoContent(path: String) {

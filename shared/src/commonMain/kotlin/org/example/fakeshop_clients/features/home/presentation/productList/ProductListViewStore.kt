@@ -33,7 +33,13 @@ class ProductListViewStore(
     }
 
     suspend fun loadCategories() {
-        _productListState.value = ProductListState(isLoading = true)
+        _productListState.update {
+            it.copy(
+                categories = emptyList(),
+                isLoading = true,
+                error = null,
+            )
+        }
 
         val accumulatedCategories = mutableListOf<UiCategoryRow>()
 
@@ -46,24 +52,28 @@ class ProductListViewStore(
                         products = mapper.map(domainCategoryRow.products)
                     )
                     accumulatedCategories.add(uiCategoryRow)
-                    _productListState.value = ProductListState(
-                        categories = accumulatedCategories.toList(),
-                        isLoading = true,
-                        error = null
-                    )
+                    _productListState.update {
+                        it.copy(
+                            categories = accumulatedCategories.toList(),
+                            isLoading = true,
+                            error = null,
+                        )
+                    }
                 }
                 is Result.Error -> {
-                    _productListState.value = ProductListState(
-                        categories = accumulatedCategories.toList(),
-                        isLoading = false,
-                        error = HomeError.Network(result.error)
-                    )
+                    _productListState.update {
+                        it.copy(
+                            categories = accumulatedCategories.toList(),
+                            isLoading = false,
+                            error = HomeError.Network(result.error),
+                        )
+                    }
                     return@collect
                 }
             }
         }
 
-        _productListState.value = _productListState.value.copy(isLoading = false)
+        _productListState.update { it.copy(isLoading = false) }
         checkBulkFavorites()
     }
 

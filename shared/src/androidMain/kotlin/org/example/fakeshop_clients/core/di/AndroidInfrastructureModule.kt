@@ -5,8 +5,11 @@ import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.http.Url
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
 import org.example.fakeshop_clients.core.concurrency.AndroidDispatcherProvider
+import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
 import org.example.fakeshop_clients.core.data.DataStoreTokenStorage
 import org.example.fakeshop_clients.shared.BuildConfig
@@ -40,5 +43,9 @@ val androidInfrastructureModule = module {
 
     single<DispatcherProvider> {
         AndroidDispatcherProvider()
+    }
+
+    single<CoroutineScope>(AppScopeQualifier) {
+        CoroutineScope(SupervisorJob() + get<DispatcherProvider>().default)
     }
 }

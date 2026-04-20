@@ -14,18 +14,17 @@ struct FavoritesView: View {
 
     var body: some View {
         Group {
-            if let isLoggedIn = viewModel.isLoggedIn {
-                if isLoggedIn {
-                    FavoritesTabbedContent(
-                        viewModel: viewModel,
-                        navigationPath: $navigationPath,
-                        onScrollOffsetChange: onScrollOffsetChange
-                    )
-                } else {
-                    LoginRequiredContent(onGoToProfile: {})
-                }
-            } else {
+            let state = viewModel.favoritesState
+            if state.error is FavoritesError.NotLoggedIn {
+                LoginRequiredContent(onGoToProfile: {})
+            } else if state.isLoading && state.products.isEmpty && state.error == nil {
                 ProgressView()
+            } else {
+                FavoritesTabbedContent(
+                    viewModel: viewModel,
+                    navigationPath: $navigationPath,
+                    onScrollOffsetChange: onScrollOffsetChange
+                )
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -42,6 +41,14 @@ private struct FavoritesTabbedContent: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            NotificationPermissionBanner(
+                permissionStatus: viewModel.favoritesState.notificationPermissionStatus,
+                showBanner: viewModel.favoritesState.showNotificationBanner,
+                onPermissionResult: { granted in
+                    viewModel.onFavoritesEvent(FavoritesEvent.NotificationPermissionResult(granted: granted))
+                }
+            )
+
             Picker("", selection: $selectedTab) {
                 Text(String(localized: "tab_favorites")).tag(0)
                 Text(String(localized: "tab_recently_seen")).tag(1)

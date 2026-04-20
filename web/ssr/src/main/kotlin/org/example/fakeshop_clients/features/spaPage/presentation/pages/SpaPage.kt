@@ -14,7 +14,13 @@ import kotlinx.html.unsafe
 import org.example.fakeshop_clients.core.assets.AssetManifest
 import org.example.fakeshop_clients.core.i18n.WebStrings
 
-fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: String) {
+fun HTML.spaPage(
+    locale: String,
+    strings: Map<String, String>,
+    stringsJson: String,
+    firebaseConfigJson: String,
+    firebaseVapidKeyJson: String,
+) {
     lang = locale
     head {
         meta(charset = "UTF-8")
@@ -49,6 +55,15 @@ fun HTML.spaPage(locale: String, strings: Map<String, String>, stringsJson: Stri
         script {
             unsafe {
                 +"""window.__LOCALE__ = "${locale}"; window.__STRINGS__ = ${stringsJson};"""
+            }
+        }
+
+        // Firebase Cloud Messaging config — injected from application.conf / env vars.
+        // These values are public (they ship to every browser); prod overrides are set
+        // via FIREBASE_* env vars to point at a different Firebase project than dev.
+        script {
+            unsafe {
+                +"window.__FIREBASE_CONFIG__ = $firebaseConfigJson; window.__FIREBASE_VAPID_KEY__ = $firebaseVapidKeyJson;"
             }
         }
     }

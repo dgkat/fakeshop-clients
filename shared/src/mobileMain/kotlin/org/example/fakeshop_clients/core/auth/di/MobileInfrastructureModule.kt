@@ -23,6 +23,9 @@ import org.example.fakeshop_clients.core.auth.data.TokenStorage
 import org.example.fakeshop_clients.core.auth.data.models.RefreshTokenRequest
 import org.example.fakeshop_clients.core.auth.data.models.TokenRefreshResponse
 import org.example.fakeshop_clients.core.auth.domain.AuthRepository
+import org.example.fakeshop_clients.core.auth.domain.SessionMutator
+import org.example.fakeshop_clients.core.auth.domain.SessionObserver
+import org.example.fakeshop_clients.core.auth.domain.SessionStore
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.KtorNetworkExceptionMapper
 import org.example.fakeshop_clients.core.data.NetworkExceptionMapper
@@ -34,6 +37,7 @@ import org.example.fakeshop_clients.core.favorites.di.mobileFavoritesCacheModule
 import org.example.fakeshop_clients.core.network.MobileUrlProvider
 import org.example.fakeshop_clients.core.network.UrlProvider
 import org.koin.core.qualifier.named
+import org.koin.dsl.binds
 import org.koin.dsl.module
 
 val mobileInfrastructureModule = module {
@@ -44,12 +48,15 @@ val mobileInfrastructureModule = module {
 
     single<NetworkExceptionMapper> { KtorNetworkExceptionMapper() }
 
+    single { SessionStore() } binds arrayOf(SessionObserver::class, SessionMutator::class)
+
     // Public HttpClient (no auth)
     single<HttpClient>(named("publicHttpClient")) {
         val parsedUrl: Url = get(named("parsedUrl"))
         val ktorLogger = getOrNull<Logger>(named("ktorLogger"))
 
         HttpClient(get<HttpClientEngine>()) {
+            expectSuccess = true
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true
@@ -75,9 +82,11 @@ val mobileInfrastructureModule = module {
         val parsedUrl: Url = get(named("parsedUrl"))
         val tokenStorage: TokenStorage = get()
         val publicApiClient: SafePublicApiClient = get()
+        val sessionMutator: SessionMutator = get()
         val ktorLogger = getOrNull<Logger>(named("ktorLogger"))
 
         HttpClient(get<HttpClientEngine>()) {
+            expectSuccess = true
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true
@@ -102,7 +111,7 @@ val mobileInfrastructureModule = module {
                     }
 
                     refreshTokens {
-                        refreshTokensSafely(tokenStorage, publicApiClient, oldTokens)
+                        refreshTokensSafely(tokenStorage, publicApiClient, sessionMutator, oldTokens)
                     }
                 }
             }
@@ -166,11 +175,15 @@ val mobileInfrastructureModule = module {
 private suspend fun refreshTokensSafely(
     tokenStorage: TokenStorage,
     publicApiClient: SafePublicApiClient,
+    sessionMutator: SessionMutator,
     oldTokens: BearerTokens?
 ): BearerTokens? {
     val refreshToken = oldTokens?.refreshToken
         ?: tokenStorage.getRefreshToken()
-        ?: return null
+        ?: run {
+            sessionMutator.setLoggedOut()
+            return null
+        }
 
     return publicApiClient.post<TokenRefreshResponse, RefreshTokenRequest>(
         path = "/api/mobile/auth/refresh",
@@ -186,6 +199,9 @@ private suspend fun refreshTokensSafely(
                 refreshToken = response.refreshToken
             )
         },
-        onError = { null }
+        onError = {
+            sessionMutator.setLoggedOut()
+            null
+        }
     )
 }

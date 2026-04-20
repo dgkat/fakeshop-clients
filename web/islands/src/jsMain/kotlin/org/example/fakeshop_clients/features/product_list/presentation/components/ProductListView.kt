@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.features.product_list.presentation.components
 
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListState
@@ -20,15 +21,14 @@ val ProductListView = FC<ProductListProps> { props ->
     var state by useState(ProductListState(isLoading = true))
 
     useEffectWithCleanup(props.viewModel) {
-        if (props.viewModel != null) {
+        val vm = props.viewModel
+        if (vm != null) {
             val scope = MainScope()
-            val job = props.viewModel!!.uiState
-                .onEach { newState ->
-                    state = newState
-                }
+            vm.uiState
+                .onEach { newState -> state = newState }
                 .launchIn(scope)
 
-            onCleanup { job::cancel }
+            onCleanup { scope.cancel() }
         } else {
             null
         }

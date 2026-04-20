@@ -6,6 +6,7 @@ import org.example.fakeshop_clients.features.favorites.di.androidFavoritesModule
 import org.example.fakeshop_clients.features.home.di.androidHomeModule
 import org.example.fakeshop_clients.features.product_detail.di.androidProductDetailModule
 import org.example.fakeshop_clients.features.profile.di.mobileProfileModule
+import org.example.fakeshop_clients.features.notifications.di.androidNotificationsModule
 import org.example.fakeshop_clients.features.search_bar.di.androidSearchModule
 
 val androidCoreModule = listOf(
@@ -16,5 +17,6 @@ val androidCoreModule = listOf(
     androidSearchModule,
     androidProductDetailModule,
     mobileProfileModule,
-    androidFavoritesModule
+    androidFavoritesModule,
+    androidNotificationsModule
 )

@@ -45,11 +45,35 @@
   "logged_in": "You are logged in",
   "logging_out": "Logging out...",
 
+  "profile_error_invalid_credentials": "Incorrect email or password",
+  "profile_error_account_locked": "Account locked. Try again later or reset your password",
+  "profile_error_account_not_verified": "Please verify your email before logging in",
+  "profile_error_email_already_exists": "An account with this email already exists",
+  "profile_error_invalid_email_format": "Please enter a valid email address",
+  "profile_error_email_too_long": "Email address is too long",
+  "profile_error_weak_password": "Password is too weak. Try a stronger one",
+  "profile_error_password_too_short": "Password is too short",
+  "profile_error_password_too_long": "Password is too long",
+  "profile_error_rate_limited": "Too many attempts. Please wait a moment and try again",
+  "profile_error_server": "Something went wrong on our end. Please try again",
+  "profile_error_network": "Network error. Check your connection and try again",
+  "profile_error_unknown": "Something went wrong. Please try again",
+
   "back": "Back",
   "home_page_title": "E-Shop Home",
   "footer_copyright": "2024 E-Shop. Built with Kotlin Multiplatform",
 
   "language": "Language",
   "language_english": "English",
-  "language_spanish": "Spanish"
+  "language_spanish": "Spanish",
+
+  "notification_permission_title": "Stay updated on price drops",
+  "notification_permission_message": "Get notified when products you love go on sale",
+  "notification_permission_enable": "Enable Notifications",
+  "notification_permission_denied": "Notifications are disabled. Enable them in Settings.",
+  "notification_permission_settings": "Open Settings",
+  "notification_prefs_title": "Notifications",
+  "notification_prefs_price_drop": "Price drop alerts",
+  "notification_prefs_price_drop_desc": "Get notified when favorited products drop in price",
+  "price_drop_snackbar_action": "View"
 }
