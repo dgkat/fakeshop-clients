@@ -67,5 +67,6 @@ iosApp/iosApp/*.lproj/
 iosApp/iosApp/Theme/FakeShopColors.swift
 
 # Firebase config (contains API keys)
-composeApp/google-services.json
+composeApp/src/dev/google-services.json
+composeApp/src/prod/google-services.json
 iosApp/iosApp/GoogleService-Info.plist

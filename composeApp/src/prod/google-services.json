@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "290173250892",
+    "project_id": "fakeshop-prod",
+    "storage_bucket": "fakeshop-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:290173250892:android:b64698b17768fd8def73e9",
+        "android_client_info": {
+          "package_name": "org.example.fakeshop_clients.prod"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCMD8UgsccIxRZMOgzsqaSQlhf1cAco_o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

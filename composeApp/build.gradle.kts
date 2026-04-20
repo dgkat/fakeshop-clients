@@ -100,14 +100,60 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    flavorDimensions += "env"
+    productFlavors {
+        create("dev") {
+            dimension = "env"
+        }
+        create("prod") {
+            dimension = "env"
+            applicationIdSuffix = ".prod"
+            versionNameSuffix = "-prod"
+        }
+    }
+
+    signingConfigs {
+        create("release") {
+            val keystorePath = System.getenv("FAKESHOP_KEYSTORE")
+                ?: providers.gradleProperty("fakeshop.keystore").orNull
+            if (keystorePath != null) {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("FAKESHOP_KEYSTORE_PASSWORD")
+                    ?: providers.gradleProperty("fakeshop.keystore.password").orNull
+                keyAlias = System.getenv("FAKESHOP_KEY_ALIAS")
+                    ?: providers.gradleProperty("fakeshop.key.alias").orNull
+                    ?: "fakeshop"
+                keyPassword = System.getenv("FAKESHOP_KEY_PASSWORD")
+                    ?: providers.gradleProperty("fakeshop.key.password").orNull
+            }
+        }
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            val releaseSigning = signingConfigs.getByName("release")
+            signingConfig = if (releaseSigning.storeFile != null) {
+                releaseSigning
+            } else {
+                // Fallback so local sanity builds still succeed; do NOT distribute these APKs.
+                signingConfigs.getByName("debug")
+            }
         }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+androidComponents {
+    beforeVariants { variant ->
+        val isDev = variant.productFlavors.any { it.second == "dev" }
+        val isDebug = variant.buildType == "debug"
+        // Only ship devDebug (local dev against emulator) and prodRelease (sideload).
+        variant.enable = (isDev && isDebug) || (!isDev && !isDebug)
     }
 }
 
