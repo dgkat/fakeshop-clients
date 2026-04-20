@@ -3,7 +3,6 @@ package org.example.fakeshop_clients.core.di
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
@@ -46,9 +45,6 @@ val jvmInfrastructureModule = module {
                     isLenient = true
                 })
             }
-
-            // Install cookies plugin to handle cookie forwarding
-            install(HttpCookies)
 
             defaultRequest {
                 url {
