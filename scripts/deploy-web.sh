@@ -2,7 +2,10 @@
 set -e
 
 # Required env vars: VPS_USER, VPS_HOST
-# Gradle property -PbackendBaseUrl is hardcoded to https://api.dgkat.com for production
+# Gradle property -PbackendBaseUrl is empty for production so browser JS calls
+# resolve same-origin (e.g. https://dgkat.com/api/web/...) and the SESSION cookie
+# is scoped to the SSR host. SSR JVM uses the BACKEND_BASE_URL docker env var at
+# runtime for its own server-side calls to the backend — independent of this flag.
 # Optional:
 #   VPS_JAR_PATH   - where the JAR lives on the host (default: /opt/fakeshop-web)
 #   COMPOSE_DIR    - directory containing docker-compose.yml (default: /opt/fakeshop/prod_env)
@@ -16,7 +19,7 @@ if [[ -z "$VPS_USER" || -z "$VPS_HOST" ]]; then
 fi
 
 echo "==> Building fat JAR (production)..."
-./gradlew :web:ssr:buildFatJar -PbackendBaseUrl=https://api.dgkat.com
+./gradlew :web:ssr:buildFatJar -PbackendBaseUrl=""
 
 echo "==> Uploading to $VPS_USER@$VPS_HOST:$VPS_JAR_PATH/..."
 scp "$JAR" "$VPS_USER@$VPS_HOST:$VPS_JAR_PATH/ssr-all.jar"
