@@ -3,8 +3,10 @@ package org.example.fakeshop_clients.core.di
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.example.fakeshop_clients.core.auth.data.LogoutUser
+import org.example.fakeshop_clients.core.auth.data.WebInstallIdProvider
 import org.example.fakeshop_clients.core.auth.data.WebRoleResolver
 import org.example.fakeshop_clients.core.auth.domain.AuthRepository
+import org.example.fakeshop_clients.core.auth.domain.InstallIdProvider
 import org.example.fakeshop_clients.core.auth.domain.RoleResolver
 import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
@@ -41,6 +43,8 @@ val webInfrastructureModule = module {
     single { SessionStore() } binds arrayOf(SessionObserver::class, SessionMutator::class)
 
     single<RoleResolver> { WebRoleResolver(authClient = get(), baseUrl = get()) }
+
+    single<InstallIdProvider> { WebInstallIdProvider() }
 
     single<NetworkExceptionMapper> { AxiosNetworkExceptionMapper() }
 
