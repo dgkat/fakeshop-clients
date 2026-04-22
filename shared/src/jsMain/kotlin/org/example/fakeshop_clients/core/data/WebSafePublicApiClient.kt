@@ -22,8 +22,19 @@ suspend inline fun <reified T : Any, B : Any> WebSafePublicApiClient.post(
     body: B
 ): Result<T, NetworkError> {
     return try {
-        val response = publicApiClient.post(path, body, T::class)
-        Result.Success(response)
+        Result.Success(publicApiClient.post(path, body, T::class))
+    } catch (e: Exception) {
+        Result.Error(exceptionMapper.map(e))
+    }
+}
+
+suspend inline fun <reified T : Any, B : Any> WebSafePublicApiClient.postWithHeaders(
+    path: String,
+    body: B,
+    headers: Map<String, String>
+): Result<T, NetworkError> {
+    return try {
+        Result.Success(publicApiClient.postWithHeaders(path, body, headers, T::class))
     } catch (e: Exception) {
         Result.Error(exceptionMapper.map(e))
     }

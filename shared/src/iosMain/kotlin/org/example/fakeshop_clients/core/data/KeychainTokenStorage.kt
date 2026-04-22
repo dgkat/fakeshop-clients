@@ -54,6 +54,14 @@ class KeychainTokenStorage(
         }
     }
 
+    override suspend fun replaceTokens(accessToken: String, refreshToken: String) {
+        cachedAccessToken = accessToken
+        withContext(dispatcherProvider.io) {
+            saveToKeychain(ACCESS_TOKEN_KEY, accessToken)
+            saveToKeychain(REFRESH_TOKEN_KEY, refreshToken)
+        }
+    }
+
     override suspend fun getAccessToken(): String? {
         return cachedAccessToken ?: withContext(dispatcherProvider.io) {
             readFromKeychain(ACCESS_TOKEN_KEY)

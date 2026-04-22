@@ -8,4 +8,5 @@ interface MobileAuthDatasource {
     suspend fun signUp(username: String, password: String): Result<TokenRefreshResponse, NetworkError>
     suspend fun login(username: String, password: String): Result<TokenRefreshResponse, NetworkError>
     suspend fun refreshToken(refreshToken: String): Result<TokenRefreshResponse, NetworkError>
+    suspend fun guest(installId: String): Result<TokenRefreshResponse, NetworkError>
 }

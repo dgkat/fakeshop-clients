@@ -27,4 +27,14 @@ class WebAuthRepository(
             }
         }
     }
+
+    override suspend fun guest(installId: String): Result<Unit, NetworkError> {
+        return webAuthDatasource.guest(installId = installId).flatMap { success ->
+            if (success) {
+                Result.Success(Unit)
+            } else {
+                Result.Error(NetworkError.Unknown("Guest creation failed"))
+            }
+        }
+    }
 }
