@@ -34,10 +34,6 @@ class ProfileViewStore(
 
         profileService.checkLoginStatus().fold(
             onSuccess = { isLoggedIn ->
-                // TODO(step-5): replace with SessionBootstrapper; this interim call keeps
-                // the state consistent until the bootstrapper takes over.
-                if (isLoggedIn) sessionMutator.setAuthenticated(Role.LOGGED_USER)
-                else sessionMutator.setAuthenticated(Role.GUEST)
                 _profileState.update {
                     it.copy(
                         isLoggedIn = isLoggedIn,
@@ -47,7 +43,6 @@ class ProfileViewStore(
                 }
             },
             onError = { networkError ->
-                sessionMutator.setAuthenticated(Role.GUEST)
                 _profileState.update {
                     it.copy(
                         isLoggedIn = false,
@@ -86,11 +81,13 @@ class ProfileViewStore(
     private suspend fun handleLogin() {
         val currentState = _profileState.value
         _profileState.update { it.copy(isProcessing = true, error = null) }
+        sessionMutator.setUpgradeInProgress(true)
 
         profileService.login(currentState.email, currentState.password).fold(
             onSuccess = {
                 registerDeviceTokenAfterAuth()
                 sessionMutator.setAuthenticated(Role.LOGGED_USER)
+                sessionMutator.setUpgradeInProgress(false)
                 _profileState.update {
                     it.copy(
                         isLoggedIn = true,
@@ -102,6 +99,8 @@ class ProfileViewStore(
                 }
             },
             onError = { networkError ->
+                // Guest session preserved — do not touch SessionState.
+                sessionMutator.setUpgradeInProgress(false)
                 _profileState.update {
                     it.copy(
                         isProcessing = false,
@@ -115,11 +114,13 @@ class ProfileViewStore(
     private suspend fun handleSignUp() {
         val currentState = _profileState.value
         _profileState.update { it.copy(isProcessing = true, error = null) }
+        sessionMutator.setUpgradeInProgress(true)
 
         profileService.signUp(currentState.email, currentState.password).fold(
             onSuccess = {
                 registerDeviceTokenAfterAuth()
                 sessionMutator.setAuthenticated(Role.LOGGED_USER)
+                sessionMutator.setUpgradeInProgress(false)
                 _profileState.update {
                     it.copy(
                         isLoggedIn = true,
@@ -131,6 +132,8 @@ class ProfileViewStore(
                 }
             },
             onError = { networkError ->
+                // Guest session preserved — do not touch SessionState.
+                sessionMutator.setUpgradeInProgress(false)
                 _profileState.update {
                     it.copy(
                         isProcessing = false,
@@ -152,7 +155,7 @@ class ProfileViewStore(
             onSuccess = {
                 favoritesService.clearCache()
                 notificationsService.unregisterDevice()
-                // TODO(step-5): SessionBootstrapper will re-create a guest session here.
+                // TODO(step-7): trigger guest re-bootstrap after logout.
                 sessionMutator.setAuthenticated(Role.GUEST)
                 _profileState.update {
                     it.copy(

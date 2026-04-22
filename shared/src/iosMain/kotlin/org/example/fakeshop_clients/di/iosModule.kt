@@ -77,7 +77,8 @@ val iosModule = module {
             scope = scope,
             favoritesService = get(),
             mapper = get(),
-            notificationsService = get()
+            notificationsService = get(),
+            sessionObserver = get()
         )
     }
 

@@ -16,16 +16,21 @@ sealed interface SessionState {
 
 interface SessionObserver {
     val state: StateFlow<SessionState>
+    val upgradeInProgress: StateFlow<Boolean>
 }
 
 interface SessionMutator {
     fun setAuthenticated(role: Role)
     fun setBootstrapFailed()
+    fun setUpgradeInProgress(inProgress: Boolean)
 }
 
 class SessionStore : SessionObserver, SessionMutator {
     private val _state = MutableStateFlow<SessionState>(SessionState.Unknown)
     override val state: StateFlow<SessionState> = _state.asStateFlow()
+
+    private val _upgradeInProgress = MutableStateFlow(false)
+    override val upgradeInProgress: StateFlow<Boolean> = _upgradeInProgress.asStateFlow()
 
     override fun setAuthenticated(role: Role) {
         _state.value = SessionState.Authenticated(role)
@@ -33,5 +38,9 @@ class SessionStore : SessionObserver, SessionMutator {
 
     override fun setBootstrapFailed() {
         _state.value = SessionState.BootstrapFailed
+    }
+
+    override fun setUpgradeInProgress(inProgress: Boolean) {
+        _upgradeInProgress.value = inProgress
     }
 }
