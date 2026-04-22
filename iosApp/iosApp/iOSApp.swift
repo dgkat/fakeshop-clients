@@ -27,13 +27,14 @@ struct iOSApp: App {
         let profileService = helper.getProfileService()
         let sessionMutator = helper.getSessionMutator()
 
+        // TODO(step-5): replace with SessionBootstrapper.
         Task {
             let result = try? await profileService.checkLoginStatus()
             let isLoggedIn = (result as? ResultSuccess<KotlinBoolean>)?.data?.boolValue ?? false
             if isLoggedIn {
-                sessionMutator.setLoggedIn()
+                sessionMutator.setAuthenticated(role: Role.loggedUser)
             } else {
-                sessionMutator.setLoggedOut()
+                sessionMutator.setAuthenticated(role: Role.guest)
             }
         }
     }

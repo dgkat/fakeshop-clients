@@ -124,7 +124,8 @@ class AxiosClient(
     }
 
     private fun onSessionRefreshFailed() {
-        sessionMutator.setLoggedOut()
+        // TODO(step-7): fall back to POST /web/guest before failing.
+        sessionMutator.setBootstrapFailed()
         refreshSubscribers.forEach { callback -> callback(false) }
         refreshSubscribers.clear()
     }

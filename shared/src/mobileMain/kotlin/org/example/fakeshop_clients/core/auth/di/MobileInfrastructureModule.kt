@@ -181,7 +181,8 @@ private suspend fun refreshTokensSafely(
     val refreshToken = oldTokens?.refreshToken
         ?: tokenStorage.getRefreshToken()
         ?: run {
-            sessionMutator.setLoggedOut()
+            // TODO(step-7): fall back to POST /mobile/guest before failing.
+            sessionMutator.setBootstrapFailed()
             return null
         }
 
@@ -200,7 +201,8 @@ private suspend fun refreshTokensSafely(
             )
         },
         onError = {
-            sessionMutator.setLoggedOut()
+            // TODO(step-7): fall back to POST /mobile/guest before failing.
+            sessionMutator.setBootstrapFailed()
             null
         }
     )

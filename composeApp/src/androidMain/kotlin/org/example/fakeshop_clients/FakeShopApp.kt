@@ -10,6 +10,7 @@ import coil.decode.SvgDecoder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.androidCoreModule
+import org.example.fakeshop_clients.core.auth.domain.Role
 import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
@@ -48,7 +49,9 @@ class FakeShopApp : Application() , ImageLoaderFactory{
                 .let { result ->
                     (result as? org.example.fakeshop_clients.core.error_handling.Result.Success)?.data ?: false
                 }
-            if (isLoggedIn) sessionMutator.setLoggedIn() else sessionMutator.setLoggedOut()
+            // TODO(step-5): replace with SessionBootstrapper.
+            if (isLoggedIn) sessionMutator.setAuthenticated(Role.LOGGED_USER)
+            else sessionMutator.setAuthenticated(Role.GUEST)
 
             val service = getKoin().get<NotificationsService>()
             if (isLoggedIn && service.getPermissionStatus() == NotificationPermissionStatus.GRANTED) {

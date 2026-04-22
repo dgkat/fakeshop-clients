@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.auth.domain.SessionState
+import org.example.fakeshop_clients.core.auth.domain.isReal
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
 
@@ -25,8 +26,11 @@ class NotificationPrefsViewStore(
         sessionObserver.state
             .onEach { session ->
                 when (session) {
-                    SessionState.LoggedIn -> loadPreferences()
-                    SessionState.LoggedOut -> _state.value = NotificationPrefsState(isLoading = false)
+                    is SessionState.Authenticated -> {
+                        if (session.role.isReal) loadPreferences()
+                        else _state.value = NotificationPrefsState(isLoading = false)
+                    }
+                    SessionState.BootstrapFailed,
                     SessionState.Unknown -> Unit
                 }
             }

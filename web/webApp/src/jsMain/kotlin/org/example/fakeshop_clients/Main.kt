@@ -4,6 +4,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.auth.domain.Role
 import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.di.webCoreModule
@@ -92,7 +93,9 @@ private fun bootstrapSession() {
         val sessionMutator = koin.get<SessionMutator>()
 
         val isLoggedIn = (profileService.checkLoginStatus() as? Result.Success)?.data ?: false
-        if (isLoggedIn) sessionMutator.setLoggedIn() else sessionMutator.setLoggedOut()
+        // TODO(step-5): replace with SessionBootstrapper.
+        if (isLoggedIn) sessionMutator.setAuthenticated(Role.LOGGED_USER)
+        else sessionMutator.setAuthenticated(Role.GUEST)
 
         val service = koin.get<NotificationsService>()
         if (isLoggedIn && service.getPermissionStatus() == NotificationPermissionStatus.GRANTED) {

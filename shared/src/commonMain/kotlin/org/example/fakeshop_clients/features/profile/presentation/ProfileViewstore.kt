@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.auth.domain.Role
 import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
@@ -33,7 +34,10 @@ class ProfileViewStore(
 
         profileService.checkLoginStatus().fold(
             onSuccess = { isLoggedIn ->
-                if (isLoggedIn) sessionMutator.setLoggedIn() else sessionMutator.setLoggedOut()
+                // TODO(step-5): replace with SessionBootstrapper; this interim call keeps
+                // the state consistent until the bootstrapper takes over.
+                if (isLoggedIn) sessionMutator.setAuthenticated(Role.LOGGED_USER)
+                else sessionMutator.setAuthenticated(Role.GUEST)
                 _profileState.update {
                     it.copy(
                         isLoggedIn = isLoggedIn,
@@ -43,7 +47,7 @@ class ProfileViewStore(
                 }
             },
             onError = { networkError ->
-                sessionMutator.setLoggedOut()
+                sessionMutator.setAuthenticated(Role.GUEST)
                 _profileState.update {
                     it.copy(
                         isLoggedIn = false,
@@ -86,7 +90,7 @@ class ProfileViewStore(
         profileService.login(currentState.email, currentState.password).fold(
             onSuccess = {
                 registerDeviceTokenAfterAuth()
-                sessionMutator.setLoggedIn()
+                sessionMutator.setAuthenticated(Role.LOGGED_USER)
                 _profileState.update {
                     it.copy(
                         isLoggedIn = true,
@@ -115,7 +119,7 @@ class ProfileViewStore(
         profileService.signUp(currentState.email, currentState.password).fold(
             onSuccess = {
                 registerDeviceTokenAfterAuth()
-                sessionMutator.setLoggedIn()
+                sessionMutator.setAuthenticated(Role.LOGGED_USER)
                 _profileState.update {
                     it.copy(
                         isLoggedIn = true,
@@ -148,7 +152,8 @@ class ProfileViewStore(
             onSuccess = {
                 favoritesService.clearCache()
                 notificationsService.unregisterDevice()
-                sessionMutator.setLoggedOut()
+                // TODO(step-5): SessionBootstrapper will re-create a guest session here.
+                sessionMutator.setAuthenticated(Role.GUEST)
                 _profileState.update {
                     it.copy(
                         isLoggedIn = false,
