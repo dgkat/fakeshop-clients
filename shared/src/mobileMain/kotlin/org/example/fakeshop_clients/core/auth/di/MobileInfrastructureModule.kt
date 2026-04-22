@@ -19,10 +19,12 @@ import org.example.fakeshop_clients.core.auth.data.MobileAuthDatasource
 import org.example.fakeshop_clients.core.auth.data.MobileAuthDatasourceImpl
 import org.example.fakeshop_clients.core.auth.data.MobileAuthRepository
 import org.example.fakeshop_clients.core.auth.data.MobileLogoutUser
+import org.example.fakeshop_clients.core.auth.data.MobileRoleResolver
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
 import org.example.fakeshop_clients.core.auth.data.models.RefreshTokenRequest
 import org.example.fakeshop_clients.core.auth.data.models.TokenRefreshResponse
 import org.example.fakeshop_clients.core.auth.domain.AuthRepository
+import org.example.fakeshop_clients.core.auth.domain.RoleResolver
 import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.auth.domain.SessionStore
@@ -49,6 +51,8 @@ val mobileInfrastructureModule = module {
     single<NetworkExceptionMapper> { KtorNetworkExceptionMapper() }
 
     single { SessionStore() } binds arrayOf(SessionObserver::class, SessionMutator::class)
+
+    single<RoleResolver> { MobileRoleResolver(tokenStorage = get()) }
 
     // Public HttpClient (no auth)
     single<HttpClient>(named("publicHttpClient")) {
