@@ -35,6 +35,10 @@ class NotificationPrefsViewStore(
                 }
             }
             .launchIn(scope)
+
+        sessionObserver.upgradeInProgress
+            .onEach { inProgress -> _state.update { it.copy(writesBlocked = inProgress) } }
+            .launchIn(scope)
     }
 
     fun onEvent(event: NotificationPrefsEvent) {
@@ -70,6 +74,7 @@ class NotificationPrefsViewStore(
     }
 
     private fun togglePriceDrop(enabled: Boolean) {
+        if (_state.value.writesBlocked) return
         val previousValue = _state.value.priceDropEnabled
         _state.update { it.copy(priceDropEnabled = enabled, isToggling = true, error = null) }
 

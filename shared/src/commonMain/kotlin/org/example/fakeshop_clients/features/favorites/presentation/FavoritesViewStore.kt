@@ -4,11 +4,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
+import org.example.fakeshop_clients.core.auth.domain.SessionState
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
@@ -40,7 +43,10 @@ class FavoritesViewStore(
             }
         }
         sessionObserver.upgradeInProgress
-            .onEach { inProgress -> _state.update { it.copy(writesBlocked = inProgress) } }
+            .combine(sessionObserver.state.map { it is SessionState.Unknown }) { upgrading, unknown ->
+                upgrading || unknown
+            }
+            .onEach { blocked -> _state.update { it.copy(writesBlocked = blocked) } }
             .launchIn(scope)
         loadFavorites()
     }
