@@ -25,6 +25,7 @@ import org.example.fakeshop_clients.core.auth.data.models.RefreshTokenRequest
 import org.example.fakeshop_clients.core.auth.data.models.TokenRefreshResponse
 import org.example.fakeshop_clients.core.auth.domain.AuthRepository
 import org.example.fakeshop_clients.core.auth.domain.RoleResolver
+import org.example.fakeshop_clients.core.auth.domain.SessionBootstrapper
 import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.auth.domain.SessionStore
@@ -53,6 +54,16 @@ val mobileInfrastructureModule = module {
     single { SessionStore() } binds arrayOf(SessionObserver::class, SessionMutator::class)
 
     single<RoleResolver> { MobileRoleResolver(tokenStorage = get()) }
+
+    single {
+        SessionBootstrapper(
+            roleResolver = get(),
+            authRepository = get(),
+            installIdProvider = get(),
+            sessionMutator = get(),
+            sessionObserver = get()
+        )
+    }
 
     // Public HttpClient (no auth)
     single<HttpClient>(named("publicHttpClient")) {

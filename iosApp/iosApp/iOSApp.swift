@@ -19,22 +19,18 @@ struct iOSApp: App {
         }
     }
 
-    /// Mirrors Android's `FakeShopApp.bootstrapSession()`:
-    /// seeds `SessionStore` from the backend on cold start so UI that observes
-    /// session state reflects reality before the user opens the Profile screen.
     private func bootstrapSession() {
         let helper = KoinHelper.shared.iosHelper
-        let profileService = helper.getProfileService()
-        let sessionMutator = helper.getSessionMutator()
+        let bootstrapper = helper.getSessionBootstrapper()
+        let notificationsService = helper.getNotificationsService()
 
-        // TODO(step-5): replace with SessionBootstrapper.
         Task {
-            let result = try? await profileService.checkLoginStatus()
-            let isLoggedIn = (result as? ResultSuccess<KotlinBoolean>)?.data?.boolValue ?? false
-            if isLoggedIn {
-                sessionMutator.setAuthenticated(role: Role.loggedUser)
-            } else {
-                sessionMutator.setAuthenticated(role: Role.guest)
+            try? await bootstrapper.bootstrap()
+
+            if helper.isSessionRealUser() {
+                if notificationsService.getPermissionStatus() == NotificationPermissionStatus.granted {
+                    notificationsService.registerDeviceAfterAuth()
+                }
             }
         }
     }

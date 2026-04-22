@@ -1,6 +1,9 @@
 import kotlinx.browser.document
-import kotlinx.browser.window
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.WebKoinManager
+import org.example.fakeshop_clients.core.auth.domain.SessionBootstrapper
+import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.features.product_list.presentation.ProductListViewmodel
 import org.example.fakeshop_clients.features.product_list.presentation.components.ProductListView
 import react.create
@@ -13,6 +16,10 @@ fun setupProductListIsland() {
     WebKoinManager.initialize()
 
     val koin = WebKoinManager.getKoin()
+
+    koin.get<CoroutineScope>(AppScopeQualifier).launch {
+        koin.get<SessionBootstrapper>().bootstrap()
+    }
 
     val viewModel = koin.get<ProductListViewmodel>()
 
