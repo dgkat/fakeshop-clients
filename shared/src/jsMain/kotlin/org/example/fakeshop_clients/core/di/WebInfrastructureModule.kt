@@ -79,6 +79,7 @@ val webInfrastructureModule = module {
             baseUrl = baseUrl,
             webAuthDatasource = webAuthDatasource,
             sessionMutator = get(),
+            installIdProvider = get(),
             scope = get(AppScopeQualifier)
         )
     }

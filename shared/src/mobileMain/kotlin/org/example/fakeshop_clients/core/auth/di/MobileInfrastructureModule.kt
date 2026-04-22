@@ -24,6 +24,8 @@ import org.example.fakeshop_clients.core.auth.data.TokenStorage
 import org.example.fakeshop_clients.core.auth.data.models.RefreshTokenRequest
 import org.example.fakeshop_clients.core.auth.data.models.TokenRefreshResponse
 import org.example.fakeshop_clients.core.auth.domain.AuthRepository
+import org.example.fakeshop_clients.core.auth.domain.InstallIdProvider
+import org.example.fakeshop_clients.core.auth.domain.Role
 import org.example.fakeshop_clients.core.auth.domain.RoleResolver
 import org.example.fakeshop_clients.core.auth.domain.SessionBootstrapper
 import org.example.fakeshop_clients.core.auth.domain.SessionMutator
@@ -97,6 +99,8 @@ val mobileInfrastructureModule = module {
         val parsedUrl: Url = get(named("parsedUrl"))
         val tokenStorage: TokenStorage = get()
         val publicApiClient: SafePublicApiClient = get()
+        val authDatasource: MobileAuthDatasource = get()
+        val installIdProvider: InstallIdProvider = get()
         val sessionMutator: SessionMutator = get()
         val ktorLogger = getOrNull<Logger>(named("ktorLogger"))
 
@@ -126,7 +130,7 @@ val mobileInfrastructureModule = module {
                     }
 
                     refreshTokens {
-                        refreshTokensSafely(tokenStorage, publicApiClient, sessionMutator, oldTokens)
+                        refreshTokensSafely(tokenStorage, publicApiClient, authDatasource, installIdProvider, sessionMutator, oldTokens)
                     }
                 }
             }
@@ -184,22 +188,19 @@ val mobileInfrastructureModule = module {
     }
 }
 
-// Helper function for token refresh
 // TODO move to separate file
 // TODO: Update to use UrlProvider when refactoring refresh token mechanism
 private suspend fun refreshTokensSafely(
     tokenStorage: TokenStorage,
     publicApiClient: SafePublicApiClient,
+    authDatasource: MobileAuthDatasource,
+    installIdProvider: InstallIdProvider,
     sessionMutator: SessionMutator,
     oldTokens: BearerTokens?
 ): BearerTokens? {
     val refreshToken = oldTokens?.refreshToken
         ?: tokenStorage.getRefreshToken()
-        ?: run {
-            // TODO(step-7): fall back to POST /mobile/guest before failing.
-            sessionMutator.setBootstrapFailed()
-            return null
-        }
+        ?: return fallbackToGuest(tokenStorage, authDatasource, installIdProvider, sessionMutator)
 
     return publicApiClient.post<TokenRefreshResponse, RefreshTokenRequest>(
         path = "/api/mobile/auth/refresh",
@@ -216,7 +217,25 @@ private suspend fun refreshTokensSafely(
             )
         },
         onError = {
-            // TODO(step-7): fall back to POST /mobile/guest before failing.
+            fallbackToGuest(tokenStorage, authDatasource, installIdProvider, sessionMutator)
+        }
+    )
+}
+
+private suspend fun fallbackToGuest(
+    tokenStorage: TokenStorage,
+    authDatasource: MobileAuthDatasource,
+    installIdProvider: InstallIdProvider,
+    sessionMutator: SessionMutator
+): BearerTokens? {
+    val installId = installIdProvider.get()
+    return authDatasource.guest(installId).fold(
+        onSuccess = { response ->
+            tokenStorage.replaceTokens(response.accessToken, response.refreshToken)
+            sessionMutator.setAuthenticated(Role.GUEST)
+            BearerTokens(accessToken = response.accessToken, refreshToken = response.refreshToken)
+        },
+        onError = {
             sessionMutator.setBootstrapFailed()
             null
         }

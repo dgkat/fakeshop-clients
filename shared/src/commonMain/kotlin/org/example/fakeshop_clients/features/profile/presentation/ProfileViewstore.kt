@@ -155,7 +155,9 @@ class ProfileViewStore(
             onSuccess = {
                 favoritesService.clearCache()
                 notificationsService.unregisterDevice()
-                // TODO(step-7): trigger guest re-bootstrap after logout.
+                // Mark as guest immediately; the first subsequent authenticated request
+                // will trigger fallbackToGuest (mobile) or the Axios interceptor (web)
+                // to create a real guest session lazily.
                 sessionMutator.setAuthenticated(Role.GUEST)
                 _profileState.update {
                     it.copy(
