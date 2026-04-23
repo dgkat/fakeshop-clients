@@ -25,12 +25,12 @@ fun HTML.bootstrapFailedPage(locale: String, strings: Map<String, String>) {
     body {
         div(classes = "page-placeholder") {
             p {
-                +(strings["profile_error_network"]
-                    ?: "Can't reach the server. Check your connection and try again.")
+                +(strings["bootstrap_failed_body"]
+                    ?: "Check your connection and try again.")
             }
             button(classes = "btn-primary") {
                 attributes["onclick"] = "window.location.reload()"
-                +(strings["retry"] ?: "Retry")
+                +(strings["bootstrap_failed_retry"] ?: "Retry")
             }
             script {
                 unsafe {

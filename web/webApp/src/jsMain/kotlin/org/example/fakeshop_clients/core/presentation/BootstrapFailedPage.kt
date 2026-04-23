@@ -16,7 +16,7 @@ import web.cssom.ClassName
 val BootstrapFailedPage = FC<Props> {
     div {
         className = ClassName("page-content page-placeholder")
-        p { +getString("profile_error_network") }
+        p { +getString("bootstrap_failed_body") }
         button {
             className = ClassName("btn-primary")
             onClick = {
@@ -25,7 +25,7 @@ val BootstrapFailedPage = FC<Props> {
                     koin.get<SessionBootstrapper>().bootstrap()
                 }
             }
-            +getString("retry")
+            +getString("bootstrap_failed_retry")
         }
     }
 }

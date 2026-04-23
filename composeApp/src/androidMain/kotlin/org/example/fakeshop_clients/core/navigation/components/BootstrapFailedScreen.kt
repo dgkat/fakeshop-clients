@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import fakeshop_clients.composeapp.generated.resources.Res
-import fakeshop_clients.composeapp.generated.resources.error_network
-import fakeshop_clients.composeapp.generated.resources.retry
+import fakeshop_clients.composeapp.generated.resources.bootstrap_failed_body
+import fakeshop_clients.composeapp.generated.resources.bootstrap_failed_retry
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -30,13 +30,13 @@ fun BootstrapFailedScreen(onRetry: () -> Unit) {
             modifier = Modifier.padding(32.dp)
         ) {
             Text(
-                text = stringResource(Res.string.error_network),
+                text = stringResource(Res.string.bootstrap_failed_body),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Button(onClick = onRetry) {
-                Text(stringResource(Res.string.retry))
+                Text(stringResource(Res.string.bootstrap_failed_retry))
             }
         }
     }

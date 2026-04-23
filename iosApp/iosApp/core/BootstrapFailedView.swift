@@ -5,11 +5,11 @@ struct BootstrapFailedView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Text("Can't reach the server.\nCheck your connection and try again.")
+            Text(String(localized: "bootstrap_failed_body"))
                 .multilineTextAlignment(.center)
                 .foregroundColor(FakeShopColors.onSurfaceVariant)
                 .padding(.horizontal, 32)
-            Button("Retry") {
+            Button(String(localized: "bootstrap_failed_retry")) {
                 onRetry()
             }
             .buttonStyle(.borderedProminent)

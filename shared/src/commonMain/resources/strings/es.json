@@ -75,5 +75,13 @@
   "notification_prefs_title": "Notificaciones",
   "notification_prefs_price_drop": "Alertas de bajada de precio",
   "notification_prefs_price_drop_desc": "Recibe notificaciones cuando tus productos favoritos bajen de precio",
-  "price_drop_snackbar_action": "Ver"
+  "price_drop_snackbar_action": "Ver",
+
+  "guest_profile_cta_title": "Guarda tus favoritos en todos los dispositivos",
+  "guest_profile_cta_body": "Regístrate o inicia sesión para sincronizar.",
+  "guest_favorites_device_note": "Guardado en este dispositivo",
+
+  "bootstrap_failed_title": "Sin conexión al servidor",
+  "bootstrap_failed_body": "Comprueba tu conexión e inténtalo de nuevo.",
+  "bootstrap_failed_retry": "Reintentar"
 }
