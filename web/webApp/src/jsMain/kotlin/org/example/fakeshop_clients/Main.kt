@@ -3,6 +3,10 @@ package org.example.fakeshop_clients
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.auth.domain.Role
 import org.example.fakeshop_clients.core.auth.domain.SessionBootstrapper
@@ -12,6 +16,7 @@ import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.di.webCoreModule
 import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.core.navigation.mobile.BottomNav
+import org.example.fakeshop_clients.core.presentation.BootstrapFailedPage
 import org.example.fakeshop_clients.core.presentation.components.Header
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesPage
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
@@ -36,7 +41,9 @@ import react.router.dom.RouterProvider
 import react.router.dom.createBrowserRouter
 import react.router.useLocation
 import react.router.useNavigate
+import react.useEffectWithCleanup
 import react.useMemo
+import react.useState
 import web.cssom.ClassName
 import web.dom.Element
 
@@ -108,23 +115,42 @@ private fun createRoute(
 
 val SpaApp = FC<Props> {
     val locale = I18n.locale
+    val koin = useMemo { getKoin() }
+    val sessionObserver = useMemo { koin.get<SessionObserver>() }
 
-    val router = createBrowserRouter(
-        arrayOf(
-            createRoute(
-                path = "/$locale",
-                element = SpaLayout.create(),
-                children = arrayOf(
-                    createRoute("favorites", FavoritesPage.create()),
-                    createRoute("notifications", NotificationsPage.create()),
-                    createRoute("profile", ProfilePage.create())
+    var sessionReady by useState { sessionObserver.state.value is SessionState.Authenticated }
+    var bootstrapFailed by useState { sessionObserver.state.value is SessionState.BootstrapFailed }
+
+    useEffectWithCleanup(sessionObserver) {
+        val scope = MainScope()
+        sessionObserver.state
+            .onEach { state ->
+                sessionReady = state is SessionState.Authenticated
+                bootstrapFailed = state is SessionState.BootstrapFailed
+            }
+            .launchIn(scope)
+        onCleanup { scope.cancel() }
+    }
+
+    val router = useMemo(locale) {
+        createBrowserRouter(
+            arrayOf(
+                createRoute(
+                    path = "/$locale",
+                    element = SpaLayout.create(),
+                    children = arrayOf(
+                        createRoute("favorites", FavoritesPage.create()),
+                        createRoute("notifications", NotificationsPage.create()),
+                        createRoute("profile", ProfilePage.create())
+                    )
                 )
             )
         )
-    )
+    }
 
-    RouterProvider {
-        this.router = router
+    when {
+        bootstrapFailed -> BootstrapFailedPage { }
+        sessionReady -> RouterProvider { this.router = router }
     }
 }
 

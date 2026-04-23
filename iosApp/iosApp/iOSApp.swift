@@ -15,7 +15,7 @@ struct iOSApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainTabView()
+            AppRootView()
         }
     }
 
@@ -32,6 +32,21 @@ struct iOSApp: App {
                     notificationsService.registerDeviceAfterAuth()
                 }
             }
+        }
+    }
+}
+
+struct AppRootView: View {
+    @StateObject private var viewModel = AppRootViewModel()
+
+    var body: some View {
+        switch viewModel.sessionState {
+        case .loading:
+            FakeShopColors.surface.ignoresSafeArea()
+        case .ready:
+            MainTabView()
+        case .bootstrapFailed:
+            BootstrapFailedView(onRetry: { viewModel.retry() })
         }
     }
 }

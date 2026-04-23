@@ -9,6 +9,7 @@ import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.example.fakeshop_clients.core.api_client.KtorClient
+import org.example.fakeshop_clients.core.auth.SSRGuestDatasource
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
 import org.example.fakeshop_clients.core.concurrency.JvmDispatcherProvider
 import org.example.fakeshop_clients.core.data.ApiClient
@@ -80,6 +81,35 @@ val jvmInfrastructureModule = module {
             exceptionMapper = get()
         )
     }
+
+    // Minimal client without HttpCookies plugin — used only for SSR guest bootstrap
+    // so the raw Set-Cookie header from the backend response remains accessible.
+    single<HttpClient>(named("guestHttpClient")) {
+        val isDevelopment = System.getProperty("io.ktor.development")?.toBoolean() ?: false
+        val backendUrl = Url(
+            System.getenv("BACKEND_BASE_URL")
+                ?: if (isDevelopment) "http://localhost:8080"
+                else error("BACKEND_BASE_URL environment variable is required in production")
+        )
+        HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                })
+            }
+            expectSuccess = false
+            defaultRequest {
+                url {
+                    protocol = backendUrl.protocol
+                    host = backendUrl.host
+                    port = backendUrl.port
+                }
+            }
+        }
+    }
+
+    single { SSRGuestDatasource(get(named("guestHttpClient"))) }
 
     single<DispatcherProvider> {
         JvmDispatcherProvider()

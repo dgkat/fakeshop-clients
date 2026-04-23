@@ -10,7 +10,7 @@ class SessionBootstrapper(
     private val sessionObserver: SessionObserver
 ) {
     suspend fun bootstrap() {
-        if (sessionObserver.state.value !is SessionState.Unknown) return
+        if (sessionObserver.state.value is SessionState.Authenticated) return
 
         val role = roleResolver.currentRole()
         if (role != null) {
