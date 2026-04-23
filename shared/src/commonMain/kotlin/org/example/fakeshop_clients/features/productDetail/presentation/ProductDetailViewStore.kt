@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailService
@@ -18,7 +19,8 @@ class ProductDetailViewStore(
     private val productDetailService: ProductDetailService,
     private val favoritesService: FavoritesService,
     private val briefProductMapper: DomainToPresentationBriefProductMapper,
-    private val detailedProductMapper: DomainToPresentationDetailedProductMapper
+    private val detailedProductMapper: DomainToPresentationDetailedProductMapper,
+    private val sessionObserver: SessionObserver
 ) {
 
     private val _state = MutableStateFlow(ProductDetailState())
@@ -109,6 +111,7 @@ class ProductDetailViewStore(
     }
 
     private fun toggleFavorite() {
+        if (sessionObserver.upgradeInProgress.value) return
         val productId = currentProductId ?: return
         val currentlyFavorited = _state.value.isFavorited
         _state.update { it.copy(isFavoriteLoading = true) }

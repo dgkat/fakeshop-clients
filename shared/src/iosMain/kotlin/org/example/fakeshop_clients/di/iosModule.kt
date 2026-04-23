@@ -51,7 +51,8 @@ val iosModule = module {
             scope = scope,
             productListService = get(),
             favoritesService = get(),
-            mapper = get()
+            mapper = get(),
+            sessionObserver = get()
         )
     }
 
@@ -68,7 +69,8 @@ val iosModule = module {
             productDetailService = get(),
             favoritesService = get(),
             briefProductMapper = get(),
-            detailedProductMapper = get()
+            detailedProductMapper = get(),
+            sessionObserver = get()
         )
     }
 
