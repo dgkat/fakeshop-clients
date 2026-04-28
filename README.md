@@ -300,7 +300,7 @@ FIREBASE_VAPID_KEY=...
 
 Each overrides the corresponding default in `application.conf`. Missing values fall back to the dev defaults — if you forget to set one, you'll ship dev Firebase config to prod users. **Double-check all seven are set before the first prod deploy.**
 
-The service worker (`/firebase-messaging-sw.js`) does not need any config — it uses raw Web Push and the browser decrypts FCM payloads before handing them to the `push` event.
+The service worker (`/firebase-messaging-sw.js`) is served **dynamically** by the Ktor SSR server (not as a static file) so the Firebase config can be injected at request time — the same config already used by `SpaPage.kt` for the HTML. The worker imports the Firebase Messaging compat SDK via `importScripts` and uses `messaging.onBackgroundMessage()` to handle incoming FCM pushes. This is required for Chrome on Android, where FCM routes pushes through Google Play Services rather than the standard Web Push protocol; the raw `push` event approach that works on desktop Chrome is not triggered on Android Chrome without the Firebase SDK in the service worker. `onBackgroundMessage()` works across all platforms (desktop Chrome, Android Chrome, and iOS Safari 16.4+).
 
 #### Wiring prod secrets
 

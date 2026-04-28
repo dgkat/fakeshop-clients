@@ -2,10 +2,8 @@ package org.example.fakeshop_clients
 
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.http.content.staticResources
-import io.ktor.server.response.respond
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
@@ -81,15 +79,11 @@ fun Application.configureRouting() {
         }
 
         // FCM service worker must be served from the root to claim the whole-origin scope.
+        // Served dynamically so the Firebase config can be injected without duplicating it
+        // from application.conf into the static file.
         get("/firebase-messaging-sw.js") {
-            val stream = this::class.java.classLoader.getResourceAsStream("static/firebase-messaging-sw.js")
-            if (stream != null) {
-                val content = stream.bufferedReader().use { it.readText() }
-                call.response.headers.append(HttpHeaders.CacheControl, "no-cache")
-                call.respondText(content, ContentType.Application.JavaScript)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
-            }
+            call.response.headers.append(HttpHeaders.CacheControl, "no-cache")
+            call.respondText(firebaseSwScript(firebase.configJson), ContentType.Application.JavaScript)
         }
 
         // HTMX API routes (no locale prefix)
