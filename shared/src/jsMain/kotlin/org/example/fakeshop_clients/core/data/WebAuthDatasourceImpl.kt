@@ -12,6 +12,9 @@ import org.example.fakeshop_clients.core.network.UrlProvider
 @Serializable
 private data object GuestRequest
 
+@Serializable
+private data class GuestAuthResponse(val isGuest: Boolean, val installId: String? = null)
+
 class WebAuthDatasourceImpl(
     private val publicClient: WebSafePublicApiClient,
     private val baseUrl: UrlProvider
@@ -48,11 +51,11 @@ class WebAuthDatasourceImpl(
 
     override suspend fun guest(installId: String?): Result<Boolean, NetworkError> {
         val headers = if (installId != null) mapOf(INSTALL_ID_HEADER to installId) else emptyMap()
-        return publicClient.postWithHeaders<WebAuthResponse, GuestRequest>(
+        return publicClient.postWithHeaders<GuestAuthResponse, GuestRequest>(
             path = "${baseUrl()}/auth/guest",
             body = GuestRequest,
             headers = headers
-        ).map { it.success }
+        ).map { it.isGuest }
     }
 
     companion object {

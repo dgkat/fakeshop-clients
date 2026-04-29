@@ -53,7 +53,7 @@ tasks.register<Copy>("copySpaResources") {
 }
 
 tasks.register("generateWebpackEnv") {
-    val url = project.findProperty("backendBaseUrl")?.toString() ?: "http://localhost:8080"
+    val url = project.findProperty("backendBaseUrl")?.toString() ?: ""
     inputs.property("backendBaseUrl", url)
     val outputFile = layout.projectDirectory.file("webpack.config.d/env.js")
     outputs.file(outputFile)

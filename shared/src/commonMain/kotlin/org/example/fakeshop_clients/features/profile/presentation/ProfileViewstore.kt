@@ -79,7 +79,18 @@ class ProfileViewStore(
                 registerDeviceTokenAfterAuth()
                 sessionMutator.setAuthenticated(Role.LOGGED_USER)
                 sessionMutator.setUpgradeInProgress(false)
-                _profileState.update { it.copy(isProcessing = false, email = "", password = "", error = null) }
+                _profileState.update {
+                    it.copy(
+                        isLoggedIn = true,
+                        isGuest = false,
+                        showNotificationsSection = true,
+                        isLoading = false,
+                        isProcessing = false,
+                        email = "",
+                        password = "",
+                        error = null
+                    )
+                }
             },
             onError = { networkError ->
                 sessionMutator.setUpgradeInProgress(false)
@@ -99,7 +110,18 @@ class ProfileViewStore(
                 registerDeviceTokenAfterAuth()
                 sessionMutator.setAuthenticated(Role.LOGGED_USER)
                 sessionMutator.setUpgradeInProgress(false)
-                _profileState.update { it.copy(isProcessing = false, email = "", password = "", error = null) }
+                _profileState.update {
+                    it.copy(
+                        isLoggedIn = true,
+                        isGuest = false,
+                        showNotificationsSection = true,
+                        isLoading = false,
+                        isProcessing = false,
+                        email = "",
+                        password = "",
+                        error = null
+                    )
+                }
             },
             onError = { networkError ->
                 sessionMutator.setUpgradeInProgress(false)

@@ -12,7 +12,7 @@ class WebRoleResolver(
     private val baseUrl: UrlProvider
 ) : RoleResolver {
     override suspend fun currentRole(): Role? {
-        return authClient.get<MeResponse>(path = "${baseUrl()}/me").fold(
+        return authClient.get<MeResponse>(path = "${baseUrl()}/users/me").fold(
             onSuccess = { response ->
                 response.role?.let { roleStr -> Role.entries.find { it.name == roleStr } }
             },

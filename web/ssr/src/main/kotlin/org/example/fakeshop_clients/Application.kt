@@ -86,6 +86,10 @@ fun Application.configureRouting() {
             call.respondText(firebaseSwScript(firebase.configJson), ContentType.Application.JavaScript)
         }
 
+        if (developmentMode) {
+            devApiProxy()
+        }
+
         // HTMX API routes (no locale prefix)
         productApiRoutes()
 

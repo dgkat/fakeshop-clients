@@ -37,7 +37,10 @@ import org.koin.dsl.module
 external val BACKEND_BASE_URL: String
 
 val webInfrastructureModule = module {
-    val baseUrl = BACKEND_BASE_URL
+    // Use relative URLs so requests go through the SSR server's /api proxy.
+    // In prod the reverse proxy handles /api/* before it reaches the SSR server.
+    // BACKEND_BASE_URL is kept for potential future non-browser use cases.
+    val baseUrl = ""
 
     single<UrlProvider> { WebUrlProvider() }
 

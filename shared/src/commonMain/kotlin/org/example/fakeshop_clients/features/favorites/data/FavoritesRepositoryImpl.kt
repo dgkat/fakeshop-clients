@@ -57,7 +57,11 @@ class FavoritesRepositoryImpl(
             response.favoritedProductIds.toSet()
         }.also { result ->
             result.fold(
-                onSuccess = { ids -> cache.addIds(ids) },
+                onSuccess = { ids ->
+                    val checkedSet = productIds.toSet()
+                    val current = cache.favoritedIds.value
+                    cache.setIds((current - checkedSet) + ids)
+                },
                 onError = { }
             )
         }
