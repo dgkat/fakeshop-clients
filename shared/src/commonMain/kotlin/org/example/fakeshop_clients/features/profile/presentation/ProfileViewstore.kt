@@ -76,6 +76,7 @@ class ProfileViewStore(
 
         profileService.login(currentState.email, currentState.password).fold(
             onSuccess = {
+                scope.launch { favoritesService.getFavorites() }
                 registerDeviceTokenAfterAuth()
                 sessionMutator.setAuthenticated(Role.LOGGED_USER)
                 sessionMutator.setUpgradeInProgress(false)
@@ -107,6 +108,7 @@ class ProfileViewStore(
 
         profileService.signUp(currentState.email, currentState.password).fold(
             onSuccess = {
+                scope.launch { favoritesService.getFavorites() }
                 registerDeviceTokenAfterAuth()
                 sessionMutator.setAuthenticated(Role.LOGGED_USER)
                 sessionMutator.setUpgradeInProgress(false)
