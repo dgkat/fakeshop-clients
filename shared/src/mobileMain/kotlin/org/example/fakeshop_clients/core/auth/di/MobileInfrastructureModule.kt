@@ -168,6 +168,7 @@ val mobileInfrastructureModule = module {
     single<MobileAuthDatasource> {
         MobileAuthDatasourceImpl(
             publicClient = get<SafePublicApiClient>(),
+            tokenStorage = get(),
             baseUrl = get()
         )
     }
@@ -175,7 +176,8 @@ val mobileInfrastructureModule = module {
     single<AuthRepository> {
         MobileAuthRepository(
             mobileAuthDatasource = get(),
-            tokenStorage = get()
+            tokenStorage = get(),
+            authApiClient = get()
         )
     }
 
@@ -216,9 +218,7 @@ private suspend fun refreshTokensSafely(
                 refreshToken = response.refreshToken
             )
         },
-        onError = {
-            fallbackToGuest(tokenStorage, authDatasource, installIdProvider, sessionMutator)
-        }
+        onError = { fallbackToGuest(tokenStorage, authDatasource, installIdProvider, sessionMutator) }
     )
 }
 

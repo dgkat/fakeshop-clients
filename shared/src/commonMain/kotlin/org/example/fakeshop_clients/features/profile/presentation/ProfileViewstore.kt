@@ -82,7 +82,6 @@ class ProfileViewStore(
                 _profileState.update { it.copy(isProcessing = false, email = "", password = "", error = null) }
             },
             onError = { networkError ->
-                // Guest session preserved — do not touch SessionState.
                 sessionMutator.setUpgradeInProgress(false)
                 _profileState.update { it.copy(isProcessing = false, error = networkError.toProfileError()) }
             }
@@ -103,7 +102,6 @@ class ProfileViewStore(
                 _profileState.update { it.copy(isProcessing = false, email = "", password = "", error = null) }
             },
             onError = { networkError ->
-                // Guest session preserved — do not touch SessionState.
                 sessionMutator.setUpgradeInProgress(false)
                 _profileState.update { it.copy(isProcessing = false, error = networkError.toProfileError()) }
             }

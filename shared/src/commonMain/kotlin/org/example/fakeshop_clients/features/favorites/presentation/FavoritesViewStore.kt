@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.auth.domain.SessionState
+import org.example.fakeshop_clients.core.auth.domain.isReal
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
@@ -48,6 +49,18 @@ class FavoritesViewStore(
             }
             .onEach { blocked -> _state.update { it.copy(writesBlocked = blocked) } }
             .launchIn(scope)
+
+        var wasGuest = false
+        sessionObserver.state
+            .onEach { state ->
+                if (state is SessionState.Authenticated) {
+                    val isReal = state.role.isReal
+                    if (isReal && wasGuest) loadFavorites()
+                    wasGuest = !isReal
+                }
+            }
+            .launchIn(scope)
+
         loadFavorites()
     }
 

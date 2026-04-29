@@ -14,6 +14,7 @@ import org.example.fakeshop_clients.core.network.UrlProvider
 
 class MobileAuthDatasourceImpl(
     private val publicClient: SafePublicApiClient,
+    private val tokenStorage: TokenStorage,
     private val baseUrl: UrlProvider
 ) : MobileAuthDatasource {
 
@@ -22,10 +23,12 @@ class MobileAuthDatasourceImpl(
         password: String
     ): Result<TokenRefreshResponse, NetworkError> {
         val signUpRequest = SignUpRequest(username, password)
-        return publicClient.post(
-            path = "${baseUrl()}/auth/signup",
-            body = signUpRequest
-        )
+        val headers = guestAuthHeader()
+        return if (headers != null) {
+            publicClient.postWithHeaders(path = "${baseUrl()}/auth/signup", body = signUpRequest, headers = headers)
+        } else {
+            publicClient.post(path = "${baseUrl()}/auth/signup", body = signUpRequest)
+        }
     }
 
     override suspend fun login(
@@ -33,10 +36,17 @@ class MobileAuthDatasourceImpl(
         password: String
     ): Result<TokenRefreshResponse, NetworkError> {
         val loginRequest = LoginRequest(username, password)
-        return publicClient.post(
-            path = "${baseUrl()}/auth/login",
-            body = loginRequest
-        )
+        val headers = guestAuthHeader()
+        return if (headers != null) {
+            publicClient.postWithHeaders(path = "${baseUrl()}/auth/login", body = loginRequest, headers = headers)
+        } else {
+            publicClient.post(path = "${baseUrl()}/auth/login", body = loginRequest)
+        }
+    }
+
+    private suspend fun guestAuthHeader(): Map<String, String>? {
+        val token = tokenStorage.getAccessToken() ?: return null
+        return mapOf(AUTHORIZATION_HEADER to "Bearer $token")
     }
 
     override suspend fun refreshToken(
@@ -59,6 +69,7 @@ class MobileAuthDatasourceImpl(
 
     companion object {
         private const val INSTALL_ID_HEADER = "X-Install-Id"
+        private const val AUTHORIZATION_HEADER = "Authorization"
     }
 }
 
