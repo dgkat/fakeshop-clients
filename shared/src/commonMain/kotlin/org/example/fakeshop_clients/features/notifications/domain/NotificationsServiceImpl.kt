@@ -28,10 +28,8 @@ class NotificationsServiceImpl(
         repository.registerDeviceToken(token, pushTokenProvider.getPlatformName())
     }
 
-    override suspend fun unregisterDevice() {
-        pushTokenProvider.getCurrentToken()?.let { token ->
-            repository.removeDeviceToken(token)
-        }
+    override suspend fun getCurrentDeviceToken(): String? {
+        return pushTokenProvider.getCurrentToken()
     }
 
     override fun getPermissionStatus(): NotificationPermissionStatus {

@@ -13,8 +13,8 @@ class ProfileRepositoryImpl(
     private val logoutUser: LogoutUser,
     private val dataToDomainUserInfoMapper: DataToDomainUserInfoMapper
 ) : ProfileRepository {
-    override suspend fun logout(): Result<Unit, NetworkError> {
-        return logoutUser()
+    override suspend fun logout(deviceToken: String?): Result<Unit, NetworkError> {
+        return logoutUser(deviceToken)
     }
 
     override suspend fun getUserInfo(): Result<UserInfo, NetworkError> {

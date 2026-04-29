@@ -4,5 +4,5 @@ import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 
 interface LogoutUser {
-    suspend operator fun invoke(): Result<Unit, NetworkError>
+    suspend operator fun invoke(deviceToken: String? = null): Result<Unit, NetworkError>
 }

@@ -14,11 +14,11 @@ class MobileLogoutUser(
     private val tokenStorage: TokenStorage,
     private val baseUrl: UrlProvider
 ) : LogoutUser {
-    override suspend operator fun invoke(): Result<Unit, NetworkError> {
+    override suspend operator fun invoke(deviceToken: String?): Result<Unit, NetworkError> {
         val refreshToken = tokenStorage.getRefreshToken()
             ?: return Result.Error(NetworkError.Unknown("No refresh token found"))
 
-        val logoutRequest = LogoutRequest(refreshToken)
+        val logoutRequest = LogoutRequest(refreshToken, deviceToken)
         return authClient.post<LogoutResponse, LogoutRequest>(
             path = "${baseUrl()}/auth/logout",
             body = logoutRequest

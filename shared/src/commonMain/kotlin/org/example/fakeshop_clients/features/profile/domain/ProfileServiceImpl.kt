@@ -29,7 +29,7 @@ class ProfileServiceImpl(
         return authRepository.signUp(email, password)
     }
 
-    override suspend fun logout(): Result<Unit, NetworkError> {
-        return profileRepository.logout()
+    override suspend fun logout(deviceToken: String?): Result<Unit, NetworkError> {
+        return profileRepository.logout(deviceToken)
     }
 }

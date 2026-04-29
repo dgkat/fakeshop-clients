@@ -3,7 +3,4 @@ package org.example.fakeshop_clients.core.auth.data.models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LogoutRequest(
-    val refreshToken: String,
-    val deviceToken: String? = null
-)
+data class WebLogoutRequest(val deviceToken: String? = null)

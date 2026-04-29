@@ -7,5 +7,5 @@ interface ProfileService {
     suspend fun checkLoginStatus(): Result<Boolean, NetworkError>
     suspend fun login(email: String, password: String): Result<Unit, NetworkError>
     suspend fun signUp(email: String, password: String): Result<Unit, NetworkError>
-    suspend fun logout(): Result<Unit, NetworkError>
+    suspend fun logout(deviceToken: String? = null): Result<Unit, NetworkError>
 }

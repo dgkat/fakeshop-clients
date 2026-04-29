@@ -136,11 +136,11 @@ class ProfileViewStore(
 
     private suspend fun handleLogout() {
         _profileState.update { it.copy(isProcessing = true, error = null) }
+        val deviceToken = notificationsService.getCurrentDeviceToken()
 
-        profileService.logout().fold(
+        profileService.logout(deviceToken).fold(
             onSuccess = {
                 favoritesService.clearCache()
-                notificationsService.unregisterDevice()
                 // Mark as guest immediately; the first subsequent authenticated request
                 // will trigger fallbackToGuest (mobile) or the Axios interceptor (web)
                 // to create a real guest session lazily.
