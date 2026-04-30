@@ -86,7 +86,7 @@ fun Application.configureRouting() {
             call.respondText(firebaseSwScript(firebase.configJson), ContentType.Application.JavaScript)
         }
 
-        if (developmentMode) {
+        if (System.getenv("DEV_PROXY") == "true") {
             devApiProxy()
         }
 
