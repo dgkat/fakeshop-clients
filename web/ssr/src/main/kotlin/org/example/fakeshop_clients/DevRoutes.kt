@@ -13,7 +13,6 @@ import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.handle
 import io.ktor.server.routing.route
 import org.koin.core.qualifier.named
 import org.koin.ktor.ext.inject
@@ -33,7 +32,12 @@ fun Route.devApiProxy() {
                 method = requestMethod
                 headers {
                     call.request.headers.forEach { name, values ->
-                        if (name !in setOf(HttpHeaders.Host, HttpHeaders.ContentLength, HttpHeaders.TransferEncoding)) {
+                        if (name !in setOf(
+                                HttpHeaders.Host,
+                                HttpHeaders.ContentLength,
+                                HttpHeaders.TransferEncoding
+                            )
+                        ) {
                             values.forEach { append(name, it) }
                         }
                     }

@@ -397,5 +397,8 @@ tasks.register("runWeb") {
     group = "application"
     description = "Generate strings, build JS bundles, and run the web SSR server"
 
+    project(":web:ssr").tasks.named<JavaExec>("run") {
+        jvmArgs("-Dio.ktor.development=true")
+    }
     dependsOn(":web:ssr:run")
 }
