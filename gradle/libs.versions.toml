@@ -39,6 +39,9 @@ kotlinx-datetime = "0.7.1"
 # HTMX
 kotlinx-html = "0.12.0"
 
+# Logging
+logback = "1.5.18"
+
 #React
 kotlinEmotion = "2025.3.26"
 kotlinReact = "2025.10.11-19.2.0"
@@ -88,6 +91,9 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 
 # HTML (for server-side rendering and web)
 kotlinx-html = { module = "org.jetbrains.kotlinx:kotlinx-html", version.ref = "kotlinx-html" }
+
+# Logging
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 # Ktor Server (add if not already present)
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }

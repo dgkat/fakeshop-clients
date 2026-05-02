@@ -76,6 +76,16 @@ class DataStoreTokenStorage(
         }
     }
 
+    override suspend fun replaceTokens(accessToken: String, refreshToken: String) {
+        cachedAccessToken = accessToken
+        withContext(dispatcherProvider.io) {
+            context.dataStore.edit { preferences ->
+                preferences[ACCESS_TOKEN_KEY] = encrypt(accessToken)
+                preferences[REFRESH_TOKEN_KEY] = encrypt(refreshToken)
+            }
+        }
+    }
+
     override suspend fun clearTokens() {
         cachedAccessToken = null
         withContext(dispatcherProvider.io) {

@@ -10,7 +10,7 @@ import org.koin.dsl.module
 val webFavoritesModule = module {
     includes(favoritesModule, recentsModule)
 
-    factory { FavoritesViewStore(scope = get(qualifier = named("appScope")), favoritesService = get(), mapper = get(), notificationsService = get()) }
+    factory { FavoritesViewStore(scope = get(qualifier = named("appScope")), favoritesService = get(), mapper = get(), notificationsService = get(), sessionObserver = get()) }
     factory { RecentsViewStore(scope = get(qualifier = named("appScope")), recentsService = get(), mapper = get()) }
     factory { FavoritesViewModel(favoritesStore = get(), recentsStore = get()) }
 }

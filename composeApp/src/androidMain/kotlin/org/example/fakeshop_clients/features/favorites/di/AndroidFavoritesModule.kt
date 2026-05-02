@@ -13,7 +13,7 @@ val androidFavoritesModule = module {
     includes(favoritesModule, recentsModule)
 
     factory<FavoritesViewStore> { (scope: CoroutineScope) ->
-        FavoritesViewStore(scope = scope, favoritesService = get(), mapper = get(), notificationsService = get())
+        FavoritesViewStore(scope = scope, favoritesService = get(), mapper = get(), notificationsService = get(), sessionObserver = get())
     }
 
     factory<RecentsViewStore> { (scope: CoroutineScope) ->

@@ -4,10 +4,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.example.fakeshop_clients.core.error_handling.fold
+import org.example.fakeshop_clients.core.auth.domain.SessionObserver
+import org.example.fakeshop_clients.core.auth.domain.SessionState
 import org.example.fakeshop_clients.core.error_handling.NetworkError
+import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.home.domain.mappers.DomainToPresentationBriefProductMapper
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
@@ -17,7 +23,8 @@ class FavoritesViewStore(
     private val scope: CoroutineScope,
     private val favoritesService: FavoritesService,
     private val mapper: DomainToPresentationBriefProductMapper,
-    private val notificationsService: NotificationsService
+    private val notificationsService: NotificationsService,
+    private val sessionObserver: SessionObserver
 ) {
 
     private val _state = MutableStateFlow(FavoritesState())
@@ -35,6 +42,12 @@ class FavoritesViewStore(
                 }
             }
         }
+        sessionObserver.upgradeInProgress
+            .combine(sessionObserver.state.map { it is SessionState.Unknown }) { upgrading, unknown ->
+                upgrading || unknown
+            }
+            .onEach { blocked -> _state.update { it.copy(writesBlocked = blocked) } }
+            .launchIn(scope)
         loadFavorites()
     }
 
@@ -114,6 +127,7 @@ class FavoritesViewStore(
         else FavoritesError.Network(this)
 
     private fun removeFavorite(productId: String) {
+        if (_state.value.writesBlocked) return
         val previousProducts = _state.value.products
         _state.update { it.copy(products = previousProducts.filter { p -> p.id != productId }) }
 

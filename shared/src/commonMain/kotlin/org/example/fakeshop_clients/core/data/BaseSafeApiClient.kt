@@ -34,6 +34,18 @@ suspend inline fun <reified T : Any, B : Any> BaseSafeApiClient.post(
     }
 }
 
+suspend inline fun <reified T : Any, B : Any> BaseSafeApiClient.postWithHeaders(
+    path: String,
+    body: B,
+    headers: Map<String, String>
+): Result<T, NetworkError> {
+    return try {
+        Result.Success(client.postWithHeaders(path, body, headers))
+    } catch (e: Exception) {
+        Result.Error(exceptionMapper.map(e))
+    }
+}
+
 suspend inline fun <reified T : Any, B : Any> BaseSafeApiClient.put(
     path: String,
     body: B

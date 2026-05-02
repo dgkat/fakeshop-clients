@@ -1,8 +1,12 @@
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.WebKoinManager
+import org.example.fakeshop_clients.core.auth.domain.SessionBootstrapper
+import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
 import org.example.fakeshop_clients.features.search.presentation.SearchViewStore
@@ -19,6 +23,10 @@ fun setupSearchIsland() {
     WebKoinManager.initialize()
 
     val koin = WebKoinManager.getKoin()
+
+    koin.get<CoroutineScope>(AppScopeQualifier).launch {
+        koin.get<SessionBootstrapper>().bootstrap()
+    }
 
     val scope = MainScope()
 

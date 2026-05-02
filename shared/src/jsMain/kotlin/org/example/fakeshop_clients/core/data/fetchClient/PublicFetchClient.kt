@@ -29,10 +29,37 @@ class PublicFetchClient(private val baseUrl: String) : PublicApiClient {
         val bodySerializer = body::class.serializer() as SerializationStrategy<B>
         val bodyJson = jsonParser.encodeToString(bodySerializer, body)
 
+        return fetchPost(path, bodyJson, emptyMap(), responseType)
+    }
+
+    @OptIn(InternalSerializationApi::class)
+    @Suppress("UNCHECKED_CAST")
+    override suspend fun <T : Any, B : Any> postWithHeaders(
+        path: String,
+        body: B,
+        headers: Map<String, String>,
+        responseType: KClass<T>
+    ): T {
+        @Suppress("UNCHECKED_CAST")
+        val bodySerializer = body::class.serializer() as SerializationStrategy<B>
+        val bodyJson = jsonParser.encodeToString(bodySerializer, body)
+        return fetchPost(path, bodyJson, headers, responseType)
+    }
+
+    @OptIn(InternalSerializationApi::class)
+    private suspend fun <T : Any> fetchPost(
+        path: String,
+        bodyJson: String,
+        extraHeaders: Map<String, String>,
+        responseType: KClass<T>
+    ): T {
+        val headersObj = json("Content-Type" to "application/json").apply {
+            extraHeaders.forEach { (k, v) -> asDynamic()[k] = v }
+        }
         val response = window.fetch(
             "$baseUrl$path", RequestInit(
                 method = "POST",
-                headers = json("Content-Type" to "application/json"),
+                headers = headersObj,
                 body = bodyJson,
                 credentials = RequestCredentials.INCLUDE
             )

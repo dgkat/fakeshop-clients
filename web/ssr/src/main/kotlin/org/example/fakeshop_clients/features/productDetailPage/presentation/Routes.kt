@@ -11,17 +11,21 @@ import kotlinx.html.FlowContent
 import kotlinx.html.body
 import kotlinx.html.button
 import kotlinx.html.id
+import org.example.fakeshop_clients.core.auth.SSRGuestDatasource
 import org.example.fakeshop_clients.core.design.IconPaths
 import org.example.fakeshop_clients.core.ui.svgIcon
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.extensions.ensureGuestSession
 import org.example.fakeshop_clients.core.extensions.extractCookies
 import org.example.fakeshop_clients.core.i18n.WebStrings
+import org.example.fakeshop_clients.core.pages.bootstrapFailedPage
 import org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailService
 import org.example.fakeshop_clients.features.productDetailPage.presentation.pages.productDetailPage
 import org.koin.ktor.ext.inject
 
 fun Route.productRoutes() {
     val productDetailService by inject<ProductDetailService>()
+    val ssrGuestDatasource by inject<SSRGuestDatasource>()
 
     // Product detail page (locale-prefixed, under /{locale} group)
     get("/product/{id}") {
@@ -33,7 +37,13 @@ fun Route.productRoutes() {
             status = HttpStatusCode.BadRequest
         )
 
-        val cookies = call.extractCookies()
+        val cookies = call.ensureGuestSession(ssrGuestDatasource)
+            ?: run {
+                call.respondHtml(HttpStatusCode.ServiceUnavailable) {
+                    bootstrapFailedPage(locale, strings)
+                }
+                return@get
+            }
 
         val fullProduct = productDetailService.getFullProductById(productId, cookies)
 

@@ -6,6 +6,7 @@ import io.ktor.client.plugins.auth.authProvider
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -31,6 +32,21 @@ class KtorClient(val http: HttpClient) : ApiClient {
         val response = http.post(path) {
             contentType(ContentType.Application.Json)
             setBody(body, bodyType)
+        }
+        return response.body(TypeInfo(responseType)) as T
+    }
+
+    override suspend fun <T : Any, B : Any> postWithHeaders(
+        path: String,
+        body: B,
+        headers: Map<String, String>,
+        responseType: KClass<T>
+    ): T {
+        val bodyType = TypeInfo(body::class)
+        val response = http.post(path) {
+            contentType(ContentType.Application.Json)
+            setBody(body, bodyType)
+            headers.forEach { (key, value) -> header(key, value) }
         }
         return response.body(TypeInfo(responseType)) as T
     }

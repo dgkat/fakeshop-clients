@@ -8,5 +8,6 @@ data class FavoritesState(
     val isLoading: Boolean = true,
     val error: FavoritesError? = null,
     val notificationPermissionStatus: NotificationPermissionStatus = NotificationPermissionStatus.NOT_DETERMINED,
-    val showNotificationBanner: Boolean = false
+    val showNotificationBanner: Boolean = false,
+    val writesBlocked: Boolean = false
 )

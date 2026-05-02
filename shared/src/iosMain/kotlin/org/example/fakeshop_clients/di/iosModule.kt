@@ -2,8 +2,11 @@ package org.example.fakeshop_clients.di
 
 import kotlinx.coroutines.CoroutineScope
 import org.example.fakeshop_clients.core.auth.di.mobileInfrastructureModule
+import org.example.fakeshop_clients.core.auth.domain.SessionBootstrapper
 import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
+import org.example.fakeshop_clients.core.auth.domain.SessionState
+import org.example.fakeshop_clients.core.auth.domain.isReal
 import org.example.fakeshop_clients.core.di.iosInfrastructureModule
 import org.example.fakeshop_clients.features.favorites.di.favoritesModule
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesViewStore
@@ -48,7 +51,8 @@ val iosModule = module {
             scope = scope,
             productListService = get(),
             favoritesService = get(),
-            mapper = get()
+            mapper = get(),
+            sessionObserver = get()
         )
     }
 
@@ -65,7 +69,8 @@ val iosModule = module {
             productDetailService = get(),
             favoritesService = get(),
             briefProductMapper = get(),
-            detailedProductMapper = get()
+            detailedProductMapper = get(),
+            sessionObserver = get()
         )
     }
 
@@ -74,7 +79,8 @@ val iosModule = module {
             scope = scope,
             favoritesService = get(),
             mapper = get(),
-            notificationsService = get()
+            notificationsService = get(),
+            sessionObserver = get()
         )
     }
 
@@ -149,5 +155,14 @@ class IOSKoinHelper : KoinComponent {
 
     fun getSessionObserver(): SessionObserver {
         return get()
+    }
+
+    fun getSessionBootstrapper(): SessionBootstrapper {
+        return get()
+    }
+
+    fun isSessionRealUser(): Boolean {
+        val state = get<SessionObserver>().state.value
+        return state is SessionState.Authenticated && state.role.isReal
     }
 }

@@ -75,5 +75,13 @@
   "notification_prefs_title": "Notifications",
   "notification_prefs_price_drop": "Price drop alerts",
   "notification_prefs_price_drop_desc": "Get notified when favorited products drop in price",
-  "price_drop_snackbar_action": "View"
+  "price_drop_snackbar_action": "View",
+
+  "guest_profile_cta_title": "Save your favorites across devices",
+  "guest_profile_cta_body": "Sign up or log in to sync.",
+  "guest_favorites_device_note": "Saved on this device",
+
+  "bootstrap_failed_title": "Can't reach the server",
+  "bootstrap_failed_body": "Check your connection and try again.",
+  "bootstrap_failed_retry": "Retry"
 }

@@ -30,4 +30,13 @@ class MobileAuthRepository(
             )
         }
     }
+
+    override suspend fun guest(installId: String): Result<Unit, NetworkError> {
+        return mobileAuthDatasource.guest(installId = installId).map { response ->
+            tokenStorage.saveTokens(
+                accessToken = response.accessToken,
+                refreshToken = response.refreshToken
+            )
+        }
+    }
 }

@@ -10,11 +10,13 @@ import coil.decode.SvgDecoder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.androidCoreModule
-import org.example.fakeshop_clients.core.auth.domain.SessionMutator
+import org.example.fakeshop_clients.core.auth.domain.Role
+import org.example.fakeshop_clients.core.auth.domain.SessionBootstrapper
+import org.example.fakeshop_clients.core.auth.domain.SessionObserver
+import org.example.fakeshop_clients.core.auth.domain.SessionState
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
-import org.example.fakeshop_clients.features.profile.domain.ProfileService
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext.startKoin
@@ -41,18 +43,14 @@ class FakeShopApp : Application() , ImageLoaderFactory{
     private fun bootstrapSession() {
         val appScope = getKoin().get<CoroutineScope>(AppScopeQualifier)
         appScope.launch {
-            val profileService = getKoin().get<ProfileService>()
-            val sessionMutator = getKoin().get<SessionMutator>()
+            getKoin().get<SessionBootstrapper>().bootstrap()
 
-            val isLoggedIn = profileService.checkLoginStatus()
-                .let { result ->
-                    (result as? org.example.fakeshop_clients.core.error_handling.Result.Success)?.data ?: false
+            val state = getKoin().get<SessionObserver>().state.value
+            if (state is SessionState.Authenticated && state.role != Role.GUEST) {
+                val service = getKoin().get<NotificationsService>()
+                if (service.getPermissionStatus() == NotificationPermissionStatus.GRANTED) {
+                    service.registerDeviceAfterAuth()
                 }
-            if (isLoggedIn) sessionMutator.setLoggedIn() else sessionMutator.setLoggedOut()
-
-            val service = getKoin().get<NotificationsService>()
-            if (isLoggedIn && service.getPermissionStatus() == NotificationPermissionStatus.GRANTED) {
-                service.registerDeviceAfterAuth()
             }
         }
     }

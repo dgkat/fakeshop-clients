@@ -5,7 +5,9 @@ import io.ktor.client.engine.darwin.Darwin
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import org.example.fakeshop_clients.core.auth.data.IosInstallIdProvider
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
+import org.example.fakeshop_clients.core.auth.domain.InstallIdProvider
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
 import org.example.fakeshop_clients.core.concurrency.IosDispatcherProvider
@@ -21,6 +23,10 @@ fun iosInfrastructureModule(baseUrl: String) = module {
     }
     single<TokenStorage> {
         KeychainTokenStorage(dispatcherProvider = get())
+    }
+
+    single<InstallIdProvider> {
+        IosInstallIdProvider()
     }
     single<HttpClientEngine> {
         Darwin.create()

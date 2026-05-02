@@ -7,6 +7,8 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import org.example.fakeshop_clients.core.auth.domain.InstallIdProvider
+import org.example.fakeshop_clients.core.auth.domain.Role
 import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.WebAuthDatasource
@@ -18,6 +20,7 @@ class AxiosClient(
     private val baseUrl: String,
     private val webAuthDatasource: WebAuthDatasource,
     private val sessionMutator: SessionMutator,
+    private val installIdProvider: InstallIdProvider,
     private val scope: CoroutineScope
 ) : ApiClient {
 
@@ -88,8 +91,24 @@ class AxiosClient(
                                     .then { resolve(it) }
                                     .catch { reject(wrapAxiosError(it.asDynamic())) }
                             } else {
-                                onSessionRefreshFailed()
-                                reject(wrapAxiosError(error))
+                                val installId = installIdProvider.get()
+                                val guestSucceeded = try {
+                                    val guestResult = webAuthDatasource.guest(installId)
+                                    guestResult is Result.Success && guestResult.data
+                                } catch (_: Throwable) {
+                                    false
+                                }
+
+                                if (guestSucceeded) {
+                                    sessionMutator.setAuthenticated(Role.GUEST)
+                                    onSessionRefreshed()
+                                    retryRequest(originalRequest)
+                                        .then { resolve(it) }
+                                        .catch { reject(wrapAxiosError(it.asDynamic())) }
+                                } else {
+                                    onSessionRefreshFailed()
+                                    reject(wrapAxiosError(error))
+                                }
                             }
                         }
                     }
@@ -124,7 +143,7 @@ class AxiosClient(
     }
 
     private fun onSessionRefreshFailed() {
-        sessionMutator.setLoggedOut()
+        sessionMutator.setBootstrapFailed()
         refreshSubscribers.forEach { callback -> callback(false) }
         refreshSubscribers.clear()
     }

@@ -8,4 +8,11 @@ interface PublicApiClient {
         body: B,
         responseType: KClass<T>
     ): T
+
+    suspend fun <T : Any, B : Any> postWithHeaders(
+        path: String,
+        body: B,
+        headers: Map<String, String>,
+        responseType: KClass<T>
+    ): T = post(path, body, responseType)
 }

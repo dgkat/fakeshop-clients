@@ -17,7 +17,8 @@ val androidProductDetailModule = module {
             productDetailService = get(),
             favoritesService = get(),
             briefProductMapper = get(),
-            detailedProductMapper = get()
+            detailedProductMapper = get(),
+            sessionObserver = get()
         )
     }
 

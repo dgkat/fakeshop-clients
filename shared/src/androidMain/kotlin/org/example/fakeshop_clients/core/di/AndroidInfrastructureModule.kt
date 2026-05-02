@@ -7,7 +7,9 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import org.example.fakeshop_clients.core.auth.data.AndroidInstallIdProvider
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
+import org.example.fakeshop_clients.core.auth.domain.InstallIdProvider
 import org.example.fakeshop_clients.core.concurrency.AndroidDispatcherProvider
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
@@ -35,6 +37,10 @@ val androidInfrastructureModule = module {
 
     single<TokenStorage> {
         DataStoreTokenStorage(context = get(), dispatcherProvider = get())
+    }
+
+    single<InstallIdProvider> {
+        AndroidInstallIdProvider(context = get(), dispatcherProvider = get())
     }
 
     single<HttpClientEngine> {

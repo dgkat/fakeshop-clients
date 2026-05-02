@@ -11,7 +11,13 @@ val androidHomeModule = module {
     includes(homeModule)
 
     factory<ProductListViewStore> { (scope: CoroutineScope) ->
-        ProductListViewStore(scope = scope, productListService = get(), favoritesService = get(), mapper = get())
+        ProductListViewStore(
+            scope = scope,
+            productListService = get(),
+            favoritesService = get(),
+            mapper = get(),
+            sessionObserver = get()
+        )
     }
 
     viewModel {

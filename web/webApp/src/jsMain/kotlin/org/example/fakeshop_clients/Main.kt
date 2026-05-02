@@ -3,19 +3,25 @@ package org.example.fakeshop_clients
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.example.fakeshop_clients.core.auth.domain.SessionMutator
+import org.example.fakeshop_clients.core.auth.domain.Role
+import org.example.fakeshop_clients.core.auth.domain.SessionBootstrapper
+import org.example.fakeshop_clients.core.auth.domain.SessionObserver
+import org.example.fakeshop_clients.core.auth.domain.SessionState
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.di.webCoreModule
-import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.core.navigation.mobile.BottomNav
+import org.example.fakeshop_clients.core.presentation.BootstrapFailedPage
 import org.example.fakeshop_clients.core.presentation.components.Header
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesPage
 import org.example.fakeshop_clients.features.notifications.domain.NotificationPermissionStatus
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsPage
-import org.example.fakeshop_clients.features.profile.domain.ProfileService
 import org.example.fakeshop_clients.features.profile.presentation.ProfilePage
 import org.example.fakeshop_clients.features.search.presentation.SearchViewModel
 import org.example.fakeshop_clients.features.search.presentation.components.SearchBar
@@ -35,7 +41,9 @@ import react.router.dom.RouterProvider
 import react.router.dom.createBrowserRouter
 import react.router.useLocation
 import react.router.useNavigate
+import react.useEffectWithCleanup
 import react.useMemo
+import react.useState
 import web.cssom.ClassName
 import web.dom.Element
 
@@ -79,24 +87,18 @@ private fun registerServiceWorker() {
     sw.register("/firebase-messaging-sw.js")
 }
 
-/**
- * Seeds [SessionStore] from the backend on app load and, if the user is
- * logged in and has granted notification permission, re-registers the FCM
- * token so the backend always has a fresh token for this browser.
- */
 private fun bootstrapSession() {
     val koin = getKoin()
     val appScope = koin.get<CoroutineScope>(AppScopeQualifier)
     appScope.launch {
-        val profileService = koin.get<ProfileService>()
-        val sessionMutator = koin.get<SessionMutator>()
+        koin.get<SessionBootstrapper>().bootstrap()
 
-        val isLoggedIn = (profileService.checkLoginStatus() as? Result.Success)?.data ?: false
-        if (isLoggedIn) sessionMutator.setLoggedIn() else sessionMutator.setLoggedOut()
-
-        val service = koin.get<NotificationsService>()
-        if (isLoggedIn && service.getPermissionStatus() == NotificationPermissionStatus.GRANTED) {
-            service.registerDeviceAfterAuth()
+        val state = koin.get<SessionObserver>().state.value
+        if (state is SessionState.Authenticated && state.role != Role.GUEST) {
+            val service = koin.get<NotificationsService>()
+            if (service.getPermissionStatus() == NotificationPermissionStatus.GRANTED) {
+                service.registerDeviceAfterAuth()
+            }
         }
     }
 }
@@ -113,23 +115,42 @@ private fun createRoute(
 
 val SpaApp = FC<Props> {
     val locale = I18n.locale
+    val koin = useMemo { getKoin() }
+    val sessionObserver = useMemo { koin.get<SessionObserver>() }
 
-    val router = createBrowserRouter(
-        arrayOf(
-            createRoute(
-                path = "/$locale",
-                element = SpaLayout.create(),
-                children = arrayOf(
-                    createRoute("favorites", FavoritesPage.create()),
-                    createRoute("notifications", NotificationsPage.create()),
-                    createRoute("profile", ProfilePage.create())
+    var sessionReady by useState { sessionObserver.state.value is SessionState.Authenticated }
+    var bootstrapFailed by useState { sessionObserver.state.value is SessionState.BootstrapFailed }
+
+    useEffectWithCleanup(sessionObserver) {
+        val scope = MainScope()
+        sessionObserver.state
+            .onEach { state ->
+                sessionReady = state is SessionState.Authenticated
+                bootstrapFailed = state is SessionState.BootstrapFailed
+            }
+            .launchIn(scope)
+        onCleanup { scope.cancel() }
+    }
+
+    val router = useMemo(locale) {
+        createBrowserRouter(
+            arrayOf(
+                createRoute(
+                    path = "/$locale",
+                    element = SpaLayout.create(),
+                    children = arrayOf(
+                        createRoute("favorites", FavoritesPage.create()),
+                        createRoute("notifications", NotificationsPage.create()),
+                        createRoute("profile", ProfilePage.create())
+                    )
                 )
             )
         )
-    )
+    }
 
-    RouterProvider {
-        this.router = router
+    when {
+        bootstrapFailed -> BootstrapFailedPage { }
+        sessionReady -> RouterProvider { this.router = router }
     }
 }
 
