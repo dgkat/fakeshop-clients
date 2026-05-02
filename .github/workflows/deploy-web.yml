@@ -31,7 +31,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Build fat JAR
-        run: ./gradlew :web:ssr:buildFatJar -PbackendBaseUrl=https://api.dgkat.com
+        run: ./gradlew :web:ssr:buildFatJar -PbackendBaseUrl=/api/web
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
