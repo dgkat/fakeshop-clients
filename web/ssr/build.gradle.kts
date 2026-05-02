@@ -38,6 +38,9 @@ dependencies {
     implementation(libs.ktor.client.content)
     implementation(libs.ktor.serialization.kotlinx.json)
 
+    // Logging
+    implementation(libs.logback.classic)
+
     // Koin for dependency injection
     implementation(libs.koin.core)
     implementation(libs.koin.ktor)
