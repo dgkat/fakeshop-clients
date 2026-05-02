@@ -33,6 +33,6 @@ class SSRGuestDatasource(private val httpClient: HttpClient) {
 
     companion object {
         // Must match the session cookie name set by the backend on POST /api/web/auth/guest.
-        const val SESSION_COOKIE_NAME = "sid"
+        const val SESSION_COOKIE_NAME = "SESSION"
     }
 }
