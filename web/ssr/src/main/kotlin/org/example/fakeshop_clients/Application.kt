@@ -6,6 +6,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -88,6 +89,10 @@ fun Application.configureRouting() {
 
         // HTMX API routes (no locale prefix)
         productApiRoutes()
+
+        get("/health") {
+            call.respondText("OK", status = HttpStatusCode.OK)
+        }
 
         // Bare "/" redirect based on Accept-Language
         get("/") {
