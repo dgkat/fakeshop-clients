@@ -1,108 +1,416 @@
+/* ===== PROFILE PAGE ===== */
 .profile-container {
     display: flex;
     justify-content: center;
-    align-items: center;
+    padding: 16px;
     min-height: 60vh;
-    padding: 2rem;
+    background-color: var(--color-background);
 }
 
-.logged-in-content,
-.logged-out-content {
+.profile-content {
     display: flex;
     flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 480px;
+    padding-bottom: 24px;
+}
+
+/* ===== BASE CARD ===== */
+.profile-card {
+    background-color: var(--color-surface-container-low);
+    border-radius: 16px;
+    width: 100%;
+}
+
+/* ===== USER CARD ===== */
+.profile-user-card {
+    display: flex;
     align-items: center;
-    gap: 1rem;
-    max-width: 400px;
-    width: 100%;
+    gap: 14px;
+    padding: 14px 16px;
 }
 
-.profile-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.form-container {
+.profile-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--color-primary-container);
+    color: var(--color-on-primary-container);
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    width: 100%;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
 }
 
-.form-input {
-    padding: 0.75rem;
-    border: 1px solid var(--color-outline-variant);
-    border-radius: 4px;
-    font-size: 1rem;
-    width: 100%;
+.profile-user-info {
+    flex: 1;
+    min-width: 0;
 }
 
-.form-input:focus {
-    outline: none;
-    border-color: var(--color-primary);
+.profile-user-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-on-surface);
 }
 
-.form-input:disabled {
-    background-color: var(--color-surface-variant);
+.profile-user-subtitle {
+    font-size: 12px;
+    color: var(--color-on-surface-variant);
+    margin-top: 2px;
+}
+
+.profile-chevron {
+    font-size: 22px;
+    color: var(--color-on-surface-variant);
+    line-height: 1;
+}
+
+/* ===== ACCOUNT LINKS CARD ===== */
+.profile-links-card {
+    overflow: hidden;
+}
+
+.profile-link-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background-color 150ms;
+}
+
+.profile-link-item:hover {
+    background-color: var(--color-surface-container);
+}
+
+.profile-link-divider {
+    border-bottom: 0.5px solid var(--color-outline-variant);
+}
+
+.profile-link-icon-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--color-secondary-container);
+    color: var(--color-on-secondary-container);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.profile-link-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-link-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-on-surface);
+}
+
+.profile-link-subtitle {
+    font-size: 12px;
+    color: var(--color-on-surface-variant);
+    margin-top: 1px;
+}
+
+/* ===== NOTIFICATION PREFS CARD ===== */
+.profile-notif-card {
+    padding: 0 16px;
+}
+
+.profile-notif-loading {
+    padding: 16px;
+    text-align: center;
+    color: var(--color-on-surface-variant);
+}
+
+.profile-notif-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+}
+
+.profile-notif-divider {
+    border-bottom: 0.5px solid var(--color-outline-variant);
+}
+
+.profile-notif-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-notif-title-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.profile-notif-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-on-surface);
+}
+
+.profile-info-icon {
+    font-size: 13px;
+    color: var(--color-on-surface-variant);
+    line-height: 1;
+}
+
+.profile-notif-desc {
+    font-size: 12px;
+    color: var(--color-on-surface-variant);
+    margin-top: 2px;
+}
+
+/* ===== TOGGLE SWITCH ===== */
+.profile-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.profile-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.profile-toggle-slider {
+    position: absolute;
+    inset: 0;
+    background-color: var(--color-outline);
+    border-radius: 14px;
+    transition: background-color 200ms;
+}
+
+.profile-toggle-slider::before {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 4px;
+    top: 4px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: transform 200ms;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.profile-toggle-switch input:checked + .profile-toggle-slider {
+    background-color: var(--color-primary);
+}
+
+.profile-toggle-switch input:checked + .profile-toggle-slider::before {
+    transform: translateX(20px);
+}
+
+.profile-toggle-switch input:disabled + .profile-toggle-slider {
+    opacity: 0.4;
     cursor: not-allowed;
 }
 
-.button-row {
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-}
-
-.primary-button,
-.secondary-button,
-.logout-button {
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    border: none;
-    flex: 1;
-}
-
-.primary-button,
-.logout-button {
-    background-color: var(--color-primary);
-    color: var(--color-on-primary);
-}
-
-.primary-button:hover:not(:disabled),
-.logout-button:hover:not(:disabled) {
-    background-color: var(--color-primary-dark);
-}
-
-.secondary-button {
+/* ===== LOGOUT BUTTON ===== */
+.profile-logout-btn {
+    width: 100%;
+    height: 48px;
     background-color: transparent;
-    color: var(--color-primary);
-    border: 1px solid var(--color-primary);
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 150ms;
 }
 
-.secondary-button:hover:not(:disabled) {
-    background-color: var(--color-surface-variant);
+.profile-logout-btn:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--color-error) 8%, transparent);
 }
 
-.primary-button:disabled,
-.secondary-button:disabled,
-.logout-button:disabled {
+.profile-logout-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.logout-button {
-    max-width: 250px;
+/* ===== LOGGED OUT FORM ===== */
+.profile-welcome-title {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--color-on-surface);
+    letter-spacing: -0.01em;
 }
 
-.error-message {
+.profile-welcome-subtitle {
+    font-size: 14px;
+    color: var(--color-on-surface-variant);
+    margin-top: 6px;
+    margin-bottom: 22px;
+    line-height: 1.5;
+}
+
+.profile-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.profile-field-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-on-surface-variant);
+    margin-top: 8px;
+}
+
+.profile-field-label:first-child {
+    margin-top: 0;
+}
+
+.profile-field-input {
+    height: 52px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1px solid var(--color-outline);
+    background-color: transparent;
+    font-size: 15px;
+    color: var(--color-on-surface);
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 150ms;
+}
+
+.profile-field-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    border-width: 2px;
+}
+
+.profile-field-input:disabled {
+    background-color: var(--color-surface-variant);
+    cursor: not-allowed;
+}
+
+.profile-forgot-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
+.profile-forgot-link {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-primary);
+    cursor: pointer;
+}
+
+.profile-error-message {
+    font-size: 13px;
     color: var(--color-error);
-    font-size: 0.875rem;
     text-align: center;
 }
 
-.loading-container {
-    text-align: center;
-    padding: 2rem;
+.profile-primary-btn {
+    width: 100%;
+    height: 48px;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border: none;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 150ms;
+}
+
+.profile-primary-btn:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+}
+
+.profile-primary-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.profile-outlined-btn {
+    width: 100%;
+    height: 48px;
+    background-color: transparent;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 150ms;
+}
+
+.profile-outlined-btn:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.profile-outlined-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.profile-or-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-divider-line {
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-outline-variant);
+}
+
+.profile-or-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-on-surface-variant);
+    letter-spacing: 0.5px;
+}
+
+.profile-google-btn {
+    width: 100%;
+    height: 44px;
+    background-color: transparent;
+    color: var(--color-on-surface-variant);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    opacity: 0.6;
+}
+
+.profile-google-g {
+    font-weight: 700;
+    color: var(--color-on-surface);
+}
+
+/* ===== LOADING STATE ===== */
+.profile-loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 48px;
+    color: var(--color-on-surface-variant);
 }
