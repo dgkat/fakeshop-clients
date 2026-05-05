@@ -22,10 +22,10 @@ external interface LoggedInViewProps : Props {
 private data class AccountLink(val emoji: String, val title: String, val subtitle: String)
 
 private val accountLinks = listOf(
-    AccountLink("🛍️", "My orders", "3 active"),
-    AccountLink("♥", "My list", "12 saved"),
-    AccountLink("📍", "Addresses", "2 on file"),
-    AccountLink("💳", "Payment methods", "Visa •• 4029"),
+    AccountLink("🛍️", "My orders", "X active"),
+    AccountLink("♥", "My list", "X saved"),
+    AccountLink("📍", "Addresses", "0 on file"),
+    AccountLink("💳", "Payment methods", "Visa •• XXXX"),
     AccountLink("🎁", "Gift cards & credit", "$0.00"),
     AccountLink("💬", "Help & support", "")
 )

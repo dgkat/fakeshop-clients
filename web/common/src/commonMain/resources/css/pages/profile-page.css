@@ -1,7 +1,8 @@
 /* ===== PROFILE PAGE ===== */
 .profile-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     padding: 16px;
     min-height: 60vh;
     background-color: var(--color-background);
@@ -458,11 +459,85 @@
     color: var(--color-on-surface-variant);
 }
 
+/* ===== ANDROID INSTALL BANNER ===== */
+.android-install-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background-color: var(--color-surface-container-low);
+    border: 1px dashed var(--color-outline);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    box-sizing: border-box;
+}
+
+.android-install-banner-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background-color: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.android-install-banner-icon-symbol {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.android-install-banner-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.android-install-banner-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-on-surface);
+}
+
+.android-install-banner-subtitle {
+    font-size: 12px;
+    color: var(--color-on-surface-variant);
+    margin-top: 2px;
+}
+
+.android-install-banner-btn {
+    flex-shrink: 0;
+    height: 40px;
+    padding: 0 16px;
+    background-color: var(--color-secondary-container);
+    color: var(--color-on-secondary-container);
+    border: none;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: background-color 150ms;
+}
+
+.android-install-banner-btn:hover {
+    background-color: color-mix(in srgb, var(--color-secondary-container) 85%, var(--color-on-secondary-container));
+}
+
 /* ===== DESKTOP OVERRIDES (≥ 768px) ===== */
 @media (min-width: 768px) {
     .profile-container {
         padding: 32px;
-        align-items: flex-start;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .android-install-banner {
+        max-width: 880px;
     }
 
     .profile-content {
