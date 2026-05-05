@@ -52,18 +52,27 @@ val LoggedInView = FC<LoggedInViewProps> { props ->
                     +"Manage your profile"
                 }
             }
+            button {
+                className = ClassName("profile-edit-btn")
+                disabled = true
+                +"Edit profile"
+            }
             span {
-                className = ClassName("profile-chevron")
+                className = ClassName("profile-chevron profile-chevron-mobile")
                 +"›"
             }
         }
 
-        // Account links card
+        // Account links
+        div {
+            className = ClassName("profile-section-label")
+            +"Account"
+        }
         div {
             className = ClassName("profile-card profile-links-card")
-            accountLinks.forEachIndexed { index, link ->
+            accountLinks.forEach { link ->
                 div {
-                    className = ClassName(if (index < accountLinks.lastIndex) "profile-link-item profile-link-divider" else "profile-link-item")
+                    className = ClassName("profile-link-item")
                     div {
                         className = ClassName("profile-link-icon-circle")
                         +link.emoji
@@ -96,7 +105,11 @@ val LoggedInView = FC<LoggedInViewProps> { props ->
             }
         }
 
-        // Notification prefs
+        // Notifications
+        div {
+            className = ClassName("profile-section-label")
+            +"Notifications"
+        }
         NotificationPrefsSection {
             state = props.prefsState
             onLoad = props.onLoadPrefs

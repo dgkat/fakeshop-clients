@@ -112,15 +112,27 @@ val LoggedOutView = FC<LoggedOutViewProps> { props ->
             div { className = ClassName("profile-divider-line") }
         }
 
-        // Google sign in
-        button {
-            className = ClassName("profile-google-btn")
-            disabled = true
-            span {
-                className = ClassName("profile-google-g")
-                +"G"
+        // Social sign in
+        div {
+            className = ClassName("profile-social-btns")
+            button {
+                className = ClassName("profile-social-btn")
+                disabled = true
+                span {
+                    className = ClassName("profile-google-g")
+                    +"G"
+                }
+                +"Google"
             }
-            +"Continue with Google"
+            button {
+                className = ClassName("profile-social-btn")
+                disabled = true
+                span {
+                    className = ClassName("profile-apple-icon")
+                    +""
+                }
+                +"Apple"
+            }
         }
     }
 }

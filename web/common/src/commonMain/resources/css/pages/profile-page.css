@@ -23,6 +23,17 @@
     width: 100%;
 }
 
+/* ===== SECTION LABEL (desktop only) ===== */
+.profile-section-label {
+    display: none;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: -8px;
+}
+
 /* ===== USER CARD ===== */
 .profile-user-card {
     display: flex;
@@ -61,6 +72,28 @@
     margin-top: 2px;
 }
 
+/* Edit profile button — desktop only */
+.profile-edit-btn {
+    display: none;
+    height: 36px;
+    padding: 0 16px;
+    background-color: transparent;
+    color: var(--color-primary);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: not-allowed;
+    white-space: nowrap;
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+
+/* Chevron — mobile only */
+.profile-chevron-mobile {
+    display: inline;
+}
+
 .profile-chevron {
     font-size: 22px;
     color: var(--color-on-surface-variant);
@@ -81,12 +114,13 @@
     transition: background-color 150ms;
 }
 
-.profile-link-item:hover {
-    background-color: var(--color-surface-container);
+/* Mobile: border between all items except last */
+.profile-link-item:not(:last-child) {
+    border-bottom: 0.5px solid var(--color-outline-variant);
 }
 
-.profile-link-divider {
-    border-bottom: 0.5px solid var(--color-outline-variant);
+.profile-link-item:hover {
+    background-color: var(--color-surface-container);
 }
 
 .profile-link-icon-circle {
@@ -384,8 +418,15 @@
     letter-spacing: 0.5px;
 }
 
-.profile-google-btn {
-    width: 100%;
+/* Social sign-in buttons — stacked on mobile */
+.profile-social-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.profile-social-btn {
+    flex: 1;
     height: 44px;
     background-color: transparent;
     color: var(--color-on-surface-variant);
@@ -401,8 +442,10 @@
     opacity: 0.6;
 }
 
-.profile-google-g {
+.profile-google-g,
+.profile-apple-icon {
     font-weight: 700;
+    font-size: 16px;
     color: var(--color-on-surface);
 }
 
@@ -413,4 +456,124 @@
     align-items: center;
     padding: 48px;
     color: var(--color-on-surface-variant);
+}
+
+/* ===== DESKTOP OVERRIDES (≥ 768px) ===== */
+@media (min-width: 768px) {
+    .profile-container {
+        padding: 32px;
+        align-items: flex-start;
+    }
+
+    .profile-content {
+        max-width: 880px;
+        padding-bottom: 32px;
+    }
+
+    /* Section labels visible on desktop */
+    .profile-section-label {
+        display: block;
+        margin-bottom: -8px;
+    }
+
+    /* Larger user card */
+    .profile-user-card {
+        padding: 24px 28px;
+        gap: 20px;
+    }
+
+    .profile-avatar {
+        width: 72px;
+        height: 72px;
+        font-size: 28px;
+    }
+
+    .profile-user-name {
+        font-size: 24px;
+        letter-spacing: -0.01em;
+    }
+
+    .profile-user-subtitle {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    /* Show edit button, hide mobile chevron */
+    .profile-edit-btn {
+        display: block;
+    }
+
+    .profile-chevron-mobile {
+        display: none;
+    }
+
+    /* 2-column grid for account links */
+    .profile-links-card {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .profile-link-item {
+        padding: 18px 20px;
+        gap: 16px;
+    }
+
+    /* Reset mobile bottom-border-on-all rule */
+    .profile-link-item:not(:last-child) {
+        border-bottom: none;
+    }
+
+    /* First 4 items get bottom border (rows 1 and 2 of 3) */
+    .profile-link-item:nth-child(-n+4) {
+        border-bottom: 1px solid var(--color-outline-variant);
+    }
+
+    /* Left column items get right border */
+    .profile-link-item:nth-child(odd) {
+        border-right: 1px solid var(--color-outline-variant);
+    }
+
+    .profile-link-icon-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .profile-link-title {
+        font-size: 15px;
+    }
+
+    .profile-link-subtitle {
+        font-size: 13px;
+    }
+
+    /* Notification rows: more breathing room */
+    .profile-notif-card {
+        padding: 0 20px;
+    }
+
+    .profile-notif-row {
+        padding: 20px 0;
+        gap: 16px;
+    }
+
+    .profile-notif-title {
+        font-size: 15px;
+    }
+
+    /* Logged out: more vertical space, wider feel */
+    .profile-welcome-title {
+        font-size: 32px;
+        letter-spacing: -0.02em;
+    }
+
+    .profile-welcome-subtitle {
+        font-size: 15px;
+        margin-bottom: 32px;
+    }
+
+    /* Google + Apple side by side on desktop */
+    .profile-social-btns {
+        flex-direction: row;
+    }
 }
