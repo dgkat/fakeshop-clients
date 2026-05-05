@@ -115,6 +115,7 @@ struct ProductCard: View {
         .frame(width: 160)
         .background(FakeShopColors.surface)
         .cornerRadius(12)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(FakeShopColors.outlineVariant, lineWidth: 1))
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         .contentShape(Rectangle())
         .scaleEffect(isPressed ? 0.97 : 1.0)
