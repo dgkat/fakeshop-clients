@@ -1,9 +1,11 @@
 package org.example.fakeshop_clients.features.product_list.presentation.components
 
+import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.example.fakeshop_clients.core.i18n.I18n
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListState
 import org.example.fakeshop_clients.features.product_list.presentation.ProductListViewmodel
 import react.FC
@@ -53,7 +55,10 @@ val ProductListView = FC<ProductListProps> { props ->
             else -> {
                 CategoriesView {
                     categories = state.categories
-                    onProductClick = { }
+                    onProductClick = { productId ->
+                        val locale = I18n.locale
+                        window.location.href = "/$locale/product/$productId"
+                    }
                     favoritedProductIds = state.favoritedProductIds
                     onToggleFavorite = props.viewModel?.let { vm ->
                         { productId: String -> vm.toggleFavorite(productId) }

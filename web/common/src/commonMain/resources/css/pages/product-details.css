@@ -93,46 +93,6 @@
     right: var(--spacing-sm);
 }
 
-/* Like Button - SVG heart overlay on image */
-.btn-like-circle {
-    position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-md);
-    width: 44px;
-    height: 44px;
-    border: none;
-    border-radius: 50%;
-    background: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 1;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-    outline: none;
-}
-
-.btn-like-circle:hover {
-    transform: scale(1.1);
-}
-
-.btn-like-circle .like-icon {
-    width: 28px;
-    height: 28px;
-    fill: none;
-    stroke: white;
-    stroke-width: 2;
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
-    transition: fill 200ms ease, stroke 200ms ease;
-}
-
-.btn-like-circle.liked .like-icon {
-    fill: var(--color-favorite);
-    stroke: var(--color-favorite);
-}
-
-
 /* Product Info Section */
 .product-info-section {
     display: flex;
