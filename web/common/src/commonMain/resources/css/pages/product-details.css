@@ -93,6 +93,19 @@
     right: var(--spacing-sm);
 }
 
+/* Like button override for product detail — larger than the card version */
+.product-image-section .btn-like-circle {
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    width: 44px;
+    height: 44px;
+}
+
+.product-image-section .btn-like-circle .like-icon {
+    width: 28px;
+    height: 28px;
+}
+
 /* Product Info Section */
 .product-info-section {
     display: flex;

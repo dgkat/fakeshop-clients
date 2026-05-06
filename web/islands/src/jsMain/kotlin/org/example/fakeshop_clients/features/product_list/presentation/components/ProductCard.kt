@@ -7,7 +7,6 @@ import react.Props
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.img
-import react.dom.html.ReactHTML.span
 import react.dom.svg.ReactSVG.path
 import react.dom.svg.ReactSVG.svg
 import web.cssom.ClassName
@@ -54,11 +53,6 @@ val ProductCard = FC<ProductCardProps> { props ->
 
         div {
             className = ClassName("product-info")
-
-            span {
-                className = ClassName("product-category")
-                +props.product.category
-            }
 
             div {
                 className = ClassName("product-name")
