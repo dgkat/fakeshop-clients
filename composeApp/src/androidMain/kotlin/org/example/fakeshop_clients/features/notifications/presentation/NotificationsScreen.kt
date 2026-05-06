@@ -3,7 +3,9 @@ package org.example.fakeshop_clients.features.notifications.presentation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
@@ -20,9 +22,9 @@ import fakeshop_clients.composeapp.generated.resources.tab_notifications
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun NotificationsScreen() {
+fun NotificationsScreen(contentPadding: PaddingValues = PaddingValues()) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().padding(contentPadding),
         contentAlignment = Alignment.Center
     ) {
         Column(
