@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Backend API — not for crawlers
+Disallow: /api/
+
+# Private pages (require login)
+Disallow: /*/favorites
+Disallow: /*/notifications
+Disallow: /*/profile
+
+# HTMX API endpoints
+Disallow: /product/like/
+
+# Assets and infra
+Disallow: /static/
+Disallow: /common/
+Disallow: /health
+Disallow: /firebase-messaging-sw.js

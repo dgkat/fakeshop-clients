@@ -94,6 +94,12 @@ fun Application.configureRouting() {
             call.respondText("OK", status = HttpStatusCode.OK)
         }
 
+        get("/robots.txt") {
+            val content = Application::class.java.getResourceAsStream("/robots.txt")
+                ?.bufferedReader()?.readText() ?: ""
+            call.respondText(content, ContentType.Text.Plain)
+        }
+
         // Bare "/" redirect based on Accept-Language
         get("/") {
             val acceptLanguage = call.request.headers["Accept-Language"]
