@@ -71,6 +71,38 @@ create("debugProd") {
 ```
 Then select the `debugProd` variant in your IDE's Build Variants panel and run normally.
 
+### Release Android APK (Sideload)
+
+1. **Update versions** in `composeApp/build.gradle.kts`:
+   ```kotlin
+   versionCode = 26MMDD01   // yymmdd + 2-digit sequence (e.g. 26050701)
+   versionName = "x.y.z"
+   ```
+
+2. **Build the signed release APK** (requires keystore env vars):
+   ```shell
+   export FAKESHOP_KEYSTORE=/Users/dimitrioskatoudis/.keystores/fakeshop-release.jks
+   export FAKESHOP_KEYSTORE_PASSWORD=yourKeystorePassword
+   export FAKESHOP_KEY_ALIAS=yourKeyAlias
+   export FAKESHOP_KEY_PASSWORD=yourKeyPassword
+
+   ./gradlew :composeApp:assembleProdRelease
+   ```
+   Output: `composeApp/prod/release/composeApp-prod-release.apk`
+
+3. **Rename the APK**:
+   ```shell
+   cp composeApp/prod/release/composeApp-prod-release.apk fakeshop.apk
+   ```
+
+4. **Create a GitHub Release** at [https://github.com/dgkat/fakeshop-android-releases/releases/new](https://github.com/dgkat/fakeshop-android-releases/releases/new):
+   - Create a new tag (e.g. `v1.0.1`)
+   - Add a title and release notes
+   - Attach `fakeshop.apk`
+   - Publish
+
+The sideload URL `https://github.com/dgkat/fakeshop-android-releases/releases/latest/download/fakeshop.apk` always points to the latest release automatically.
+
 ---
 
 ### Build and Run iOS Application
