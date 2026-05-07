@@ -15,10 +15,6 @@ class NotificationsRepositoryImpl(
         return datasource.registerDeviceToken(token, platform)
     }
 
-    override suspend fun removeDeviceToken(token: String): Result<Unit, NetworkError> {
-        return datasource.removeDeviceToken(token)
-    }
-
     override suspend fun getPreferences(): Result<NotificationPreferences, NetworkError> {
         return datasource.getPreferences().map { response ->
             NotificationPreferences(priceDropEnabled = response.priceDropEnabled)

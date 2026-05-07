@@ -120,7 +120,6 @@ class ProfileViewStore(
         profileService.logout().fold(
             onSuccess = {
                 favoritesService.clearCache()
-                notificationsService.unregisterDevice()
                 // Mark as guest immediately; the first subsequent authenticated request
                 // will trigger fallbackToGuest (mobile) or the Axios interceptor (web)
                 // to create a real guest session lazily.

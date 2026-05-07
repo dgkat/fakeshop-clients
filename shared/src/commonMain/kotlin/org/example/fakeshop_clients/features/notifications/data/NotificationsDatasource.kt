@@ -7,7 +7,6 @@ import org.example.fakeshop_clients.features.notifications.data.models.Notificat
 
 interface NotificationsDatasource {
     suspend fun registerDeviceToken(token: String, platform: String): Result<Unit, NetworkError>
-    suspend fun removeDeviceToken(token: String): Result<Unit, NetworkError>
     suspend fun getPreferences(): Result<NotificationPreferencesResponse, NetworkError>
     suspend fun updatePreferences(request: NotificationPreferencesRequest): Result<Unit, NetworkError>
 }
