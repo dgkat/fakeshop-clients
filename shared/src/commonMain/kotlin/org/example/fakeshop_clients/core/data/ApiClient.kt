@@ -16,8 +16,6 @@ interface ApiClient {
     suspend fun <B : Any> postNoContent(path: String, body: B, bodyType: KClass<B>)
     suspend fun <B : Any> putNoContent(path: String, body: B, bodyType: KClass<B>)
     suspend fun deleteNoContent(path: String)
-
-    fun clearTokenCache() {}
 }
 
 suspend inline fun <reified T : Any> ApiClient.get(path: String): T {
