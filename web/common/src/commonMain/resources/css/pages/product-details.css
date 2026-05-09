@@ -184,7 +184,6 @@
     .product-detail-top {
         display: flex;
         flex-direction: row;
-        justify-content: center;
         gap: var(--spacing-xxxl);
         padding: 0 var(--spacing-xl);
     }
