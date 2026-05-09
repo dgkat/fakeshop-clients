@@ -107,11 +107,6 @@ fun HTML.productDetailPage(
             attributes["data-scroll-behavior"] = "scroll-reactive"
             div(classes = "container header-content") {
 
-                button(classes = "back-button") {
-                    onClick = "window.history.back()"
-                    +"← ${strings["back"] ?: "Back"}"
-                }
-
                 h1(classes = "logo") {
                     a(href = "/$locale/") {
                         +(strings["app_name"] ?: "E-Shop")
