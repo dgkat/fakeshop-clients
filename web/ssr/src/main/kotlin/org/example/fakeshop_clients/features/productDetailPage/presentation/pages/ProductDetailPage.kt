@@ -221,7 +221,6 @@ fun HTML.productDetailPage(
 
                     // Specs
                     product.specs?.let { specs ->
-                        hr(classes = "product-divider") {}
                         div(classes = "product-section") {
                             h2(classes = "product-section-title") {
                                 +(strings["specifications"] ?: "Specifications")
