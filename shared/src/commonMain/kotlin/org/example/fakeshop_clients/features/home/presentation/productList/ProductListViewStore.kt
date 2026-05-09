@@ -112,6 +112,13 @@ class ProductListViewStore(
         favoritesService.checkBulkFavorites(allProductIds)
     }
 
+    fun refreshFavorites() {
+        scope.launch {
+            favoritesService.clearCache()
+            checkBulkFavorites()
+        }
+    }
+
     fun toggleFavorite(productId: String) {
         if (sessionObserver.upgradeInProgress.value) return
         val currentlyFavorited = productId in favoritesService.favoritedIds.value
