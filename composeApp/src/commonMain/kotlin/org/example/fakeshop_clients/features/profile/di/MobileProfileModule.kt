@@ -15,7 +15,6 @@ val mobileProfileModule = module {
         ProfileViewStore(
             scope = scope,
             profileService = get(),
-            favoritesService = get(),
             notificationsService = get(),
             sessionMutator = get(),
             sessionObserver = get()
