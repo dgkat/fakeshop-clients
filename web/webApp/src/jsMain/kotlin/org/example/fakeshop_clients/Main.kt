@@ -61,14 +61,12 @@ fun main() {
 
     window.addEventListener("load", { bootstrapSession() })
 
-    // Re-initialize Koin when restored from bfcache (back-forward cache).
-    // The beforeunload handler stops Koin, but if the browser caches the page
-    // and the user navigates back, main() won't re-run — so we restart here.
+    // When restored from bfcache, force a fresh load so Koin and React start
+    // clean. Partial revival (restarting Koin alone) leaves React components
+    // holding stale bean references and skips bootstrapSession() entirely.
     window.addEventListener("pageshow", { event ->
         if (event.asDynamic().persisted == true) {
-            startKoin {
-                modules(webCoreModule)
-            }
+            window.location.reload()
         }
     })
 

@@ -12,7 +12,6 @@ val webProfileModule = module {
         ProfileViewStore(
             scope = get(qualifier = named("appScope")),
             profileService = get(),
-            favoritesService = get(),
             notificationsService = get(),
             sessionMutator = get(),
             sessionObserver = get()

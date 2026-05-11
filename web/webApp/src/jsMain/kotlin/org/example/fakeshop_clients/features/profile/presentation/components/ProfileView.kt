@@ -115,5 +115,7 @@ val ProfileView = FC<ProfileProps> { props ->
                 }
             }
         }
+
+        AndroidInstallBanner()
     }
 }

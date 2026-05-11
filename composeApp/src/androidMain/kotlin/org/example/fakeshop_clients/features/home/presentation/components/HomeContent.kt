@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.features.home.presentation.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,10 +11,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -84,8 +92,6 @@ private fun ProductListContent(
         contentPadding = PaddingValues(
             top = contentPadding.calculateTopPadding() + 16.dp,
             bottom = 16.dp,
-            start = 16.dp,
-            end = 16.dp
         )
     ) {
         items(
@@ -138,8 +144,39 @@ private fun ProductRow(
     onToggleFavorite: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier) {
+    val listState = rememberLazyListState()
+    val showStartShadow by remember { derivedStateOf { listState.canScrollBackward } }
+    val showEndShadow by remember { derivedStateOf { listState.canScrollForward } }
+    val startAlpha by animateFloatAsState(targetValue = if (showStartShadow) 1f else 0f)
+    val endAlpha by animateFloatAsState(targetValue = if (showEndShadow) 1f else 0f)
+    val surfaceColor = MaterialTheme.colorScheme.surface
+
+    Box(
+        modifier = modifier.drawWithContent {
+            drawContent()
+            val shadowWidth = 48.dp.toPx()
+            if (startAlpha > 0f) {
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(surfaceColor.copy(alpha = startAlpha), Color.Transparent),
+                        startX = 0f,
+                        endX = shadowWidth
+                    )
+                )
+            }
+            if (endAlpha > 0f) {
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(Color.Transparent, surfaceColor.copy(alpha = endAlpha)),
+                        startX = size.width - shadowWidth,
+                        endX = size.width
+                    )
+                )
+            }
+        }
+    ) {
         LazyRow(
+            state = listState,
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth()

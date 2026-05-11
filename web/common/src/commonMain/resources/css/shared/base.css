@@ -79,8 +79,7 @@ body {
 
     /* Hide logo and nav on mobile */
     .header-content .logo,
-    .header-content .desktop-nav,
-    .header-content .back-button {
+    .header-content .desktop-nav {
         display: none;
     }
 }
@@ -163,37 +162,6 @@ body {
     max-width: 600px;
 }
 
-.back-button {
-    background: transparent;
-    border: none;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 4px 8px;
-    color: inherit;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    border-radius: 6px;
-    transition: background-color 0.2s;
-    flex-shrink: 0;
-    line-height: 1;
-    height: 28px; /* Fixed height to match logo */
-    white-space: nowrap;
-}
-
-.back-button:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-@media (min-width: 768px) {
-    .back-button {
-        font-size: 14px;
-        padding: 4px 8px;
-        height: 28px; /* Same as logo to prevent height increase */
-    }
-}
 
 /* ===== Main Content ===== */
 .main-content {

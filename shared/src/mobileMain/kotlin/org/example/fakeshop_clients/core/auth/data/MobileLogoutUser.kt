@@ -12,7 +12,8 @@ import org.example.fakeshop_clients.core.network.UrlProvider
 class MobileLogoutUser(
     private val authClient: SafeAuthenticatedApiClient,
     private val tokenStorage: TokenStorage,
-    private val baseUrl: UrlProvider
+    private val baseUrl: UrlProvider,
+    private val tokenCacheInvalidator: TokenCacheInvalidator
 ) : LogoutUser {
     override suspend operator fun invoke(): Result<Unit, NetworkError> {
         val refreshToken = tokenStorage.getRefreshToken()
@@ -23,10 +24,8 @@ class MobileLogoutUser(
             path = "${baseUrl()}/auth/logout",
             body = logoutRequest
         ).map { _ ->
-
             tokenStorage.clearTokens()
-
-            authClient.clearTokenCache()
+            tokenCacheInvalidator.invalidate()
         }
     }
 }

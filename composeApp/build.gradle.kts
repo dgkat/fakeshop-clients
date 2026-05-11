@@ -53,6 +53,7 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
@@ -92,8 +93,9 @@ android {
         applicationId = "org.example.fakeshop_clients"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        // version code = yymmddxx
+        versionCode = 26050701
+        versionName = "1.0.1"
     }
     packaging {
         resources {

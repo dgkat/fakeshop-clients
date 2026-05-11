@@ -13,10 +13,11 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.util.reflect.TypeInfo
+import org.example.fakeshop_clients.core.auth.data.TokenCacheInvalidator
 import org.example.fakeshop_clients.core.data.ApiClient
 import kotlin.reflect.KClass
 
-class KtorClient(val http: HttpClient) : ApiClient {
+class KtorClient(val http: HttpClient) : ApiClient, TokenCacheInvalidator {
 
     override suspend fun <T : Any> get(path: String, responseType: KClass<T>): T {
         val response = http.get(path)
@@ -85,7 +86,7 @@ class KtorClient(val http: HttpClient) : ApiClient {
         http.delete(path)
     }
 
-    override fun clearTokenCache() {
+    override fun invalidate() {
         http.authProvider<BearerAuthProvider>()?.clearToken()
     }
 }

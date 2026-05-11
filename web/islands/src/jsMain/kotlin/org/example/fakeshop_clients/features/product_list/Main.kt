@@ -1,4 +1,5 @@
 import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.WebKoinManager
@@ -31,4 +32,10 @@ fun setupProductListIsland() {
             this.viewModel = viewModel
         }
     )
+
+    window.addEventListener("pageshow", { event ->
+        if (event.asDynamic().persisted == true) {
+            viewModel.refreshFavorites()
+        }
+    })
 }

@@ -71,6 +71,7 @@
     background-color: var(--color-surface);
     border-radius: var(--radius-md);
     overflow: hidden;
+    border: 1px solid var(--color-outline-variant);
     box-shadow: var(--shadow-md);
     transition: all var(--transition-base);
     cursor: pointer;
@@ -142,32 +143,6 @@
     font-weight: var(--font-weight-bold);
     color: var(--color-primary);
     margin-top: auto;
-}
-
-/* ===== HEART BUTTON ON CARD ===== */
-.btn-heart-card {
-    position: absolute;
-    top: var(--spacing-sm, 8px);
-    right: var(--spacing-sm, 8px);
-    width: 36px;
-    height: 36px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-    padding: 0;
-    transition: transform 200ms ease, background 200ms ease;
-    line-height: 1;
-}
-
-.btn-heart-card:hover {
-    transform: scale(1.15);
-    background: rgba(0, 0, 0, 0.45);
 }
 
 .product-image-container {

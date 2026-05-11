@@ -1,55 +1,41 @@
 package org.example.fakeshop_clients.features.profile.presentation
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import fakeshop_clients.composeapp.generated.resources.Res
-import fakeshop_clients.composeapp.generated.resources.tab_profile
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsEvent
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewModel
 import org.example.fakeshop_clients.features.profile.presentation.components.NotificationPrefsSection
 import org.example.fakeshop_clients.features.profile.presentation.components.ProfileContent
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     profileViewModel: ProfileViewModel = koinViewModel(),
     notificationPrefsViewModel: NotificationPrefsViewModel = koinViewModel(),
-    languageSection: @Composable (() -> Unit)? = null
+    languageSection: @Composable (() -> Unit)? = null,
+    contentPadding: PaddingValues = PaddingValues()
 ) {
     val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
     val notificationPrefsState by notificationPrefsViewModel.state.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(Res.string.tab_profile)) }
+    ProfileContent(
+        profileState = uiState,
+        onEvent = profileViewModel::onEvent,
+        modifier = Modifier.padding(contentPadding),
+        notificationPrefsSection = {
+            NotificationPrefsSection(
+                state = notificationPrefsState,
+                onTogglePriceDrop = { enabled ->
+                    notificationPrefsViewModel.onEvent(
+                        NotificationPrefsEvent.TogglePriceDrop(enabled)
+                    )
+                }
             )
-        }
-    ) { paddingValues ->
-        ProfileContent(
-            profileState = uiState,
-            onEvent = profileViewModel::onEvent,
-            modifier = Modifier.padding(paddingValues),
-            notificationPrefsSection = {
-                NotificationPrefsSection(
-                    state = notificationPrefsState,
-                    onTogglePriceDrop = { enabled ->
-                        notificationPrefsViewModel.onEvent(
-                            NotificationPrefsEvent.TogglePriceDrop(enabled)
-                        )
-                    }
-                )
-            },
-            languageSection = languageSection
-        )
-    }
+        },
+        languageSection = languageSection
+    )
 }

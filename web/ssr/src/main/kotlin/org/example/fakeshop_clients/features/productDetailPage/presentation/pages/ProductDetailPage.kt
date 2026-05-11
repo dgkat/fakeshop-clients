@@ -44,6 +44,11 @@ fun HTML.productDetailPage(
         meta(charset = "UTF-8")
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
         title { +product.name }
+        link(rel = "icon", type = "image/x-icon", href = "/static/favicon_io/favicon.ico")
+        link(rel = "icon", type = "image/png", href = "/static/favicon_io/favicon-32x32.png") { attributes["sizes"] = "32x32" }
+        link(rel = "icon", type = "image/png", href = "/static/favicon_io/favicon-16x16.png") { attributes["sizes"] = "16x16" }
+        link(rel = "apple-touch-icon", href = "/static/favicon_io/apple-touch-icon.png") { attributes["sizes"] = "180x180" }
+        link(rel = "manifest", href = "/static/favicon_io/site.webmanifest")
 
         // SEO: hreflang alternate links
         WebStrings.SUPPORTED_LOCALES.forEach { loc ->
@@ -101,11 +106,6 @@ fun HTML.productDetailPage(
         header(classes = "header") {
             attributes["data-scroll-behavior"] = "scroll-reactive"
             div(classes = "container header-content") {
-
-                button(classes = "back-button") {
-                    onClick = "window.history.back()"
-                    +"← ${strings["back"] ?: "Back"}"
-                }
 
                 h1(classes = "logo") {
                     a(href = "/$locale/") {
@@ -216,7 +216,6 @@ fun HTML.productDetailPage(
 
                     // Specs
                     product.specs?.let { specs ->
-                        hr(classes = "product-divider") {}
                         div(classes = "product-section") {
                             h2(classes = "product-section-title") {
                                 +(strings["specifications"] ?: "Specifications")

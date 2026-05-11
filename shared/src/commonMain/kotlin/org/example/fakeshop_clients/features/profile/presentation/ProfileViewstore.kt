@@ -12,16 +12,14 @@ import org.example.fakeshop_clients.core.auth.domain.Role
 import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.auth.domain.SessionState
-import org.example.fakeshop_clients.core.auth.domain.isReal
+import org.example.fakeshop_clients.core.auth.domain.isLoggedIn
 import org.example.fakeshop_clients.core.error_handling.fold
-import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.notifications.domain.NotificationsService
 import org.example.fakeshop_clients.features.profile.domain.ProfileService
 
 class ProfileViewStore(
     private val scope: CoroutineScope,
     private val profileService: ProfileService,
-    private val favoritesService: FavoritesService,
     private val notificationsService: NotificationsService,
     private val sessionMutator: SessionMutator,
     private val sessionObserver: SessionObserver
@@ -34,12 +32,12 @@ class ProfileViewStore(
             .onEach { state ->
                 when (state) {
                     is SessionState.Authenticated -> {
-                        val isReal = state.role.isReal
+                        val isLoggedIn = state.role.isLoggedIn
                         _profileState.update {
                             it.copy(
-                                isLoggedIn = isReal,
-                                isGuest = !isReal,
-                                showNotificationsSection = isReal,
+                                isLoggedIn = isLoggedIn,
+                                isGuest = !isLoggedIn,
+                                showNotificationsSection = isLoggedIn,
                                 isLoading = false
                             )
                         }
@@ -119,8 +117,6 @@ class ProfileViewStore(
 
         profileService.logout().fold(
             onSuccess = {
-                favoritesService.clearCache()
-                notificationsService.unregisterDevice()
                 // Mark as guest immediately; the first subsequent authenticated request
                 // will trigger fallbackToGuest (mobile) or the Axios interceptor (web)
                 // to create a real guest session lazily.

@@ -10,4 +10,8 @@ class ProductListViewmodel(
     fun toggleFavorite(productId: String) {
         store.toggleFavorite(productId)
     }
+
+    fun refreshFavorites() {
+        store.refreshFavorites()
+    }
 }

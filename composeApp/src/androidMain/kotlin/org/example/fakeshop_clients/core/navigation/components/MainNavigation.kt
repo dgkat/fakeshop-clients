@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.core.navigation.components
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -35,6 +36,7 @@ import org.example.fakeshop_clients.features.search.presentation.SearchBarBehavi
 import org.example.fakeshop_clients.features.search.presentation.SearchEvent
 import org.example.fakeshop_clients.features.search_bar.presentation.SearchViewModel
 import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarLayout
+import org.example.fakeshop_clients.features.search_bar.presentation.components.rememberSearchBarDimensions
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -108,7 +110,10 @@ fun MainNavigation(initialProductId: String? = null) {
         onResultClick = { result ->
             navController.navigate(Route.ProductDetail.createRoute(result.productId))
         }
-    ) { contentPadding ->
+    ) {
+        val searchBarDimensions = rememberSearchBarDimensions()
+        val searchBarPadding = PaddingValues(top = searchBarDimensions.searchBarHeightDp)
+
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
@@ -133,7 +138,7 @@ fun MainNavigation(initialProductId: String? = null) {
                         onProductClick = { productId ->
                             navController.navigate(Route.ProductDetail.createRoute(productId))
                         },
-                        contentPadding = contentPadding,
+                        contentPadding = searchBarPadding,
                         onScrollOffsetChange = { scrollOffset = it }
                     )
                 }
@@ -149,17 +154,18 @@ fun MainNavigation(initialProductId: String? = null) {
                                 launchSingleTop = true
                             }
                         },
-                        contentPadding = contentPadding
+                        contentPadding = searchBarPadding
                     )
                 }
 
                 composable(Route.Notifications.route) {
-                    NotificationsScreen()
+                    NotificationsScreen(contentPadding = PaddingValues())
                 }
 
                 composable(Route.Profile.route) {
                     ProfileScreen(
-                        languageSection = { LanguagePickerSection() }
+                        languageSection = { LanguagePickerSection() },
+                        contentPadding = searchBarPadding
                     )
                 }
 
@@ -173,7 +179,7 @@ fun MainNavigation(initialProductId: String? = null) {
                         backStackEntry.arguments?.getString("productId") ?: return@composable
                     ProductDetailScreen(
                         productId = productId,
-                        contentPadding = contentPadding,
+                        contentPadding = searchBarPadding,
                         onScrollOffsetChange = { scrollOffset = it }
                     )
                 }

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 enum class Role { GUEST, LOGGED_USER, ADMIN }
 
-val Role.isReal: Boolean get() = this != Role.GUEST
+val Role.isLoggedIn: Boolean get() = this != Role.GUEST
 
 sealed interface SessionState {
     data object Unknown : SessionState          // cold start, pre-bootstrap

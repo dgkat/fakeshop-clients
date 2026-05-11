@@ -64,6 +64,45 @@
     cursor: not-allowed;
 }
 
+/* ===== Like Button (SVG heart overlay on product image) ===== */
+.btn-like-circle {
+    position: absolute;
+    top: var(--spacing-xs);
+    right: var(--spacing-xs);
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+.btn-like-circle:hover {
+    transform: scale(1.1);
+}
+
+.btn-like-circle .like-icon {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: white;
+    stroke-width: 2;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+    transition: fill 200ms ease, stroke 200ms ease;
+}
+
+.btn-like-circle.liked .like-icon {
+    fill: var(--color-favorite);
+    stroke: var(--color-favorite);
+}
+
 /* ===== Card Component ===== */
 .card {
     background-color: var(--color-surface);
@@ -121,20 +160,6 @@
 .link:hover {
     color: var(--color-primary-dark);
     text-decoration: underline;
-}
-
-.back-button {
-    display: inline-flex;
-    align-items: center;
-    color: var(--color-primary);
-    text-decoration: none;
-    font-weight: var(--font-weight-medium);
-    margin-bottom: var(--spacing-xl);
-    transition: color var(--transition-base);
-}
-
-.back-button:hover {
-    color: var(--color-primary-dark);
 }
 
 /* ===== Divider ===== */

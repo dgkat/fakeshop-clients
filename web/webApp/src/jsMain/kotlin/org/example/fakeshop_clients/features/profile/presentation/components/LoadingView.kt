@@ -9,7 +9,7 @@ import web.cssom.ClassName
 
 val LoadingView = FC<Props> {
     div {
-        className = ClassName("loading-container")
+        className = ClassName("profile-loading-container")
         p {
             +getString("loading")
         }

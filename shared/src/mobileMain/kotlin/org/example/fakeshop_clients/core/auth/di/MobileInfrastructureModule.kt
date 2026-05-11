@@ -20,6 +20,7 @@ import org.example.fakeshop_clients.core.auth.data.MobileAuthDatasourceImpl
 import org.example.fakeshop_clients.core.auth.data.MobileAuthRepository
 import org.example.fakeshop_clients.core.auth.data.MobileLogoutUser
 import org.example.fakeshop_clients.core.auth.data.MobileRoleResolver
+import org.example.fakeshop_clients.core.auth.data.TokenCacheInvalidator
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
 import org.example.fakeshop_clients.core.auth.data.models.RefreshTokenRequest
 import org.example.fakeshop_clients.core.auth.data.models.TokenRefreshResponse
@@ -151,6 +152,10 @@ val mobileInfrastructureModule = module {
         KtorClient(get(named("authHttpClient")))
     }
 
+    single<TokenCacheInvalidator> {
+        get<ApiClient>(named("authApiClient")) as TokenCacheInvalidator
+    }
+
     single {
         SafePublicApiClient(
             client = get<ApiClient>(named("publicApiClient")),
@@ -175,7 +180,8 @@ val mobileInfrastructureModule = module {
     single<AuthRepository> {
         MobileAuthRepository(
             mobileAuthDatasource = get(),
-            tokenStorage = get()
+            tokenStorage = get(),
+            tokenCacheInvalidator = get()
         )
     }
 
@@ -183,7 +189,8 @@ val mobileInfrastructureModule = module {
         MobileLogoutUser(
             authClient = get(),
             tokenStorage = get(),
-            baseUrl = get()
+            baseUrl = get(),
+            tokenCacheInvalidator = get()
         )
     }
 }

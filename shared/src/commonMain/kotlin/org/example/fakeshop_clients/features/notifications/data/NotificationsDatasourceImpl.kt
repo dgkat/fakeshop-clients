@@ -1,7 +1,6 @@
 package org.example.fakeshop_clients.features.notifications.data
 
 import org.example.fakeshop_clients.core.data.SafeAuthenticatedApiClient
-import org.example.fakeshop_clients.core.data.deleteNoContent
 import org.example.fakeshop_clients.core.data.get
 import org.example.fakeshop_clients.core.data.postNoContent
 import org.example.fakeshop_clients.core.data.putNoContent
@@ -19,10 +18,6 @@ class NotificationsDatasourceImpl(
 
     override suspend fun registerDeviceToken(token: String, platform: String): Result<Unit, NetworkError> {
         return authClient.postNoContent("${baseUrl()}/device-tokens", DeviceTokenRequest(token, platform))
-    }
-
-    override suspend fun removeDeviceToken(token: String): Result<Unit, NetworkError> {
-        return authClient.deleteNoContent("${baseUrl()}/device-tokens/$token")
     }
 
     override suspend fun getPreferences(): Result<NotificationPreferencesResponse, NetworkError> {

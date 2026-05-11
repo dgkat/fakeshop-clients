@@ -93,45 +93,18 @@
     right: var(--spacing-sm);
 }
 
-/* Like Button - SVG heart overlay on image */
-.btn-like-circle {
-    position: absolute;
+/* Like button override for product detail — larger than the card version */
+.product-image-section .btn-like-circle {
     top: var(--spacing-md);
     right: var(--spacing-md);
     width: 44px;
     height: 44px;
-    border: none;
-    border-radius: 50%;
-    background: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 1;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-    outline: none;
 }
 
-.btn-like-circle:hover {
-    transform: scale(1.1);
-}
-
-.btn-like-circle .like-icon {
+.product-image-section .btn-like-circle .like-icon {
     width: 28px;
     height: 28px;
-    fill: none;
-    stroke: white;
-    stroke-width: 2;
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
-    transition: fill 200ms ease, stroke 200ms ease;
 }
-
-.btn-like-circle.liked .like-icon {
-    fill: var(--color-favorite);
-    stroke: var(--color-favorite);
-}
-
 
 /* Product Info Section */
 .product-info-section {
@@ -202,6 +175,12 @@
 
 /* Desktop layout */
 @media (min-width: 769px) {
+    .product-detail {
+        max-width: 1100px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
     .product-detail-top {
         display: flex;
         flex-direction: row;
@@ -213,10 +192,14 @@
         padding: var(--spacing-lg) var(--spacing-xl);
     }
 
+    .product-detail > .product-section {
+        max-width: 988px;
+        margin-left: 0;
+    }
+
     .product-image-section {
-        flex: 0 0 50%;
-        min-width: 0;
-        max-width: 600px;
+        flex: 0 0 500px;
+        width: 500px;
     }
 
     .carousel-track {
@@ -230,8 +213,8 @@
     }
 
     .product-info-section {
-        flex: 1;
-        min-width: 0;
+        flex: 0 0 440px;
+        width: 440px;
         padding: 0;
     }
 
