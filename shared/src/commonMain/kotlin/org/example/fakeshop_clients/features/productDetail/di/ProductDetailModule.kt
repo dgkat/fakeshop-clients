@@ -6,6 +6,7 @@ import org.example.fakeshop_clients.features.productDetail.data.ProductDetailDat
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailDatasourceImpl
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailRepositoryImpl
 import org.example.fakeshop_clients.features.productDetail.data.mappers.DataToDomainDetailedProductMapper
+import org.example.fakeshop_clients.features.productDetail.data.mappers.DataToDomainDetailedProductV2Mapper
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailRepository
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailService
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailServiceImpl
@@ -22,6 +23,10 @@ val productDetailModule = module {
         DataToDomainDetailedProductMapper()
     }
 
+    factory {
+        DataToDomainDetailedProductV2Mapper()
+    }
+
     factory<ProductDetailDatasource> {
         ProductDetailDatasourceImpl(
             authClient = get(),
@@ -34,7 +39,8 @@ val productDetailModule = module {
         ProductDetailRepositoryImpl(
             datasource = get(),
             briefProductMapper = get(), // Reuses home module's DataToDomainBriefProductMapper
-            detailedProductMapper = get()
+            detailedProductMapper = get(),
+            detailedProductV2Mapper = get()
         )
     }
 
