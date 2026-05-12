@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,13 +22,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Button
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,9 +37,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -58,6 +58,7 @@ import fakeshop_clients.composeapp.generated.resources.specifications
 import fakeshop_clients.composeapp.generated.resources.thumbnail
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import org.example.fakeshop_clients.core.presentation.models.UiDetailedProduct
+import org.example.fakeshop_clients.features.productDetail.presentation.BduiBodyState
 import org.example.fakeshop_clients.features.productDetail.presentation.DetailedProductState
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailError
 import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarScrollState
@@ -105,6 +106,7 @@ fun ErrorContent(
 fun ProductContent(
     briefProduct: UiBriefProduct,
     detailedState: DetailedProductState,
+    bduiBodyState: BduiBodyState,
     isFavorited: Boolean,
     isFavoriteLoading: Boolean,
     onToggleFavorite: () -> Unit,
@@ -140,6 +142,7 @@ fun ProductContent(
                         )
                     }
                 }
+
                 else -> {
                     SingleProductImage(
                         imageUrl = briefProduct.imageUrl,
@@ -169,18 +172,10 @@ fun ProductContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Detailed Product Info
-            when (detailedState) {
-                is DetailedProductState.Loading -> {
-                    DetailedProductLoadingIndicator()
-                }
-                is DetailedProductState.Success -> {
-                    DetailedProductInfo(detailedProduct = detailedState.product)
-                }
-                is DetailedProductState.Error -> {
-                    DetailedProductErrorIndicator(error = detailedState.error)
-                }
-            }
+            // BDUI body — server-driven bottom half
+            org.example.fakeshop_clients.features.product_detail.presentation.bdui.BduiBodySection(
+                state = bduiBodyState
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
         }
