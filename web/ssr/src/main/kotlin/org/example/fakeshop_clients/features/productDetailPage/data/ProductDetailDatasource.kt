@@ -4,7 +4,7 @@ import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.features.core.models.Cookies
 import org.example.fakeshop_clients.features.home.data.models.BriefProductResponse
-import org.example.fakeshop_clients.features.productDetail.data.models.DetailedProductResponse
+import org.example.fakeshop_clients.features.productDetail.data.models.DetailedProductV2Response
 
 interface ProductDetailDatasource {
     suspend fun getBriefProductById(
@@ -12,10 +12,10 @@ interface ProductDetailDatasource {
         cookies: Cookies
     ): Result<BriefProductResponse, NetworkError>
 
-    suspend fun getDetailedProductById(
+    suspend fun getDetailedProductV2ById(
         id: String,
         cookies: Cookies
-    ): Result<DetailedProductResponse, NetworkError>
+    ): Result<DetailedProductV2Response, NetworkError>
 
     suspend fun addFavorite(
         productId: String,

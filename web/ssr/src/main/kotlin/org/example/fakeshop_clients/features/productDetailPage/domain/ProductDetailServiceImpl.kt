@@ -1,43 +1,61 @@
 package org.example.fakeshop_clients.features.productDetailPage.domain
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
+import org.example.fakeshop_clients.features.bdui.data.SSRBduiTemplateDatasource
+import org.example.fakeshop_clients.features.bdui.data.mappers.DataToDomainBduiTemplateMapper
+import org.example.fakeshop_clients.features.bdui.domain.buildPdpBindData
 import org.example.fakeshop_clients.features.core.models.Cookies
-import org.example.fakeshop_clients.features.productDetailPage.domain.models.FullProduct
+import org.example.fakeshop_clients.features.productDetailPage.domain.models.PdpData
 
 class ProductDetailServiceImpl(
     private val productDetailRepository: ProductDetailRepository,
+    private val bduiTemplateDatasource: SSRBduiTemplateDatasource,
+    private val bduiTemplateMapper: DataToDomainBduiTemplateMapper
 ) : ProductDetailService {
 
-
-    override suspend fun getFullProductById(
+    override suspend fun getPdpData(
         id: String,
         cookies: Cookies
-    ): Result<FullProduct, NetworkError> {
-        val briefProduct = productDetailRepository.getBriefProductById(id, cookies)
-        val detailedProduct = productDetailRepository.getDetailedProductById(id, cookies)
+    ): Result<PdpData, NetworkError> = coroutineScope {
+        val briefDef = async { productDetailRepository.getBriefProductById(id, cookies) }
+        val v2Def = async { productDetailRepository.getDetailedProductV2ById(id, cookies) }
+        val briefRes = briefDef.await()
+        val v2Res = v2Def.await()
 
-        return if (briefProduct is Result.Success && detailedProduct is Result.Success) {
-            Result.Success(
-                FullProduct(
-                    id = briefProduct.data.id,
-                    name = briefProduct.data.name,
-                    price = briefProduct.data.price,
-                    imageUrl = briefProduct.data.imageUrl,
-                    category = briefProduct.data.category,
-                    description = detailedProduct.data.description,
-                    specs = detailedProduct.data.specs,
-                    galleryUrls = detailedProduct.data.galleryUrls,
-                    isLiked = false
-                )
-            )
-        } else {
-            val error = when {
-                briefProduct is Result.Error -> briefProduct.error
-                detailedProduct is Result.Error -> detailedProduct.error
-                else -> NetworkError.Unknown(message = "Unknown error")
+        when {
+            briefRes is Result.Error -> Result.Error(briefRes.error)
+            v2Res is Result.Error -> Result.Error(v2Res.error)
+            briefRes is Result.Success && v2Res is Result.Success -> {
+                val brief = briefRes.data
+                val v2 = v2Res.data
+                when (val templateRes = bduiTemplateDatasource.getPdpTemplate(brief.category, cookies)) {
+                    is Result.Error -> Result.Error(templateRes.error)
+                    is Result.Success -> {
+                        val template = bduiTemplateMapper.map(templateRes.data)
+                        val uiBrief = UiBriefProduct(
+                            id = brief.id,
+                            name = brief.name,
+                            price = brief.price,
+                            imageUrl = brief.imageUrl,
+                            category = brief.category
+                        )
+                        val bindData = buildPdpBindData(uiBrief, v2)
+                        Result.Success(
+                            PdpData(
+                                brief = brief,
+                                galleryUrls = v2.galleryUrls,
+                                template = template,
+                                bindData = bindData
+                            )
+                        )
+                    }
+                }
             }
-            Result.Error(error)
+            else -> Result.Error(NetworkError.Unknown(message = "Unknown error"))
         }
     }
 

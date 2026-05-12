@@ -45,9 +45,9 @@ fun Route.productRoutes() {
                 return@get
             }
 
-        val fullProduct = productDetailService.getFullProductById(productId, cookies)
+        val pdpData = productDetailService.getPdpData(productId, cookies)
 
-        when (fullProduct) {
+        when (pdpData) {
             is Result.Error -> {
                 call.respondText(
                     "Unable to load product details. Please try again later.",
@@ -57,7 +57,7 @@ fun Route.productRoutes() {
 
             is Result.Success -> {
                 call.respondHtml(HttpStatusCode.OK) {
-                    productDetailPage(fullProduct.data, locale, strings, stringsJson)
+                    productDetailPage(pdpData.data, locale, strings, stringsJson)
                 }
             }
         }
