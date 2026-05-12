@@ -67,6 +67,7 @@ val iosModule = module {
         ProductDetailViewStore(
             scope = scope,
             productDetailService = get(),
+            bduiTemplateService = get(),
             favoritesService = get(),
             briefProductMapper = get(),
             detailedProductMapper = get(),
