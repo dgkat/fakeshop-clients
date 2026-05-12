@@ -29,7 +29,7 @@ struct iOSApp: App {
 
             if helper.isSessionRealUser() {
                 if notificationsService.getPermissionStatus() == NotificationPermissionStatus.granted {
-                    notificationsService.registerDeviceAfterAuth()
+                    try? await notificationsService.registerDeviceAfterAuth()
                 }
             }
         }
