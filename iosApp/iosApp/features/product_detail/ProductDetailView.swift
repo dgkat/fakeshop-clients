@@ -12,6 +12,7 @@ struct ProductDetailView: View {
     let onScrollOffsetChange: (CGFloat) -> Void
 
     @StateObject private var viewModel = ProductDetailViewModel()
+    @StateObject private var actionToast = BduiActionToastState()
 
     var body: some View {
         ZStack {
@@ -34,12 +35,16 @@ struct ProductDetailView: View {
                 ProductContentView(
                     briefProduct: successState.product,
                     detailedState: viewModel.state.detailedState,
+                    bduiBodyState: viewModel.state.bduiBodyState,
                     isFavorited: viewModel.state.isFavorited,
                     isFavoriteLoading: viewModel.state.isFavoriteLoading,
                     onToggleFavorite: { viewModel.onEvent(ProductDetailEvent.ToggleFavorite()) },
+                    onAction: actionToast.makeHandler(),
                     onScrollOffsetChange: onScrollOffsetChange
                 )
             }
+
+            BduiActionToastOverlay(state: actionToast)
         }
         .navigationBarHidden(true)
         .onAppear {
@@ -86,15 +91,17 @@ struct ErrorView: View {
 struct ProductContentView: View {
     let briefProduct: UiBriefProduct
     let detailedState: DetailedProductState
+    let bduiBodyState: BduiBodyState
     let isFavorited: Bool
     let isFavoriteLoading: Bool
     let onToggleFavorite: () -> Void
+    let onAction: BduiActionHandler
     let onScrollOffsetChange: (CGFloat) -> Void
 
     var body: some View {
         ScrollableVStack(onScroll: onScrollOffsetChange) {
             LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
-                // Image Section
+                // Image Section (top half — native, fed by brief + legacy detailedState gallery)
                 ImageSection(
                     briefProduct: briefProduct,
                     detailedState: detailedState,
@@ -110,8 +117,8 @@ struct ProductContentView: View {
                     Divider()
                         .padding(.vertical, 8)
 
-                    // Detailed Product Info
-                    DetailedProductSection(detailedState: detailedState)
+                    // BDUI body — server-driven bottom half
+                    BduiBodySection(state: bduiBodyState, onAction: onAction)
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
