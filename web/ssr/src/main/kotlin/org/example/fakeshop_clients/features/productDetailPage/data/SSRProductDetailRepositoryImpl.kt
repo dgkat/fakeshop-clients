@@ -6,14 +6,14 @@ import org.example.fakeshop_clients.core.error_handling.map
 import org.example.fakeshop_clients.features.core.models.Cookies
 import org.example.fakeshop_clients.features.home.data.mappers.DataToDomainBriefProductMapper
 import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
-import org.example.fakeshop_clients.features.productDetail.data.mappers.DataToDomainDetailedProductV2Mapper
-import org.example.fakeshop_clients.features.productDetail.domain.models.DetailedProductV2
+import org.example.fakeshop_clients.features.productDetail.data.mappers.DataToDomainDetailedProductMapper
+import org.example.fakeshop_clients.features.productDetail.domain.models.DetailedProduct
 import org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailRepository
 
 class SSRProductDetailRepositoryImpl(
     private val productDetailDatasource: ProductDetailDatasource,
     private val dataToDomainBriefProductMapper: DataToDomainBriefProductMapper,
-    private val dataToDomainDetailedProductV2Mapper: DataToDomainDetailedProductV2Mapper
+    private val dataToDomainDetailedProductMapper: DataToDomainDetailedProductMapper
 ) : ProductDetailRepository {
     override suspend fun getBriefProductById(
         id: String,
@@ -24,12 +24,12 @@ class SSRProductDetailRepositoryImpl(
         }
     }
 
-    override suspend fun getDetailedProductV2ById(
+    override suspend fun getDetailedProductById(
         id: String,
         cookies: Cookies
-    ): Result<DetailedProductV2, NetworkError> {
-        return productDetailDatasource.getDetailedProductV2ById(id, cookies).map {
-            dataToDomainDetailedProductV2Mapper.map(it)
+    ): Result<DetailedProduct, NetworkError> {
+        return productDetailDatasource.getDetailedProductById(id, cookies).map {
+            dataToDomainDetailedProductMapper.map(it)
         }
     }
 

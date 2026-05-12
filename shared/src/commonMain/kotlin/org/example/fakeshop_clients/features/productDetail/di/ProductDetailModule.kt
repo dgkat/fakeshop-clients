@@ -1,31 +1,21 @@
 package org.example.fakeshop_clients.features.productDetail.di
 
 import org.example.fakeshop_clients.features.bdui.di.bduiModule
-import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailDatasource
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailDatasourceImpl
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailRepositoryImpl
 import org.example.fakeshop_clients.features.productDetail.data.mappers.DataToDomainDetailedProductMapper
-import org.example.fakeshop_clients.features.productDetail.data.mappers.DataToDomainDetailedProductV2Mapper
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailRepository
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailService
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailServiceImpl
 import org.example.fakeshop_clients.features.productDetail.domain.mappers.DomainToPresentationBriefProductMapper
-import org.example.fakeshop_clients.features.productDetail.domain.mappers.DomainToPresentationDetailedProductMapper
 import org.koin.dsl.module
 
 val productDetailModule = module {
 
     includes(bduiModule)
 
-    // Data
-    factory {
-        DataToDomainDetailedProductMapper()
-    }
-
-    factory {
-        DataToDomainDetailedProductV2Mapper()
-    }
+    factory { DataToDomainDetailedProductMapper() }
 
     factory<ProductDetailDatasource> {
         ProductDetailDatasourceImpl(
@@ -34,13 +24,11 @@ val productDetailModule = module {
         )
     }
 
-    // Domain
     factory<ProductDetailRepository> {
         ProductDetailRepositoryImpl(
             datasource = get(),
-            briefProductMapper = get(), // Reuses home module's DataToDomainBriefProductMapper
-            detailedProductMapper = get(),
-            detailedProductV2Mapper = get()
+            briefProductMapper = get(),
+            detailedProductMapper = get()
         )
     }
 
@@ -50,12 +38,5 @@ val productDetailModule = module {
         )
     }
 
-    // Presentation
-    factory {
-        DomainToPresentationBriefProductMapper()
-    }
-
-    factory {
-        DomainToPresentationDetailedProductMapper()
-    }
+    factory { DomainToPresentationBriefProductMapper() }
 }

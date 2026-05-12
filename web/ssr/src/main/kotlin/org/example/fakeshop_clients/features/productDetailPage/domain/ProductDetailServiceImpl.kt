@@ -22,16 +22,16 @@ class ProductDetailServiceImpl(
         cookies: Cookies
     ): Result<PdpData, NetworkError> = coroutineScope {
         val briefDef = async { productDetailRepository.getBriefProductById(id, cookies) }
-        val v2Def = async { productDetailRepository.getDetailedProductV2ById(id, cookies) }
+        val detailedDef = async { productDetailRepository.getDetailedProductById(id, cookies) }
         val briefRes = briefDef.await()
-        val v2Res = v2Def.await()
+        val detailedRes = detailedDef.await()
 
         when {
             briefRes is Result.Error -> Result.Error(briefRes.error)
-            v2Res is Result.Error -> Result.Error(v2Res.error)
-            briefRes is Result.Success && v2Res is Result.Success -> {
+            detailedRes is Result.Error -> Result.Error(detailedRes.error)
+            briefRes is Result.Success && detailedRes is Result.Success -> {
                 val brief = briefRes.data
-                val v2 = v2Res.data
+                val detailed = detailedRes.data
                 when (val templateRes = bduiTemplateDatasource.getPdpTemplate(brief.category, cookies)) {
                     is Result.Error -> Result.Error(templateRes.error)
                     is Result.Success -> {
@@ -43,11 +43,11 @@ class ProductDetailServiceImpl(
                             imageUrl = brief.imageUrl,
                             category = brief.category
                         )
-                        val bindData = buildPdpBindData(uiBrief, v2)
+                        val bindData = buildPdpBindData(uiBrief, detailed)
                         Result.Success(
                             PdpData(
                                 brief = brief,
-                                galleryUrls = v2.galleryUrls,
+                                galleryUrls = detailed.galleryUrls,
                                 template = template,
                                 bindData = bindData
                             )

@@ -1,7 +1,7 @@
 package org.example.fakeshop_clients.features.productDetailPage.di
 
 import org.example.fakeshop_clients.features.home.data.mappers.DataToDomainBriefProductMapper
-import org.example.fakeshop_clients.features.productDetail.data.mappers.DataToDomainDetailedProductV2Mapper
+import org.example.fakeshop_clients.features.productDetail.data.mappers.DataToDomainDetailedProductMapper
 import org.example.fakeshop_clients.features.productDetailPage.data.ProductDetailDatasource
 import org.example.fakeshop_clients.features.productDetailPage.data.SSRProductDetailDatasourceImpl
 import org.example.fakeshop_clients.features.productDetailPage.data.SSRProductDetailRepositoryImpl
@@ -19,13 +19,13 @@ val ssrProductDetailModule = module {
     }
 
     single { DataToDomainBriefProductMapper() }
-    single { DataToDomainDetailedProductV2Mapper() }
+    single { DataToDomainDetailedProductMapper() }
 
     single<ProductDetailRepository> {
         SSRProductDetailRepositoryImpl(
             productDetailDatasource = get(),
             dataToDomainBriefProductMapper = get(),
-            dataToDomainDetailedProductV2Mapper = get()
+            dataToDomainDetailedProductMapper = get()
         )
     }
 

@@ -1,7 +1,11 @@
 package org.example.fakeshop_clients.features.productDetail.domain.models
 
+import kotlinx.serialization.json.JsonObject
+
 data class DetailedProduct(
-    val description: String?,
-    val specs: String?,
-    val galleryUrls: List<String>?
+    val productId: String,
+    val category: String,
+    val fullDescription: String?,
+    val galleryUrls: List<String>,
+    val data: JsonObject
 )

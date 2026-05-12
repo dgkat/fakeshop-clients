@@ -17,7 +17,6 @@ import org.example.fakeshop_clients.features.bdui.presentation.BduiError
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailService
 import org.example.fakeshop_clients.features.productDetail.domain.mappers.DomainToPresentationBriefProductMapper
-import org.example.fakeshop_clients.features.productDetail.domain.mappers.DomainToPresentationDetailedProductMapper
 
 class ProductDetailViewStore(
     private val scope: CoroutineScope,
@@ -25,7 +24,6 @@ class ProductDetailViewStore(
     private val bduiTemplateService: BduiTemplateService,
     private val favoritesService: FavoritesService,
     private val briefProductMapper: DomainToPresentationBriefProductMapper,
-    private val detailedProductMapper: DomainToPresentationDetailedProductMapper,
     private val sessionObserver: SessionObserver
 ) {
 
@@ -56,8 +54,8 @@ class ProductDetailViewStore(
         _state.update {
             it.copy(
                 briefState = BriefProductState.Loading,
-                detailedState = DetailedProductState.Loading,
                 bduiBodyState = BduiBodyState.Loading,
+                galleryUrls = emptyList(),
                 isFavorited = productId in favoritesService.favoritedIds.value
             )
         }
@@ -65,21 +63,20 @@ class ProductDetailViewStore(
         scope.launch {
             coroutineScope {
                 launch { loadBriefAndBdui(productId) }
-                launch { loadDetailedProduct(productId) }
                 launch { favoritesService.checkFavorite(productId) }
             }
         }
     }
 
     /**
-     * Drives briefState (top half) and bduiBodyState (bottom half).
-     * brief + detailedV2 fan out in parallel; the template fetch chains off brief.category.
+     * Drives briefState (top half), galleryUrls (top-half carousel) and bduiBodyState (bottom half).
+     * brief + detailed fan out in parallel; the template fetch chains off brief.category.
      */
     private suspend fun loadBriefAndBdui(productId: String) = coroutineScope {
         val briefDef = async { productDetailService.getBriefProductById(productId) }
-        val v2Def = async { productDetailService.getDetailedProductV2ById(productId) }
+        val detailedDef = async { productDetailService.getDetailedProductById(productId) }
         val briefRes = briefDef.await()
-        val v2Res = v2Def.await()
+        val detailedRes = detailedDef.await()
 
         briefRes.fold(
             onSuccess = { brief ->
@@ -94,15 +91,19 @@ class ProductDetailViewStore(
             }
         )
 
+        if (detailedRes is Result.Success) {
+            _state.update { it.copy(galleryUrls = detailedRes.data.galleryUrls) }
+        }
+
         when {
             briefRes is Result.Error -> setBduiError(BduiError.Network(briefRes.error))
-            v2Res is Result.Error -> setBduiError(BduiError.Network(v2Res.error))
-            briefRes is Result.Success && v2Res is Result.Success -> {
+            detailedRes is Result.Error -> setBduiError(BduiError.Network(detailedRes.error))
+            briefRes is Result.Success && detailedRes is Result.Success -> {
                 val brief = briefRes.data
-                val v2 = v2Res.data
+                val detailed = detailedRes.data
                 bduiTemplateService.getPdpTemplate(brief.category).fold(
                     onSuccess = { template ->
-                        val bindData = buildPdpBindData(briefProductMapper.map(brief), v2)
+                        val bindData = buildPdpBindData(briefProductMapper.map(brief), detailed)
                         _state.update {
                             it.copy(bduiBodyState = BduiBodyState.Ready(template, bindData))
                         }
@@ -117,29 +118,6 @@ class ProductDetailViewStore(
 
     private fun setBduiError(error: BduiError) {
         _state.update { it.copy(bduiBodyState = BduiBodyState.Error(error)) }
-    }
-
-    private suspend fun loadDetailedProduct(productId: String) {
-        productDetailService.getDetailedProductById(productId).fold(
-            onSuccess = { detailedProduct ->
-                _state.update {
-                    it.copy(
-                        detailedState = DetailedProductState.Success(
-                            product = detailedProductMapper.map(detailedProduct)
-                        )
-                    )
-                }
-            },
-            onError = { networkError ->
-                _state.update {
-                    it.copy(
-                        detailedState = DetailedProductState.Error(
-                            error = ProductDetailError.Network(networkError)
-                        )
-                    )
-                }
-            }
-        )
     }
 
     private fun toggleFavorite() {

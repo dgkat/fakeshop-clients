@@ -52,7 +52,7 @@ fun ProductDetailScreen(
             CompositionLocalProvider(LocalBduiActionHandler provides actionHandler) {
                 ProductContent(
                     briefProduct = briefState.product,
-                    detailedState = state.detailedState,
+                    galleryUrls = state.galleryUrls,
                     bduiBodyState = state.bduiBodyState,
                     isFavorited = state.isFavorited,
                     isFavoriteLoading = state.isFavoriteLoading,

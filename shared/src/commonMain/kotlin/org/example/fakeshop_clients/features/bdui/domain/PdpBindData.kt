@@ -6,7 +6,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
-import org.example.fakeshop_clients.features.productDetail.domain.models.DetailedProductV2
+import org.example.fakeshop_clients.features.productDetail.domain.models.DetailedProduct
 
 /**
  * Builds the merged JsonObject the BDUI bind resolver walks.
@@ -14,7 +14,7 @@ import org.example.fakeshop_clients.features.productDetail.domain.models.Detaile
  *
  *   { id, name, price, imageUrl, category, fullDescription, galleryUrls, data: { ... } }
  */
-fun buildPdpBindData(brief: UiBriefProduct, detailed: DetailedProductV2): JsonObject = buildJsonObject {
+fun buildPdpBindData(brief: UiBriefProduct, detailed: DetailedProduct): JsonObject = buildJsonObject {
     put("id", JsonPrimitive(brief.id))
     put("name", JsonPrimitive(brief.name))
     put("price", JsonPrimitive(brief.price))

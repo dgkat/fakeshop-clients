@@ -34,7 +34,7 @@ struct ProductDetailView: View {
             case .success(let successState):
                 ProductContentView(
                     briefProduct: successState.product,
-                    detailedState: viewModel.state.detailedState,
+                    galleryUrls: viewModel.state.galleryUrls,
                     bduiBodyState: viewModel.state.bduiBodyState,
                     isFavorited: viewModel.state.isFavorited,
                     isFavoriteLoading: viewModel.state.isFavoriteLoading,
@@ -90,7 +90,7 @@ struct ErrorView: View {
 // MARK: - Product Content View
 struct ProductContentView: View {
     let briefProduct: UiBriefProduct
-    let detailedState: DetailedProductState
+    let galleryUrls: [String]
     let bduiBodyState: BduiBodyState
     let isFavorited: Bool
     let isFavoriteLoading: Bool
@@ -101,10 +101,10 @@ struct ProductContentView: View {
     var body: some View {
         ScrollableVStack(onScroll: onScrollOffsetChange) {
             LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
-                // Image Section (top half — native, fed by brief + legacy detailedState gallery)
+                // Image Section (top half — native, fed by brief + galleryUrls)
                 ImageSection(
                     briefProduct: briefProduct,
-                    detailedState: detailedState,
+                    galleryUrls: galleryUrls,
                     isFavorited: isFavorited,
                     isFavoriteLoading: isFavoriteLoading,
                     onToggleFavorite: onToggleFavorite
@@ -130,22 +130,16 @@ struct ProductContentView: View {
 // MARK: - Image Section
 struct ImageSection: View {
     let briefProduct: UiBriefProduct
-    let detailedState: DetailedProductState
+    let galleryUrls: [String]
     let isFavorited: Bool
     let isFavoriteLoading: Bool
     let onToggleFavorite: () -> Void
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            switch onEnum(of: detailedState) {
-            case .success(let successState):
-                if let galleryUrls = successState.product.galleryUrls, !galleryUrls.isEmpty {
-                    ImageGallery(imageUrls: galleryUrls)
-                } else {
-                    SingleProductImage(imageUrl: briefProduct.imageUrl)
-                }
-
-            default:
+            if !galleryUrls.isEmpty {
+                ImageGallery(imageUrls: galleryUrls)
+            } else {
                 SingleProductImage(imageUrl: briefProduct.imageUrl)
             }
 
@@ -270,72 +264,3 @@ struct BriefProductInfo: View {
     }
 }
 
-// MARK: - Detailed Product Section
-struct DetailedProductSection: View {
-    let detailedState: DetailedProductState
-
-    var body: some View {
-        switch onEnum(of: detailedState) {
-        case .loading:
-            HStack(spacing: 8) {
-                ProgressView()
-                    .scaleEffect(0.8)
-                Text(String(localized: "loading_details"))
-                    .font(.body)
-                    .foregroundColor(FakeShopColors.onSurfaceVariant)
-            }
-
-        case .success(let successState):
-            DetailedProductInfo(product: successState.product)
-
-        case .error:
-            HStack(spacing: 8) {
-                Image(systemName: "exclamationmark.triangle")
-                    .foregroundColor(FakeShopColors.error)
-                Text(String(localized: "error_product_details"))
-                    .font(.body)
-                    .foregroundColor(FakeShopColors.onErrorContainer)
-            }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-            .background(FakeShopColors.errorContainer)
-            .cornerRadius(8)
-        }
-    }
-}
-
-// MARK: - Detailed Product Info
-struct DetailedProductInfo: View {
-    let product: UiDetailedProduct
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            if let description = product.description_ as String?, !description.isEmpty {
-                ProductSection(title: String(localized: "description"), content: description)
-            }
-
-            if let specs = product.specs as String?, !specs.isEmpty {
-                ProductSection(title: String(localized: "specifications"), content: specs)
-            }
-        }
-    }
-}
-
-// MARK: - Product Section
-struct ProductSection: View {
-    let title: String
-    let content: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.headline)
-                .fontWeight(.semibold)
-
-            Text(content)
-                .font(.body)
-                .foregroundColor(FakeShopColors.onSurfaceVariant)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-}

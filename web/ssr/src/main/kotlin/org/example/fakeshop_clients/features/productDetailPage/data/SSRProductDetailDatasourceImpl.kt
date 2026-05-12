@@ -8,7 +8,7 @@ import org.example.fakeshop_clients.core.network.UrlProvider
 import org.example.fakeshop_clients.features.core.models.Cookies
 import org.example.fakeshop_clients.features.favorites.data.models.FavoriteCheckResponse
 import org.example.fakeshop_clients.features.home.data.models.BriefProductResponse
-import org.example.fakeshop_clients.features.productDetail.data.models.DetailedProductV2Response
+import org.example.fakeshop_clients.features.productDetail.data.models.DetailedProductResponse
 
 class SSRProductDetailDatasourceImpl(
     private val safeApiClient: SSRSafeApiClient,
@@ -25,10 +25,10 @@ class SSRProductDetailDatasourceImpl(
         )
     }
 
-    override suspend fun getDetailedProductV2ById(
+    override suspend fun getDetailedProductById(
         id: String,
         cookies: Cookies
-    ): Result<DetailedProductV2Response, NetworkError> {
+    ): Result<DetailedProductResponse, NetworkError> {
         return safeApiClient.get(
             path = "${baseUrl()}/products/v2/detailed/$id",
             cookies = cookies
