@@ -64,6 +64,8 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
 
+            implementation(libs.kotlinx.serialization.json)
+
             api(projects.shared)
         }
         val iosX64Main by getting
