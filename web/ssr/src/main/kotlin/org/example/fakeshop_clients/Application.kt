@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
 import org.example.fakeshop_clients.core.di.jvmInfrastructureModule
 import org.example.fakeshop_clients.core.i18n.WebStrings
 import org.example.fakeshop_clients.features.homePage.presentation.homeRoute
+import org.example.fakeshop_clients.features.bdui.di.ssrBduiModule
 import org.example.fakeshop_clients.features.productDetailPage.di.ssrProductDetailModule
 import org.example.fakeshop_clients.features.productDetailPage.presentation.productApiRoutes
 import org.example.fakeshop_clients.features.productDetailPage.presentation.productRoutes
@@ -35,6 +36,7 @@ fun Application.configureKoin() {
     startKoin {
         modules(
             jvmInfrastructureModule,
+            ssrBduiModule,
             ssrProductDetailModule
         )
     }
