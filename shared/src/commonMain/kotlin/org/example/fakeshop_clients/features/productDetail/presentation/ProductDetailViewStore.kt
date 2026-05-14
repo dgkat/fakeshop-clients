@@ -3,16 +3,24 @@ package org.example.fakeshop_clients.features.productDetail.presentation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.fold
+import kotlinx.serialization.json.JsonObject
+import org.example.fakeshop_clients.features.bdui.domain.BduiActionService
+import org.example.fakeshop_clients.features.bdui.domain.BduiMutationApplier
 import org.example.fakeshop_clients.features.bdui.domain.BduiTemplateService
 import org.example.fakeshop_clients.features.bdui.domain.buildPdpBindData
+import org.example.fakeshop_clients.features.bdui.domain.models.BduiMutation
+import org.example.fakeshop_clients.features.bdui.domain.models.ToastSeverity
 import org.example.fakeshop_clients.features.bdui.presentation.BduiError
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailService
@@ -22,6 +30,7 @@ class ProductDetailViewStore(
     private val scope: CoroutineScope,
     private val productDetailService: ProductDetailService,
     private val bduiTemplateService: BduiTemplateService,
+    private val bduiActionService: BduiActionService,
     private val favoritesService: FavoritesService,
     private val briefProductMapper: DomainToPresentationBriefProductMapper,
     private val sessionObserver: SessionObserver
@@ -29,6 +38,9 @@ class ProductDetailViewStore(
 
     private val _state = MutableStateFlow(ProductDetailState())
     val state: StateFlow<ProductDetailState> = _state.asStateFlow()
+
+    private val _effects = MutableSharedFlow<ProductDetailEffect>(extraBufferCapacity = 8)
+    val effects: SharedFlow<ProductDetailEffect> = _effects.asSharedFlow()
 
     private var currentProductId: String? = null
 
@@ -46,6 +58,9 @@ class ProductDetailViewStore(
             is ProductDetailEvent.LoadProduct -> loadProduct(event.productId)
             ProductDetailEvent.Retry -> retry()
             ProductDetailEvent.ToggleFavorite -> toggleFavorite()
+            is ProductDetailEvent.DispatchAction -> dispatchAction(
+                event.actionId, event.context, event.idempotencyKey
+            )
         }
     }
 
@@ -135,6 +150,68 @@ class ProductDetailViewStore(
                     _state.update { it.copy(isFavoriteLoading = false) }
                 }
             )
+        }
+    }
+
+    private fun dispatchAction(
+        actionId: String,
+        context: JsonObject,
+        idempotencyKey: String?
+    ) {
+        val ready = _state.value.bduiBodyState as? BduiBodyState.Ready ?: return
+        scope.launch {
+            bduiActionService.dispatch(
+                actionId = actionId,
+                screen = ready.template.screen,
+                templateId = null,
+                context = context,
+                idempotencyKey = idempotencyKey
+            ).fold(
+                onSuccess = { response ->
+                    response.mutations.forEach { applyMutation(it) }
+                },
+                onError = {
+                    _effects.emit(
+                        ProductDetailEffect.ShowToast(
+                            message = "Action failed. Please try again.",
+                            severity = ToastSeverity.error
+                        )
+                    )
+                }
+            )
+        }
+    }
+
+    private suspend fun applyMutation(mutation: BduiMutation) {
+        when (mutation) {
+            is BduiMutation.UpdateBindData -> {
+                _state.update { state ->
+                    val ready = state.bduiBodyState as? BduiBodyState.Ready ?: return@update state
+                    state.copy(
+                        bduiBodyState = ready.copy(
+                            bindData = BduiMutationApplier.applyBindPatch(ready.bindData, mutation.patch)
+                        )
+                    )
+                }
+            }
+            is BduiMutation.ReplaceSlot -> {
+                _state.update { state ->
+                    val ready = state.bduiBodyState as? BduiBodyState.Ready ?: return@update state
+                    state.copy(
+                        bduiBodyState = ready.copy(
+                            template = ready.template.copy(
+                                root = BduiMutationApplier.applyReplaceSlot(ready.template.root, mutation)
+                            )
+                        )
+                    )
+                }
+            }
+            is BduiMutation.Navigate -> {
+                _effects.emit(ProductDetailEffect.Navigate(mutation.url, mutation.replace))
+            }
+            is BduiMutation.ShowToast -> {
+                _effects.emit(ProductDetailEffect.ShowToast(mutation.message, mutation.severity))
+            }
         }
     }
 
