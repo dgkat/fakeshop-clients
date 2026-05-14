@@ -19,6 +19,7 @@ sealed interface UiNode {
     data class Column(
         val spacing: Spacing = Spacing.md,
         val children: List<UiNode> = emptyList(),
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null
@@ -29,6 +30,7 @@ sealed interface UiNode {
     data class Row(
         val spacing: Spacing = Spacing.md,
         val children: List<UiNode> = emptyList(),
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null
@@ -39,6 +41,7 @@ sealed interface UiNode {
     data class Section(
         val title: String? = null,
         val children: List<UiNode> = emptyList(),
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null
@@ -94,6 +97,9 @@ sealed interface UiNode {
     @SerialName("SizeSelector")
     data class SizeSelector(
         val bind: String? = null,
+        val actionId: String = "",
+        val contextBindings: Map<String, String> = emptyMap(),
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null
@@ -103,6 +109,9 @@ sealed interface UiNode {
     @SerialName("ColorSwatchPicker")
     data class ColorSwatchPicker(
         val bind: String? = null,
+        val actionId: String = "",
+        val contextBindings: Map<String, String> = emptyMap(),
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null
@@ -113,7 +122,9 @@ sealed interface UiNode {
     data class Button(
         val label: String = "",
         val style: ButtonStyle = ButtonStyle.primary,
-        val action: ActionRef,
+        val actionId: String = "",
+        val contextBindings: Map<String, String> = emptyMap(),
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null
