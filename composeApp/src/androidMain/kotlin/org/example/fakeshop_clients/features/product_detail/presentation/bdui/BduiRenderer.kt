@@ -7,8 +7,9 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.serialization.json.JsonObject
-import org.example.fakeshop_clients.features.bdui.domain.models.ActionRef
+import kotlinx.serialization.json.buildJsonObject
 import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
+import org.example.fakeshop_clients.features.bdui.domain.models.resolve
 import org.example.fakeshop_clients.features.bdui.domain.models.tokens.NodeAlignment
 import org.example.fakeshop_clients.features.product_detail.presentation.bdui.nodes.RenderButton
 import org.example.fakeshop_clients.features.product_detail.presentation.bdui.nodes.RenderColorSwatchPicker
@@ -24,7 +25,10 @@ import org.example.fakeshop_clients.features.product_detail.presentation.bdui.no
 import org.example.fakeshop_clients.features.product_detail.presentation.bdui.nodes.RenderSpecTable
 import org.example.fakeshop_clients.features.product_detail.presentation.bdui.nodes.RenderText
 
-val LocalBduiActionHandler = compositionLocalOf<(ActionRef) -> Unit> { {} }
+val LocalBduiActionHandler = compositionLocalOf<(String, JsonObject) -> Unit> { { _, _ -> } }
+
+fun buildActionContext(bindings: Map<String, String>, data: JsonObject): JsonObject =
+    buildJsonObject { bindings.forEach { (key, path) -> data.resolve(path)?.let { put(key, it) } } }
 
 @Composable
 fun BduiRenderer(
@@ -76,7 +80,7 @@ private fun RenderNodeContent(node: UiNode, data: JsonObject) {
         is UiNode.SpecTable -> RenderSpecTable(node, data)
         is UiNode.SizeSelector -> RenderSizeSelector(node, data)
         is UiNode.ColorSwatchPicker -> RenderColorSwatchPicker(node, data)
-        is UiNode.Button -> RenderButton(node)
+        is UiNode.Button -> RenderButton(node, data)
         is UiNode.Spacer -> RenderSpacer(node)
         is UiNode.Divider -> RenderDivider()
     }

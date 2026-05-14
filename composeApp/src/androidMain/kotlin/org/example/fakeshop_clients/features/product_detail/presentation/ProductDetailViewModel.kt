@@ -12,6 +12,7 @@ class ProductDetailViewModel : ViewModel() {
         getKoin().get<ProductDetailViewStore> { parametersOf(viewModelScope) }
     }
     val state = store.state
+    val effects = store.effects
 
     fun onEvent(event: ProductDetailEvent) {
         store.onEvent(event)

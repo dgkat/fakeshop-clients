@@ -2,9 +2,11 @@ package org.example.fakeshop_clients.features.product_detail.presentation.bdui.n
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -14,22 +16,43 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
 import org.example.fakeshop_clients.features.bdui.domain.models.resolveColorList
+import org.example.fakeshop_clients.features.bdui.domain.models.resolveString
+import org.example.fakeshop_clients.features.product_detail.presentation.bdui.LocalBduiActionHandler
+import org.example.fakeshop_clients.features.product_detail.presentation.bdui.buildActionContext
 
 @Composable
 fun RenderColorSwatchPicker(node: UiNode.ColorSwatchPicker, data: JsonObject) {
     val entries = node.bind?.let { data.resolveColorList(it) } ?: emptyList()
-    val colors: List<Color> = entries.mapNotNull { parseHexColor(it.hex) }
+    val selectedName: String? = data.resolveString("data.selectedColor")
+    val onAction = LocalBduiActionHandler.current
 
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        colors.forEach { color ->
+        entries.forEach { entry ->
+            val color = parseHexColor(entry.hex) ?: return@forEach
+            val isSelected = selectedName == entry.name
             Box(
                 modifier = Modifier
                     .size(28.dp)
                     .clip(CircleShape)
                     .background(color)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                    .then(
+                        if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        else Modifier.border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                    )
+                    .clickable {
+                        if (node.actionId.isNotBlank()) {
+                            val ctx = buildJsonObject {
+                                put("color", entry.name)
+                                buildActionContext(node.contextBindings, data).forEach { (k, v) -> put(k, v) }
+                            }
+                            onAction(node.actionId, ctx)
+                        }
+                    }
+                    .padding(if (isSelected) 2.dp else 0.dp)
             )
         }
     }
