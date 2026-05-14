@@ -9,20 +9,27 @@ import ComposeApp
 struct ColorSwatchPickerView: View {
     let node: UiNodeColorSwatchPicker
     let data: BindData
-    @State private var selected: String? = nil
+    let onAction: BduiActionHandler
 
     var body: some View {
         let entries = (node.bind.map { data.resolveColorList(path: $0) } ?? nil) ?? []
+        let selectedName = data.resolveString(path: "data.selectedColor")
+
         HStack(spacing: 8) {
             ForEach(Array(entries.enumerated()), id: \.offset) { _, entry in
-                Button(action: { selected = entry.name }) {
+                let isSelected = selectedName == entry.name
+                Button(action: {
+                    guard !node.actionId.isEmpty else { return }
+                    let ctx = buildActionContext(bindings: node.contextBindings, data: data, extra: ["color": entry.name])
+                    onAction(node.actionId, ctx)
+                }) {
                     Circle()
                         .fill(color(from: entry.hex))
                         .frame(width: 28, height: 28)
                         .overlay(
                             Circle().stroke(
-                                selected == entry.name ? FakeShopColors.primary : FakeShopColors.outline,
-                                lineWidth: selected == entry.name ? 2 : 1
+                                isSelected ? FakeShopColors.primary : FakeShopColors.outline,
+                                lineWidth: isSelected ? 2 : 1
                             )
                         )
                 }

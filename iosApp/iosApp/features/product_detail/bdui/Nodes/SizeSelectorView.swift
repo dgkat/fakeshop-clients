@@ -9,13 +9,19 @@ import ComposeApp
 struct SizeSelectorView: View {
     let node: UiNodeSizeSelector
     let data: BindData
-    @State private var selected: String? = nil
+    let onAction: BduiActionHandler
 
     var body: some View {
         let sizes = (node.bind.map { data.resolveStringList(path: $0) } ?? nil) ?? []
+        let selected = data.resolveString(path: "data.selectedSize")
+
         FlowHStack(spacing: 8) {
             ForEach(Array(sizes.enumerated()), id: \.offset) { _, size in
-                Button(action: { selected = size }) {
+                Button(action: {
+                    guard !node.actionId.isEmpty else { return }
+                    let ctx = buildActionContext(bindings: node.contextBindings, data: data, extra: ["size": size])
+                    onAction(node.actionId, ctx)
+                }) {
                     Text(size)
                         .font(.system(size: 13))
                         .padding(.vertical, 6)
@@ -45,12 +51,9 @@ struct FlowHStack<Content: View>: View {
     }
 
     var body: some View {
-        // SwiftUI's HStack wraps via Layout in iOS 16+; fall back to a simple horizontal stack.
         if #available(iOS 16.0, *) {
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: spacing) { content() }
-                // Wrap into multiple rows by using LazyVGrid as a fallback isn't trivial here;
-                // rely on horizontal scroll if it overflows.
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: spacing) { content() }
                 }

@@ -1,42 +1,26 @@
 //
-//  BduiActionToast.swift
+//  BduiEffectHandler.swift
 //  iosApp
-//
-//  v1: action handler is a stub — log + transient banner. Full action protocol
-//  (BE-driven actionId → response → patch UI) is a future TODO.
 //
 
 import SwiftUI
 import ComposeApp
 
-final class BduiActionToastState: ObservableObject {
+final class BduiToastState: ObservableObject {
     @Published var message: String? = nil
 
-    func makeHandler() -> BduiActionHandler {
-        return { [weak self] action in
-            let label: String
-            if let target = action.target {
-                label = "\(action.type): \(target)"
-            } else {
-                label = action.type
-            }
-            print("[BduiAction] \(label)")
-            self?.show(label)
-        }
-    }
-
-    private func show(_ text: String) {
+    func show(_ text: String) {
         DispatchQueue.main.async { [weak self] in
             self?.message = text
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in
                 if self?.message == text { self?.message = nil }
             }
         }
     }
 }
 
-struct BduiActionToastOverlay: View {
-    @ObservedObject var state: BduiActionToastState
+struct BduiToastOverlay: View {
+    @ObservedObject var state: BduiToastState
 
     var body: some View {
         VStack {

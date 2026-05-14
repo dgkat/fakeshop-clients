@@ -6,7 +6,12 @@
 import SwiftUI
 import ComposeApp
 
-typealias BduiActionHandler = (ActionRef) -> Void
+typealias BduiActionHandler = (String, JsonObject) -> Void
+
+/// Resolves contextBindings from BindData and merges extra literal values into a JsonObject.
+func buildActionContext(bindings: [String: String], data: BindData, extra: [String: String] = [:]) -> JsonObject {
+    return data.resolveActionContext(bindings: bindings, extra: extra)
+}
 
 struct BduiNodeView: View {
     let node: UiNode
@@ -29,9 +34,9 @@ struct BduiNodeView: View {
         case .imageGallery(let n): ImageGalleryNodeView(node: n, data: data)
         case .priceBlock(let n): PriceBlockView(node: n, data: data)
         case .specTable(let n): SpecTableView(node: n, data: data)
-        case .sizeSelector(let n): SizeSelectorView(node: n, data: data)
-        case .colorSwatchPicker(let n): ColorSwatchPickerView(node: n, data: data)
-        case .button(let n): ButtonNodeView(node: n, onAction: onAction)
+        case .sizeSelector(let n): SizeSelectorView(node: n, data: data, onAction: onAction)
+        case .colorSwatchPicker(let n): ColorSwatchPickerView(node: n, data: data, onAction: onAction)
+        case .button(let n): ButtonNodeView(node: n, data: data, onAction: onAction)
         case .spacer(let n): SpacerNodeView(node: n)
         case .divider: DividerNodeView()
         }

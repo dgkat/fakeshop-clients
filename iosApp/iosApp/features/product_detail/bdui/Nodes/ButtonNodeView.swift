@@ -8,10 +8,14 @@ import ComposeApp
 
 struct ButtonNodeView: View {
     let node: UiNodeButton
+    let data: BindData
     let onAction: BduiActionHandler
 
     var body: some View {
-        Button(action: { onAction(node.action) }) {
+        Button(action: {
+            guard !node.actionId.isEmpty else { return }
+            onAction(node.actionId, buildActionContext(bindings: node.contextBindings, data: data))
+        }) {
             Text(node.label)
                 .font(.system(size: 14, weight: .medium))
                 .padding(.vertical, 10)

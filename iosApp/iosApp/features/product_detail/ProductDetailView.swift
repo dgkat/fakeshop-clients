@@ -10,9 +10,10 @@ import ComposeApp
 struct ProductDetailView: View {
     let productId: String
     let onScrollOffsetChange: (CGFloat) -> Void
+    var onNavigate: (String, Bool) -> Void = { _, _ in }
 
     @StateObject private var viewModel = ProductDetailViewModel()
-    @StateObject private var actionToast = BduiActionToastState()
+    @StateObject private var toastState = BduiToastState()
 
     var body: some View {
         ZStack {
@@ -26,9 +27,7 @@ struct ProductDetailView: View {
             case .error(let errorState):
                 ErrorView(
                     error: errorState.error,
-                    onRetry: {
-                        viewModel.onEvent(ProductDetailEvent.Retry())
-                    }
+                    onRetry: { viewModel.onEvent(ProductDetailEvent.Retry()) }
                 )
 
             case .success(let successState):
@@ -39,16 +38,25 @@ struct ProductDetailView: View {
                     isFavorited: viewModel.state.isFavorited,
                     isFavoriteLoading: viewModel.state.isFavoriteLoading,
                     onToggleFavorite: { viewModel.onEvent(ProductDetailEvent.ToggleFavorite()) },
-                    onAction: actionToast.makeHandler(),
+                    onAction: { actionId, context in viewModel.dispatchAction(actionId: actionId, context: context) },
                     onScrollOffsetChange: onScrollOffsetChange
                 )
             }
 
-            BduiActionToastOverlay(state: actionToast)
+            BduiToastOverlay(state: toastState)
         }
         .navigationBarHidden(true)
         .onAppear {
             viewModel.onEvent(ProductDetailEvent.LoadProduct(productId: productId))
+        }
+        .onChange(of: viewModel.effectTick) { _ in
+            guard let effect = viewModel.pendingEffect else { return }
+            switch onEnum(of: effect) {
+            case .showToast(let e):
+                toastState.show(e.message)
+            case .navigate(let e):
+                onNavigate(e.url, e.replace)
+            }
         }
     }
 }
