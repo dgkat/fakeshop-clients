@@ -190,7 +190,13 @@ fun HTML.productDetailPage(
 
                 // BDUI body — server-driven bottom half
                 div(classes = "product-detail-bdui") {
-                    renderBduiNode(pdpData.template.root, pdpData.bindData)
+                    renderBduiNode(pdpData.template.root, pdpData.bindData, "pdp")
+                }
+
+                // Toast region for BDUI action feedback (HTMX swaps content here)
+                div {
+                    id = "bdui-toast-region"
+                    classes = setOf("bdui-toast-region")
                 }
             }
         }
@@ -213,6 +219,28 @@ fun HTML.productDetailPage(
         // ===== HYDRATOR SCRIPT =====
         script(src = "/static/js/universal-hydrator.js") {}
         script(src = "/static/js/view-transitions.js") {}
+
+        // ===== BDUI selection update handler =====
+        script {
+            unsafe {
+                +"""
+document.addEventListener('bdui:selectionUpdate', function(e) {
+    var patch = e.detail;
+    if (!patch || !patch.data) return;
+    if (patch.data.selectedSize !== undefined) {
+        document.querySelectorAll('.bdui-size-chip').forEach(function(chip) {
+            chip.classList.toggle('selected', chip.dataset.value === patch.data.selectedSize);
+        });
+    }
+    if (patch.data.selectedColor !== undefined) {
+        document.querySelectorAll('.bdui-color-swatch').forEach(function(swatch) {
+            swatch.classList.toggle('selected', swatch.dataset.value === patch.data.selectedColor);
+        });
+    }
+});
+""".trimIndent()
+            }
+        }
 
         // ===== CAROUSEL (arrow nav + dot sync) =====
         script(src = "/static/js/carousel.js") {}

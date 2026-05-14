@@ -7,12 +7,12 @@ import kotlinx.serialization.json.JsonObject
 import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
 import org.example.fakeshop_clients.features.bdui.presentation.render.renderBduiNode
 
-fun FlowContent.renderSection(node: UiNode.Section, data: JsonObject) {
+fun FlowContent.renderSection(node: UiNode.Section, data: JsonObject, screen: String) {
     div(classes = "bdui-section") {
         applyNodeAttrs(node)
         node.title?.takeIf { it.isNotBlank() }?.let { title ->
             h2(classes = "bdui-section-title") { +title }
         }
-        node.children.forEach { renderBduiNode(it, data) }
+        node.children.forEach { renderBduiNode(it, data, screen) }
     }
 }
