@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import org.example.fakeshop_clients.features.bdui.data.SSRBduiTemplateDatasource
 import org.example.fakeshop_clients.features.bdui.data.mappers.DataToDomainBduiTemplateMapper
@@ -23,39 +24,38 @@ class ProductDetailServiceImpl(
     ): Result<PdpData, NetworkError> = coroutineScope {
         val briefDef = async { productDetailRepository.getBriefProductById(id, cookies) }
         val detailedDef = async { productDetailRepository.getDetailedProductById(id, cookies) }
-        val briefRes = briefDef.await()
-        val detailedRes = detailedDef.await()
 
-        when {
-            briefRes is Result.Error -> Result.Error(briefRes.error)
-            detailedRes is Result.Error -> Result.Error(detailedRes.error)
-            briefRes is Result.Success && detailedRes is Result.Success -> {
-                val brief = briefRes.data
-                val detailed = detailedRes.data
-                when (val templateRes = bduiTemplateDatasource.getPdpTemplate(brief.category, cookies)) {
-                    is Result.Error -> Result.Error(templateRes.error)
-                    is Result.Success -> {
-                        val template = bduiTemplateMapper.map(templateRes.data)
-                        val uiBrief = UiBriefProduct(
-                            id = brief.id,
-                            name = brief.name,
-                            price = brief.price,
-                            imageUrl = brief.imageUrl,
-                            category = brief.category
-                        )
-                        val bindData = buildPdpBindData(uiBrief, detailed)
-                        Result.Success(
-                            PdpData(
-                                brief = brief,
-                                galleryUrls = detailed.galleryUrls,
-                                template = template,
-                                bindData = bindData
-                            )
-                        )
-                    }
-                }
+        val briefRes = briefDef.await()
+        if (briefRes is Result.Error) return@coroutineScope Result.Error(briefRes.error)
+        val brief = (briefRes as Result.Success).data
+
+        val templateDef = async { bduiTemplateDatasource.getPdpTemplate(brief.category, cookies) }
+
+        val detailedRes = detailedDef.await()
+        if (detailedRes is Result.Error) return@coroutineScope Result.Error(detailedRes.error)
+        val detailed = (detailedRes as Result.Success).data
+
+        when (val templateRes = templateDef.await()) {
+            is Result.Error -> Result.Error(templateRes.error)
+            is Result.Success -> {
+                val template = bduiTemplateMapper.map(templateRes.data)
+                val uiBrief = UiBriefProduct(
+                    id = brief.id,
+                    name = brief.name,
+                    price = brief.price,
+                    imageUrl = brief.imageUrl,
+                    category = brief.category
+                )
+                val bindData = buildPdpBindData(uiBrief, detailed)
+                Result.Success(
+                    PdpData(
+                        brief = brief,
+                        galleryUrls = detailed.galleryUrls,
+                        template = template,
+                        bindData = bindData
+                    )
+                )
             }
-            else -> Result.Error(NetworkError.Unknown(message = "Unknown error"))
         }
     }
 
