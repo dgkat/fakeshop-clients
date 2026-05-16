@@ -44,15 +44,6 @@ class ProductDetailViewStore(
 
     private var currentProductId: String? = null
 
-    init {
-        scope.launch {
-            favoritesService.favoritedIds.collect { ids ->
-                val productId = currentProductId ?: return@collect
-                _state.update { it.copy(isFavorited = productId in ids) }
-            }
-        }
-    }
-
     fun onEvent(event: ProductDetailEvent) {
         when (event) {
             is ProductDetailEvent.LoadProduct -> loadProduct(event.productId)
@@ -71,16 +62,27 @@ class ProductDetailViewStore(
                 briefState = BriefProductState.Loading,
                 bduiBodyState = BduiBodyState.Loading,
                 galleryUrls = emptyList(),
-                isFavorited = productId in favoritesService.favoritedIds.value
+                isFavorited = false
             )
         }
 
         scope.launch {
             coroutineScope {
                 launch { loadBriefAndBdui(productId) }
-                launch { favoritesService.checkFavorite(productId) }
+                launch {
+                    val isFav = isFavorite(productId)
+                    _state.update { it.copy(isFavorited = isFav) }
+                }
             }
         }
+    }
+
+    private suspend fun isFavorite(productId: String): Boolean {
+        if (productId in favoritesService.favoritedIds.value) return true
+        return favoritesService.checkFavorite(productId).fold(
+            onSuccess = { it },
+            onError = { false }
+        )
     }
 
     /**
@@ -90,9 +92,8 @@ class ProductDetailViewStore(
     private suspend fun loadBriefAndBdui(productId: String) = coroutineScope {
         val briefDef = async { productDetailService.getBriefProductById(productId) }
         val detailedDef = async { productDetailService.getDetailedProductById(productId) }
-        val briefRes = briefDef.await()
-        val detailedRes = detailedDef.await()
 
+        val briefRes = briefDef.await()
         briefRes.fold(
             onSuccess = { brief ->
                 _state.update {
@@ -106,27 +107,33 @@ class ProductDetailViewStore(
             }
         )
 
+        if (briefRes is Result.Error) {
+            setBduiError(BduiError.Network(briefRes.error))
+            val detailedRes = detailedDef.await()
+            if (detailedRes is Result.Success) {
+                _state.update { it.copy(galleryUrls = detailedRes.data.galleryUrls) }
+            }
+            return@coroutineScope
+        }
+
+        val brief = (briefRes as Result.Success).data
+        val templateDef = async { bduiTemplateService.getPdpTemplate(brief.category) }
+
+        val detailedRes = detailedDef.await()
         if (detailedRes is Result.Success) {
             _state.update { it.copy(galleryUrls = detailedRes.data.galleryUrls) }
         }
 
+        val templateRes = templateDef.await()
+
         when {
-            briefRes is Result.Error -> setBduiError(BduiError.Network(briefRes.error))
             detailedRes is Result.Error -> setBduiError(BduiError.Network(detailedRes.error))
-            briefRes is Result.Success && detailedRes is Result.Success -> {
-                val brief = briefRes.data
-                val detailed = detailedRes.data
-                bduiTemplateService.getPdpTemplate(brief.category).fold(
-                    onSuccess = { template ->
-                        val bindData = buildPdpBindData(briefProductMapper.map(brief), detailed)
-                        _state.update {
-                            it.copy(bduiBodyState = BduiBodyState.Ready(template, bindData))
-                        }
-                    },
-                    onError = { networkError ->
-                        setBduiError(BduiError.Network(networkError))
-                    }
-                )
+            templateRes is Result.Error -> setBduiError(BduiError.Network(templateRes.error))
+            detailedRes is Result.Success && templateRes is Result.Success -> {
+                val bindData = buildPdpBindData(briefProductMapper.map(brief), detailedRes.data)
+                _state.update {
+                    it.copy(bduiBodyState = BduiBodyState.Ready(templateRes.data, bindData))
+                }
             }
         }
     }
