@@ -6,6 +6,7 @@
 import SwiftUI
 import ComposeApp
 
+typealias JsonObject = [String: Kotlinx_serialization_jsonJsonElement]
 typealias BduiActionHandler = (String, JsonObject) -> Void
 
 /// Resolves contextBindings from BindData and merges extra literal values into a JsonObject.
