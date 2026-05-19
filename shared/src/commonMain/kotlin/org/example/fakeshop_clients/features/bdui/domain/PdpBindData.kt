@@ -10,9 +10,10 @@ import org.example.fakeshop_clients.features.productDetail.domain.models.Detaile
 
 /**
  * Builds the merged JsonObject the BDUI bind resolver walks.
- * Top-level keys come from the brief; `data` is the v2 detailed blob verbatim.
+ * Top-level keys come from the brief + detailed fields; the v2 `data` blob is spread
+ * at the top level so template bind paths like "title1" resolve directly.
  *
- *   { id, name, price, imageUrl, category, fullDescription, galleryUrls, data: { ... } }
+ *   { id, name, price, imageUrl, category, fullDescription, galleryUrls, <data keys...> }
  */
 fun buildPdpBindData(brief: UiBriefProduct, detailed: DetailedProduct): JsonObject = buildJsonObject {
     put("id", JsonPrimitive(brief.id))
@@ -22,5 +23,5 @@ fun buildPdpBindData(brief: UiBriefProduct, detailed: DetailedProduct): JsonObje
     put("category", JsonPrimitive(brief.category))
     put("fullDescription", detailed.fullDescription?.let(::JsonPrimitive) ?: JsonNull)
     put("galleryUrls", JsonArray(detailed.galleryUrls.map(::JsonPrimitive)))
-    put("data", detailed.data)
+    detailed.data.forEach { (key, value) -> put(key, value) }
 }
