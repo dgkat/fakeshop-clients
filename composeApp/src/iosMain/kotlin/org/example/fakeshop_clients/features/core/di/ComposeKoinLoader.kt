@@ -2,12 +2,14 @@ package org.example.fakeshop_clients.features.core.di
 
 import org.koin.core.context.loadKoinModules
 import org.koin.core.module.Module
+import org.example.fakeshop_clients.features.notifications.di.iosNotificationsModule
 import org.example.fakeshop_clients.features.profile.di.mobileProfileModule
+
 private var composeModulesLoaded = false
 
 private val composeAppKoinModules: List<Module> = listOf(
-    mobileProfileModule
-    // Add other compose modules here
+    mobileProfileModule,
+    iosNotificationsModule
 )
 
 fun ensureComposeKoinModulesLoaded() {
