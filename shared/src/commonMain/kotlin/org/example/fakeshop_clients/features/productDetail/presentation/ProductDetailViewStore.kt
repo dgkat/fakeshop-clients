@@ -11,15 +11,16 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.fold
-import kotlinx.serialization.json.JsonObject
 import org.example.fakeshop_clients.features.bdui.domain.BduiActionService
 import org.example.fakeshop_clients.features.bdui.domain.BduiMutationApplier
 import org.example.fakeshop_clients.features.bdui.domain.BduiTemplateService
 import org.example.fakeshop_clients.features.bdui.domain.buildPdpBindData
 import org.example.fakeshop_clients.features.bdui.domain.models.BduiMutation
+import org.example.fakeshop_clients.features.bdui.domain.models.BindData
 import org.example.fakeshop_clients.features.bdui.domain.models.ToastSeverity
 import org.example.fakeshop_clients.features.bdui.presentation.BduiError
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
@@ -102,7 +103,13 @@ class ProductDetailViewStore(
             },
             onError = { networkError ->
                 _state.update {
-                    it.copy(briefState = BriefProductState.Error(ProductDetailError.Network(networkError)))
+                    it.copy(
+                        briefState = BriefProductState.Error(
+                            ProductDetailError.Network(
+                                networkError
+                            )
+                        )
+                    )
                 }
             }
         )
@@ -130,7 +137,12 @@ class ProductDetailViewStore(
             detailedRes is Result.Error -> setBduiError(BduiError.Network(detailedRes.error))
             templateRes is Result.Error -> setBduiError(BduiError.Network(templateRes.error))
             detailedRes is Result.Success && templateRes is Result.Success -> {
-                val bindData = buildPdpBindData(briefProductMapper.map(brief), detailedRes.data)
+                val bindData = BindData(
+                    buildPdpBindData(
+                        briefProductMapper.map(brief),
+                        detailedRes.data
+                    )
+                )
                 _state.update {
                     it.copy(bduiBodyState = BduiBodyState.Ready(templateRes.data, bindData))
                 }
@@ -196,26 +208,37 @@ class ProductDetailViewStore(
                     val ready = state.bduiBodyState as? BduiBodyState.Ready ?: return@update state
                     state.copy(
                         bduiBodyState = ready.copy(
-                            bindData = BduiMutationApplier.applyBindPatch(ready.bindData, mutation.patch)
+                            bindData = BindData(
+                                BduiMutationApplier.applyBindPatch(
+                                    ready.bindData.json,
+                                    mutation.patch
+                                )
+                            )
                         )
                     )
                 }
             }
+
             is BduiMutation.ReplaceSlot -> {
                 _state.update { state ->
                     val ready = state.bduiBodyState as? BduiBodyState.Ready ?: return@update state
                     state.copy(
                         bduiBodyState = ready.copy(
                             template = ready.template.copy(
-                                root = BduiMutationApplier.applyReplaceSlot(ready.template.root, mutation)
+                                root = BduiMutationApplier.applyReplaceSlot(
+                                    ready.template.root,
+                                    mutation
+                                )
                             )
                         )
                     )
                 }
             }
+
             is BduiMutation.Navigate -> {
                 _effects.emit(ProductDetailEffect.Navigate(mutation.url, mutation.replace))
             }
+
             is BduiMutation.ShowToast -> {
                 _effects.emit(ProductDetailEffect.ShowToast(mutation.message, mutation.severity))
             }

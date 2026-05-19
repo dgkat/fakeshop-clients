@@ -34,7 +34,7 @@ struct BduiBodySection: View {
         case .ready(let ready):
             BduiNodeView(
                 node: ready.template.root,
-                data: BindData(json: ready.bindData),
+                data: ready.bindData,
                 onAction: onAction
             )
         }

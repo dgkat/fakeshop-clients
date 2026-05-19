@@ -1,7 +1,7 @@
 package org.example.fakeshop_clients.features.productDetail.presentation
 
-import kotlinx.serialization.json.JsonObject
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
+import org.example.fakeshop_clients.features.bdui.domain.models.BindData
 import org.example.fakeshop_clients.features.bdui.domain.models.BduiTemplate
 import org.example.fakeshop_clients.features.bdui.presentation.BduiError
 
@@ -21,6 +21,6 @@ sealed class BriefProductState {
 
 sealed class BduiBodyState {
     data object Loading : BduiBodyState()
-    data class Ready(val template: BduiTemplate, val bindData: JsonObject) : BduiBodyState()
+    data class Ready(val template: BduiTemplate, val bindData: BindData) : BduiBodyState()
     data class Error(val error: BduiError) : BduiBodyState()
 }
