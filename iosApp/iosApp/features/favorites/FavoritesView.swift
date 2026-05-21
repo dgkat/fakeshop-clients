@@ -171,7 +171,7 @@ private struct ProductGrid: View {
     ]
 
     var body: some View {
-        ScrollableVStack(onScroll: onScrollOffsetChange) {
+        ReactiveScrollView(onScroll: onScrollOffsetChange, showTopInset: false) {
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(products, id: \.id) { product in
                     ProductCardWithHeart(

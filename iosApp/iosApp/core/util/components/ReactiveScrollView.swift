@@ -12,15 +12,18 @@ import SwiftUI
 /// UIScrollView — avoids UIHostingController safe-area propagation issues.
 struct ReactiveScrollView<Content: View>: View {
     let onScroll: (CGFloat) -> Void
+    let showTopInset: Bool
     let content: Content
 
-    init(onScroll: @escaping (CGFloat) -> Void, @ViewBuilder content: () -> Content) {
+    init(onScroll: @escaping (CGFloat) -> Void, showTopInset: Bool = true, @ViewBuilder content: () -> Content) {
         self.onScroll = onScroll
+        self.showTopInset = showTopInset
         self.content = content()
     }
 
+    private let searchBarHeight: CGFloat = 58
+
     private var totalHeight: CGFloat {
-        let searchBarHeight: CGFloat = 58
         guard
             let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
             let window = scene.windows.first
@@ -28,12 +31,12 @@ struct ReactiveScrollView<Content: View>: View {
         return searchBarHeight + window.safeAreaInsets.top
     }
 
-    private var searchBarHeight: CGFloat { 58 }
-
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                Color.clear.frame(height: searchBarHeight)
+                if showTopInset {
+                    Color.clear.frame(height: searchBarHeight)
+                }
                 content
                     .background(
                         ScrollOffsetTracker(

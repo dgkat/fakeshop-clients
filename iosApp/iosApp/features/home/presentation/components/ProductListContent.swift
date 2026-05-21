@@ -17,8 +17,7 @@ struct ProductListContent: View {
     let onScrollOffsetChange: (CGFloat) -> Void
 
     var body: some View {
-        ScrollableVStack(onScroll: onScrollOffsetChange) {
-            Color.clear.frame(height: 58)
+        ReactiveScrollView(onScroll: onScrollOffsetChange) {
             LazyVStack(alignment: .leading, spacing: 16, pinnedViews: []) {
                 ForEach(categories, id: \.category) { categoryRow in
                     CategorySection(
