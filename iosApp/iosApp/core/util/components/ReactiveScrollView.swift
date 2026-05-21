@@ -28,16 +28,21 @@ struct ReactiveScrollView<Content: View>: View {
         return searchBarHeight + window.safeAreaInsets.top
     }
 
+    private var searchBarHeight: CGFloat { 58 }
+
     var body: some View {
         ScrollView {
-            content
-                .background(
-                    ScrollOffsetTracker(
-                        totalHeight: totalHeight,
-                        onSearchBarOffset: onScroll
+            VStack(spacing: 0) {
+                Color.clear.frame(height: searchBarHeight)
+                content
+                    .background(
+                        ScrollOffsetTracker(
+                            totalHeight: totalHeight,
+                            onSearchBarOffset: onScroll
+                        )
+                        .frame(height: 0)
                     )
-                    .frame(height: 0)
-                )
+            }
         }
     }
 }

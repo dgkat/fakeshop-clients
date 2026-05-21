@@ -113,11 +113,11 @@ struct SearchBarContainer<Content: View>: View {
     }
 
     private var contentTopPadding: CGFloat {
-        guard behavior != .hidden else { return 0 }
-
-        let totalHeight = searchBarHeight + statusBarHeight
-        let visiblePortion = totalHeight + scrollOffset
-        return max(0, visiblePortion)
+        switch behavior {
+        case .hidden: return 0
+        case .scrollReactive: return statusBarHeight
+        default: return searchBarHeight + statusBarHeight
+        }
     }
 
     private func calculateOffset() -> CGFloat {

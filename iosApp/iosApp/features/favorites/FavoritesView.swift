@@ -41,6 +41,7 @@ private struct FavoritesTabbedContent: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            Color.clear.frame(height: 58)
             NotificationPermissionBanner(
                 permissionStatus: viewModel.favoritesState.notificationPermissionStatus,
                 showBanner: viewModel.favoritesState.showNotificationBanner,

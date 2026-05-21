@@ -18,6 +18,7 @@ struct ProductListContent: View {
 
     var body: some View {
         ScrollableVStack(onScroll: onScrollOffsetChange) {
+            Color.clear.frame(height: 58)
             LazyVStack(alignment: .leading, spacing: 16, pinnedViews: []) {
                 ForEach(categories, id: \.category) { categoryRow in
                     CategorySection(
