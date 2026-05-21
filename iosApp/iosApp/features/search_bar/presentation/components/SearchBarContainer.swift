@@ -14,11 +14,11 @@ struct SearchBarContainer<Content: View>: View {
     let behavior: SearchBarBehavior
     let onResultClick: (SearchResult) -> Void
     let content: Content
-    
+
     @Binding var scrollOffset: CGFloat
     @State private var searchBarHeight: CGFloat = 72
     @State private var statusBarHeight: CGFloat = 0
-    
+
     init(
         searchViewModel: SearchViewModel,
         currentTab: Tab,
@@ -45,7 +45,7 @@ struct SearchBarContainer<Content: View>: View {
                     .onAppear {
                         statusBarHeight = geometry.safeAreaInsets.top
                     }
-                
+
                 if state.isActive && behavior != .hidden {
                     Color.black.opacity(0.5)
                         .ignoresSafeArea()
@@ -54,7 +54,7 @@ struct SearchBarContainer<Content: View>: View {
                         }
                         .transition(.opacity)
                 }
-                
+
                 VStack(spacing: 0) {
                     SearchBarView(
                         query: state.query,
@@ -79,7 +79,7 @@ struct SearchBarContainer<Content: View>: View {
                         radius: 4,
                         y: 2
                     )
-                    
+
                     // Search results dropdown
                     if state.isActive && behavior != .hidden {
                         SearchResultsView(
@@ -111,21 +111,18 @@ struct SearchBarContainer<Content: View>: View {
             }
         }
     }
-    
+
     private var contentTopPadding: CGFloat {
         guard behavior != .hidden else { return 0 }
-        
+
         let totalHeight = searchBarHeight + statusBarHeight
-        
         let visiblePortion = totalHeight + scrollOffset
-        
         return max(0, visiblePortion)
     }
-    
+
     private func calculateOffset() -> CGFloat {
-        let totalHeight = searchBarHeight + statusBarHeight
         let offset: CGFloat
-        
+
         switch behavior {
         case .hidden:
             offset = -searchBarHeight
@@ -136,10 +133,10 @@ struct SearchBarContainer<Content: View>: View {
         default:
             offset = statusBarHeight
         }
-        
+
         return offset
     }
-    
+
     private var showShadow: Bool {
         scrollOffset < -5 || behavior == .static
     }
