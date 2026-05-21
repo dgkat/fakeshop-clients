@@ -58,23 +58,22 @@ private struct ScrollOffsetTracker: UIViewRepresentable {
     }
 }
 
-// MARK: - UIView that KVO-observes the enclosing UIScrollView
+// MARK: - UIView that attaches a delegate proxy to the enclosing UIScrollView
 
 private class ScrollTrackerView: UIView {
     var totalHeight: CGFloat = 0
     var onSearchBarOffset: ((CGFloat) -> Void)?
 
     private var contentOffsetObs: NSKeyValueObservation?
-    private var isDraggingObs: NSKeyValueObservation?
-    private var isDeceleratingObs: NSKeyValueObservation?
+    private weak var trackedScrollView: UIScrollView?
+    private var delegateProxy: ScrollDelegateProxy?
 
-    // Mirror of ScrollableVStack's internal state
     private var lastContentOffsetY: CGFloat = 0
     private var searchBarOffset: CGFloat = 0
 
     override func didMoveToWindow() {
         super.didMoveToWindow()
-        invalidateObservations()
+        detach()
         guard window != nil else { return }
 
         var candidate: UIView? = superview
@@ -88,6 +87,21 @@ private class ScrollTrackerView: UIView {
     }
 
     private func attach(to sv: UIScrollView) {
+        trackedScrollView = sv
+
+        let proxy = ScrollDelegateProxy(original: sv.delegate)
+        proxy.onWillBeginDragging = { [weak self, weak sv] in
+            self?.lastContentOffsetY = sv?.contentOffset.y ?? 0
+        }
+        proxy.onDidEndDragging = { [weak self] willDecelerate in
+            if !willDecelerate { self?.snap() }
+        }
+        proxy.onDidEndDecelerating = { [weak self] in
+            self?.snap()
+        }
+        delegateProxy = proxy
+        sv.delegate = proxy
+
         // Delta tracking — only fires while user is actively dragging
         contentOffsetObs = sv.observe(\.contentOffset, options: .new) { [weak self, weak sv] _, change in
             guard let self, let sv, sv.isDragging, let y = change.newValue?.y else { return }
@@ -100,24 +114,16 @@ private class ScrollTrackerView: UIView {
             self.onSearchBarOffset?(self.searchBarOffset)
             self.lastContentOffsetY = y
         }
+    }
 
-        // Capture start offset; snap if drag ends with no deceleration
-        isDraggingObs = sv.observe(\.isDragging, options: .new) { [weak self, weak sv] _, change in
-            guard let self, let sv else { return }
-            if change.newValue == true {
-                self.lastContentOffsetY = sv.contentOffset.y
-            } else if !sv.isDecelerating {
-                self.snap()
-            }
+    private func detach() {
+        contentOffsetObs?.invalidate()
+        contentOffsetObs = nil
+        if let sv = trackedScrollView, let proxy = delegateProxy, sv.delegate === proxy {
+            sv.delegate = proxy.original
         }
-
-        // Snap when momentum scrolling ends
-        isDeceleratingObs = sv.observe(\.isDecelerating, options: .new) { [weak self, weak sv] _, change in
-            guard let self, let sv else { return }
-            if change.newValue == false, !sv.isDragging {
-                self.snap()
-            }
-        }
+        trackedScrollView = nil
+        delegateProxy = nil
     }
 
     private func snap() {
@@ -126,14 +132,44 @@ private class ScrollTrackerView: UIView {
         onSearchBarOffset?(searchBarOffset)
     }
 
-    private func invalidateObservations() {
-        contentOffsetObs?.invalidate()
-        isDraggingObs?.invalidate()
-        isDeceleratingObs?.invalidate()
-        contentOffsetObs = nil
-        isDraggingObs = nil
-        isDeceleratingObs = nil
+    deinit { detach() }
+}
+
+// MARK: - Forwarding delegate proxy
+
+/// Intercepts the three drag/deceleration lifecycle callbacks we need and forwards
+/// everything else to SwiftUI's original internal delegate.
+private class ScrollDelegateProxy: NSObject, UIScrollViewDelegate {
+    weak var original: UIScrollViewDelegate?
+    var onWillBeginDragging: (() -> Void)?
+    var onDidEndDragging: ((Bool) -> Void)?
+    var onDidEndDecelerating: (() -> Void)?
+
+    init(original: UIScrollViewDelegate?) {
+        self.original = original
     }
 
-    deinit { invalidateObservations() }
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        onWillBeginDragging?()
+        original?.scrollViewWillBeginDragging?(scrollView)
+    }
+
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        onDidEndDragging?(decelerate)
+        original?.scrollViewDidEndDragging?(scrollView, willDecelerate: decelerate)
+    }
+
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        onDidEndDecelerating?()
+        original?.scrollViewDidEndDecelerating?(scrollView)
+    }
+
+    // Transparent forwarding — all other delegate calls go to SwiftUI's original delegate
+    override func responds(to aSelector: Selector!) -> Bool {
+        super.responds(to: aSelector) || (original?.responds(to: aSelector) ?? false)
+    }
+
+    override func forwardingTarget(for aSelector: Selector!) -> Any? {
+        original?.responds(to: aSelector) == true ? original : super.forwardingTarget(for: aSelector)
+    }
 }
