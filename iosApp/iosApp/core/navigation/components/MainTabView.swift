@@ -17,6 +17,7 @@ struct MainTabView: View {
     @State private var profilePath = NavigationPath()
 
     @State private var scrollOffset: CGFloat = 0
+    @State private var scrollResetToken = UUID()
 
     init() {
         let appearance = UITabBarAppearance()
@@ -49,8 +50,10 @@ struct MainTabView: View {
             }
             .tint(FakeShopColors.primary)
         }
+        .environment(\.scrollResetToken, scrollResetToken)
         .onChange(of: selectedTab) { oldValue, newValue in
             scrollOffset = 0
+            scrollResetToken = UUID()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 if newValue != .home { homePath = NavigationPath() }
                 if newValue != .favorites { favoritesPath = NavigationPath() }
@@ -139,6 +142,7 @@ struct MainTabView: View {
         let hasVisibleSearchBar = tab.searchBarBehavior != .hidden
         if hasVisibleSearchBar && newPath.count != oldPath.count {
             scrollOffset = 0
+            scrollResetToken = UUID()
         }
     }
 }

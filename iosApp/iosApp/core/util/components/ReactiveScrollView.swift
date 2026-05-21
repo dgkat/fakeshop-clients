@@ -7,6 +7,21 @@
 
 import SwiftUI
 
+// MARK: - Environment key for external reset signal
+
+private struct ScrollResetTokenKey: EnvironmentKey {
+    static let defaultValue = UUID()
+}
+
+extension EnvironmentValues {
+    var scrollResetToken: UUID {
+        get { self[ScrollResetTokenKey.self] }
+        set { self[ScrollResetTokenKey.self] = newValue }
+    }
+}
+
+// MARK: - ReactiveScrollView
+
 /// Pure SwiftUI scroll view with reactive search-bar offset tracking.
 /// Embeds a zero-height UIViewRepresentable that KVO-observes the underlying
 /// UIScrollView — avoids UIHostingController safe-area propagation issues.
@@ -14,6 +29,8 @@ struct ReactiveScrollView<Content: View>: View {
     let onScroll: (CGFloat) -> Void
     let showTopInset: Bool
     let content: Content
+
+    @Environment(\.scrollResetToken) private var resetToken
 
     init(onScroll: @escaping (CGFloat) -> Void, showTopInset: Bool = true, @ViewBuilder content: () -> Content) {
         self.onScroll = onScroll
@@ -41,7 +58,8 @@ struct ReactiveScrollView<Content: View>: View {
                     .background(
                         ScrollOffsetTracker(
                             totalHeight: totalHeight,
-                            onSearchBarOffset: onScroll
+                            onSearchBarOffset: onScroll,
+                            resetToken: resetToken
                         )
                         .frame(height: 0)
                     )
@@ -55,6 +73,7 @@ struct ReactiveScrollView<Content: View>: View {
 private struct ScrollOffsetTracker: UIViewRepresentable {
     let totalHeight: CGFloat
     let onSearchBarOffset: (CGFloat) -> Void
+    let resetToken: UUID
 
     func makeUIView(context: Context) -> ScrollTrackerView {
         ScrollTrackerView()
@@ -63,6 +82,10 @@ private struct ScrollOffsetTracker: UIViewRepresentable {
     func updateUIView(_ uiView: ScrollTrackerView, context: Context) {
         uiView.totalHeight = totalHeight
         uiView.onSearchBarOffset = onSearchBarOffset
+        if uiView.lastResetToken != resetToken {
+            uiView.lastResetToken = resetToken
+            uiView.resetOffset()
+        }
     }
 }
 
@@ -71,6 +94,7 @@ private struct ScrollOffsetTracker: UIViewRepresentable {
 private class ScrollTrackerView: UIView {
     var totalHeight: CGFloat = 0
     var onSearchBarOffset: ((CGFloat) -> Void)?
+    var lastResetToken: UUID = UUID()
 
     private var contentOffsetObs: NSKeyValueObservation?
     private weak var trackedScrollView: UIScrollView?
@@ -78,6 +102,11 @@ private class ScrollTrackerView: UIView {
 
     private var lastContentOffsetY: CGFloat = 0
     private var searchBarOffset: CGFloat = 0
+
+    func resetOffset() {
+        searchBarOffset = 0
+        lastContentOffsetY = trackedScrollView?.contentOffset.y ?? 0
+    }
 
     override func didMoveToWindow() {
         super.didMoveToWindow()
