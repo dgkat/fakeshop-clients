@@ -19,6 +19,11 @@ struct MainTabView: View {
     @State private var scrollOffset: CGFloat = 0
     @State private var scrollResetToken = UUID()
 
+    private var isOnDetailScreen: Bool {
+        homePath.count > 0 || favoritesPath.count > 0 ||
+        notificationsPath.count > 0 || profilePath.count > 0
+    }
+
     init() {
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
@@ -49,6 +54,17 @@ struct MainTabView: View {
                 profileTab
             }
             .tint(FakeShopColors.primary)
+            .toolbar(.hidden, for: .tabBar)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            CustomTabBar(selectedTab: $selectedTab, isOnDetailScreen: isOnDetailScreen) { tab in
+                switch tab {
+                case .home: homePath = NavigationPath()
+                case .favorites: favoritesPath = NavigationPath()
+                case .notifications: notificationsPath = NavigationPath()
+                case .profile: profilePath = NavigationPath()
+                }
+            }
         }
         .environment(\.scrollResetToken, scrollResetToken)
         .onChange(of: selectedTab) { oldValue, newValue in
@@ -116,7 +132,7 @@ struct MainTabView: View {
                         productId: productId,
                         onScrollOffsetChange: { offset in scrollOffset = offset }
                     )
-                }
+                    }
         }
         .tabItem { Label(Tab.notifications.title, systemImage: selectedTab == .notifications ? Tab.notifications.iconFilled : Tab.notifications.icon) }
         .tag(Tab.notifications)
@@ -132,7 +148,7 @@ struct MainTabView: View {
                         productId: productId,
                         onScrollOffsetChange: { offset in scrollOffset = offset }
                     )
-                }
+                    }
         }
         .tabItem { Label(Tab.profile.title, systemImage: selectedTab == .profile ? Tab.profile.iconFilled : Tab.profile.icon) }
         .tag(Tab.profile)
@@ -146,3 +162,44 @@ struct MainTabView: View {
         }
     }
 }
+
+// MARK: - Custom tab bar
+
+private struct CustomTabBar: View {
+    @Binding var selectedTab: Tab
+    let isOnDetailScreen: Bool
+    let onTabReselected: (Tab) -> Void
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(Tab.allCases, id: \.self) { tab in
+                let isSelected = !isOnDetailScreen && selectedTab == tab
+                Button {
+                    if selectedTab == tab {
+                        onTabReselected(tab)
+                    } else {
+                        selectedTab = tab
+                    }
+                } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: isSelected ? tab.iconFilled : tab.icon)
+                            .font(.system(size: 22))
+                        Text(tab.title)
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(isSelected ? FakeShopColors.primary : Color(UIColor.systemGray))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .background(FakeShopColors.surface)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(Color(UIColor.separator))
+                .frame(height: 0.5)
+        }
+    }
+}
+
