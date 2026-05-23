@@ -45,7 +45,7 @@ struct ProductDetailView: View {
 
             BduiToastOverlay(state: toastState)
         }
-        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.onEvent(ProductDetailEvent.LoadProduct(productId: productId))
         }
@@ -107,9 +107,8 @@ struct ProductContentView: View {
     let onScrollOffsetChange: (CGFloat) -> Void
 
     var body: some View {
-        ScrollableVStack(onScroll: onScrollOffsetChange) {
-            LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
-                // Image Section (top half — native, fed by brief + galleryUrls)
+        ReactiveScrollView(onScroll: onScrollOffsetChange) {
+            VStack(alignment: .leading, spacing: 0) {
                 ImageSection(
                     briefProduct: briefProduct,
                     galleryUrls: galleryUrls,
@@ -118,14 +117,12 @@ struct ProductContentView: View {
                     onToggleFavorite: onToggleFavorite
                 )
 
-                // Product Info Section
                 VStack(alignment: .leading, spacing: 16) {
                     BriefProductInfo(product: briefProduct)
 
                     Divider()
                         .padding(.vertical, 8)
 
-                    // BDUI body — server-driven bottom half
                     BduiBodySection(state: bduiBodyState, onAction: onAction)
                 }
                 .padding(.horizontal, 16)

@@ -41,6 +41,7 @@ private struct FavoritesTabbedContent: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            Color.clear.frame(height: 58)
             NotificationPermissionBanner(
                 permissionStatus: viewModel.favoritesState.notificationPermissionStatus,
                 showBanner: viewModel.favoritesState.showNotificationBanner,
@@ -170,7 +171,7 @@ private struct ProductGrid: View {
     ]
 
     var body: some View {
-        ScrollableVStack(onScroll: onScrollOffsetChange) {
+        ReactiveScrollView(onScroll: onScrollOffsetChange, showTopInset: false) {
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(products, id: \.id) { product in
                     ProductCardWithHeart(
