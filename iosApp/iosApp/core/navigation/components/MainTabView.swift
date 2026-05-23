@@ -143,7 +143,6 @@ struct MainTabView: View {
         NavigationStack(path: $profilePath) {
             ComposeProfileView()
                 .navigationBarTitleDisplayMode(.inline)
-                .navigationTitle(Tab.profile.title)
                 .navigationDestination(for: String.self) { productId in
                     ProductDetailView(
                         productId: productId,
