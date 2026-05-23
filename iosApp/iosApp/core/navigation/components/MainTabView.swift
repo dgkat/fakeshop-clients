@@ -24,15 +24,6 @@ struct MainTabView: View {
         notificationsPath.count > 0 || profilePath.count > 0
     }
 
-    init() {
-        let appearance = UITabBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(FakeShopColors.surface)
-
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
-    }
-
     var body: some View {
         SearchBarContainer(
             searchViewModel: searchViewModel,
@@ -47,15 +38,21 @@ struct MainTabView: View {
                 }
             }
         ) {
-            TabView(selection: $selectedTab) {
+            ZStack {
                 homeTab
+                    .opacity(selectedTab == .home ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .home)
                 favoritesTab
+                    .opacity(selectedTab == .favorites ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .favorites)
                 notificationsTab
+                    .opacity(selectedTab == .notifications ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .notifications)
                 profileTab
+                    .opacity(selectedTab == .profile ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .profile)
             }
             .tint(FakeShopColors.primary)
-            .toolbar(.hidden, for: .tabBar)
-            .animation(.none, value: selectedTab)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             CustomTabBar(selectedTab: $selectedTab, isOnDetailScreen: isOnDetailScreen) { tab in
@@ -104,8 +101,6 @@ struct MainTabView: View {
                 )
             }
         }
-        .tabItem { Label(Tab.home.title, systemImage: selectedTab == .home ? Tab.home.iconFilled : Tab.home.icon) }
-        .tag(Tab.home)
     }
 
     @ViewBuilder private var favoritesTab: some View {
@@ -121,8 +116,6 @@ struct MainTabView: View {
                 )
             }
         }
-        .tabItem { Label(Tab.favorites.title, systemImage: selectedTab == .favorites ? Tab.favorites.iconFilled : Tab.favorites.icon) }
-        .tag(Tab.favorites)
     }
 
     @ViewBuilder private var notificationsTab: some View {
@@ -133,25 +126,21 @@ struct MainTabView: View {
                         productId: productId,
                         onScrollOffsetChange: { offset in scrollOffset = offset }
                     )
-                    }
+                }
         }
-        .tabItem { Label(Tab.notifications.title, systemImage: selectedTab == .notifications ? Tab.notifications.iconFilled : Tab.notifications.icon) }
-        .tag(Tab.notifications)
     }
 
     @ViewBuilder private var profileTab: some View {
         NavigationStack(path: $profilePath) {
             ComposeProfileView()
-                .navigationBarTitleDisplayMode(.inline)
+                .toolbar(.hidden, for: .navigationBar)
                 .navigationDestination(for: String.self) { productId in
                     ProductDetailView(
                         productId: productId,
                         onScrollOffsetChange: { offset in scrollOffset = offset }
                     )
-                    }
+                }
         }
-        .tabItem { Label(Tab.profile.title, systemImage: selectedTab == .profile ? Tab.profile.iconFilled : Tab.profile.icon) }
-        .tag(Tab.profile)
     }
 
     private func handleNavigationChange(oldPath: NavigationPath, newPath: NavigationPath, tab: Tab) {
@@ -202,4 +191,3 @@ private struct CustomTabBar: View {
         }
     }
 }
-
