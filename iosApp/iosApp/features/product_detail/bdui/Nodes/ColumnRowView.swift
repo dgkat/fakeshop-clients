@@ -30,11 +30,9 @@ struct RowView: View {
     var body: some View {
         HStack(alignment: .top, spacing: spacing(node.spacing)) {
             ForEach(Array(node.children.enumerated()), id: \.offset) { _, child in
-                let weight = child.weight?.floatValue
-                if let w = weight {
+                if child.weight != nil {
                     BduiNodeView(node: child, data: data, onAction: onAction)
                         .frame(maxWidth: .infinity)
-                        .layoutPriority(Double(w))
                 } else {
                     BduiNodeView(node: child, data: data, onAction: onAction)
                 }

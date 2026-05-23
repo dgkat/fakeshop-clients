@@ -12,22 +12,24 @@ struct ImageNodeView: View {
 
     var body: some View {
         let url = (node.bind.map { data.resolveString(path: $0) } ?? nil) ?? ""
-        if let u = URL(string: url), !url.isEmpty {
-            AsyncImage(url: u) { image in
-                image.resizable().aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Rectangle().fill(FakeShopColors.surfaceVariant)
-            }
+        // Color.clear drives the layout size (responds purely to proposed width as a 1:1 square).
+        // AsyncImage is an overlay so its post-load natural dimensions never escape the frame.
+        Color.clear
             .aspectRatio(1, contentMode: .fit)
-            .frame(maxWidth: .infinity)
+            .overlay(
+                Group {
+                    if let u = URL(string: url), !url.isEmpty {
+                        AsyncImage(url: u) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Rectangle().fill(FakeShopColors.surfaceVariant)
+                        }
+                    } else {
+                        Rectangle().fill(FakeShopColors.surfaceVariant)
+                    }
+                }
+            )
             .clipShape(RoundedRectangle(cornerRadius: 8))
-        } else {
-            Rectangle()
-                .fill(FakeShopColors.surfaceVariant)
-                .aspectRatio(1, contentMode: .fit)
-                .frame(maxWidth: .infinity)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-        }
     }
 }
 
