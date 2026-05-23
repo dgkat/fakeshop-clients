@@ -55,6 +55,7 @@ struct MainTabView: View {
             }
             .tint(FakeShopColors.primary)
             .toolbar(.hidden, for: .tabBar)
+            .animation(.none, value: selectedTab)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             CustomTabBar(selectedTab: $selectedTab, isOnDetailScreen: isOnDetailScreen) { tab in
