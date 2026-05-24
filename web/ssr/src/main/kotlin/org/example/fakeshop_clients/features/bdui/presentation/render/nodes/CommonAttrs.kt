@@ -9,7 +9,7 @@ internal fun CommonAttributeGroupFacade.applyNodeAttrs(node: UiNode) {
     val tokens = mutableListOf<String>()
     node.alignment?.let { tokens += alignmentClass(it) }
     node.widthFraction?.let { tokens += "bdui-w-${(it * 100).toInt()}" }
-    node.weight?.let { attributes["style"] = "flex: ${it};" }
+    node.weight?.let { attributes["style"] = "flex: ${it}; min-width: 0;" }
     if (tokens.isNotEmpty()) {
         val existing = attributes["class"]
         attributes["class"] = if (existing.isNullOrBlank()) tokens.joinToString(" ") else "$existing ${tokens.joinToString(" ")}"

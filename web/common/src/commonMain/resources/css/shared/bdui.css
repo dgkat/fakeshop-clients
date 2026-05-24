@@ -35,7 +35,6 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  flex-wrap: wrap;
 }
 
 .bdui-section {
