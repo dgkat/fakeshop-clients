@@ -29,12 +29,14 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  text-align: start;
 }
 
 .bdui-row {
   display: flex;
   flex-direction: row;
   width: 100%;
+  text-align: start;
 }
 
 .bdui-section {
