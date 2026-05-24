@@ -44,6 +44,40 @@ struct BduiNodeView: View {
     }
 }
 
+/// Single-child layout that allocates `fraction * parentWidth` to its child and positions it
+/// according to `alignment` within the full parent width. Unlike GeometryReader it correctly
+/// reports the child's actual height to the parent, so ScrollView contentSize is never underestimated.
+private struct FractionalWidthLayout: Layout {
+    let fraction: Float
+    let alignment: NodeAlignment?
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard let totalWidth = proposal.width, totalWidth > 0 else {
+            return subviews.first?.sizeThatFits(.unspecified) ?? .zero
+        }
+        let childWidth = totalWidth * CGFloat(fraction)
+        let childHeight = subviews.first?.sizeThatFits(
+            ProposedViewSize(width: childWidth, height: proposal.height)
+        ).height ?? 0
+        return CGSize(width: totalWidth, height: childHeight)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard let subview = subviews.first else { return }
+        let childWidth = bounds.width * CGFloat(fraction)
+        let x: CGFloat
+        switch alignment {
+        case .center?: x = bounds.minX + (bounds.width - childWidth) / 2
+        case .end?:    x = bounds.maxX - childWidth
+        default:       x = bounds.minX
+        }
+        subview.place(
+            at: CGPoint(x: x, y: bounds.minY),
+            proposal: ProposedViewSize(width: childWidth, height: proposal.height)
+        )
+    }
+}
+
 private struct NodeLayoutModifier: ViewModifier {
     let node: UiNode
 
@@ -53,9 +87,8 @@ private struct NodeLayoutModifier: ViewModifier {
 
         Group {
             if let w = widthFraction {
-                GeometryReader { proxy in
-                    aligned(content: content, alignment: alignment)
-                        .frame(width: proxy.size.width * CGFloat(w))
+                FractionalWidthLayout(fraction: w, alignment: alignment) {
+                    content
                 }
             } else {
                 aligned(content: content, alignment: alignment)

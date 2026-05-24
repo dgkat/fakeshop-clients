@@ -10,7 +10,7 @@ struct SpacerNodeView: View {
     let node: UiNodeSpacer
 
     var body: some View {
-        Spacer().frame(height: spacerHeight(node.size))
+        Color.clear.frame(height: spacerHeight(node.size))
     }
 }
 

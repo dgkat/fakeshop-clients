@@ -39,6 +39,7 @@ struct ReactiveScrollView<Content: View>: View {
     }
 
     private let searchBarHeight: CGFloat = 58
+    private let tabBarClearance: CGFloat = 80
 
     private var totalHeight: CGFloat {
         guard
@@ -63,6 +64,7 @@ struct ReactiveScrollView<Content: View>: View {
                         )
                         .frame(height: 0)
                     )
+                Color.clear.frame(height: tabBarClearance)
             }
         }
     }
