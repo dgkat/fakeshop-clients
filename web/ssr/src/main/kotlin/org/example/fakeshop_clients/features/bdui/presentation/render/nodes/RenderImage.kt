@@ -10,14 +10,9 @@ import org.example.fakeshop_clients.features.bdui.domain.models.resolveStringLis
 
 fun FlowContent.renderImage(node: UiNode.Image, data: JsonObject) {
     val url = node.bind?.let { data.resolveString(it) }
-    if (url.isNullOrBlank()) {
-        div(classes = "bdui-image bdui-image-placeholder") {
-            applyNodeAttrs(node)
-        }
-    } else {
-        img(src = url, alt = "", classes = "bdui-image") {
-            applyNodeAttrs(node)
-        }
+    if (url.isNullOrBlank()) return
+    img(src = url, alt = "", classes = "bdui-image") {
+        applyNodeAttrs(node)
     }
 }
 

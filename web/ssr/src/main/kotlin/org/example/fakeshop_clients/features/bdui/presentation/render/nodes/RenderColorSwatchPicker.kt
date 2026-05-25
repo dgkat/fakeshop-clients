@@ -9,7 +9,7 @@ import org.example.fakeshop_clients.features.bdui.domain.models.resolveColorList
 import org.example.fakeshop_clients.features.bdui.domain.models.resolveString
 
 fun FlowContent.renderColorSwatchPicker(node: UiNode.ColorSwatchPicker, data: JsonObject, screen: String) {
-    val entries = node.bind?.let { data.resolveColorList(it) } ?: emptyList()
+    val entries = node.bind?.let { data.resolveColorList(it) }?.takeIf { it.isNotEmpty() } ?: return
     val selected = data.resolveString("data.selectedColor")
     div(classes = "bdui-color-swatch-picker") {
         applyNodeAttrs(node)

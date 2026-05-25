@@ -9,7 +9,7 @@ import org.example.fakeshop_clients.features.bdui.domain.models.resolveString
 import org.example.fakeshop_clients.features.bdui.domain.models.resolveStringList
 
 fun FlowContent.renderSizeSelector(node: UiNode.SizeSelector, data: JsonObject, screen: String) {
-    val sizes = node.bind?.let { data.resolveStringList(it) } ?: emptyList()
+    val sizes = node.bind?.let { data.resolveStringList(it) }?.takeIf { it.isNotEmpty() } ?: return
     val selected = data.resolveString("data.selectedSize")
     div(classes = "bdui-size-selector") {
         applyNodeAttrs(node)
