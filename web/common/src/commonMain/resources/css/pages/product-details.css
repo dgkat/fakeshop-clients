@@ -173,6 +173,11 @@
     white-space: pre-line;
 }
 
+/* BDUI bottom half */
+.product-detail-bdui {
+    padding: 0 var(--spacing-lg);
+}
+
 /* Desktop layout */
 @media (min-width: 769px) {
     .product-detail {
@@ -185,6 +190,10 @@
         display: flex;
         flex-direction: row;
         gap: var(--spacing-xxxl);
+        padding: 0 var(--spacing-xl);
+    }
+
+    .product-detail-bdui {
         padding: 0 var(--spacing-xl);
     }
 
