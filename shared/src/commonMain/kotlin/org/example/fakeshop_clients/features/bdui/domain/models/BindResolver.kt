@@ -38,17 +38,34 @@ fun JsonObject.resolveStringList(path: String): List<String>? {
     return element.map { (it as? JsonPrimitive)?.content ?: return null }
 }
 
-/**
- * Specs are objects with arbitrary keys → primitive values.
- * Returns ordered (key, value) pairs to preserve template-defined order.
- */
-fun JsonObject.resolveSpecPairs(path: String): List<Pair<String, String>>? {
-    val element = resolve(path) ?: return null
-    if (element !is JsonObject) return null
-    return element.entries.map { (k, v) ->
-        k to ((v as? JsonPrimitive)?.content ?: v.toString())
-    }
+sealed class SpecItem {
+    data class Group(val title: String) : SpecItem()
+    data class Row(val label: String, val value: String) : SpecItem()
 }
+
+/**
+ * Resolves a spec array into a flat list of [SpecItem]s.
+ * Each array element may carry an optional "group" (emitted as a [SpecItem.Group] header
+ * before the row) plus required "label"/"value" fields (emitted as a [SpecItem.Row]).
+ */
+fun JsonObject.resolveSpecItems(path: String): List<SpecItem>? {
+    val element = resolve(path) ?: return null
+    if (element !is JsonArray) return null
+    val result = mutableListOf<SpecItem>()
+    for (item in element) {
+        val obj = item as? JsonObject ?: continue
+        val group = (obj["group"] as? JsonPrimitive)?.content
+        val label = (obj["label"] as? JsonPrimitive)?.content
+        val value = (obj["value"] as? JsonPrimitive)?.content
+        if (group != null) result.add(SpecItem.Group(group))
+        if (label != null && value != null) result.add(SpecItem.Row(label, value))
+    }
+    return result.takeIf { it.isNotEmpty() }
+}
+
+/** Legacy flat-object variant kept for callers that don't need group headers. */
+fun JsonObject.resolveSpecPairs(path: String): List<Pair<String, String>>? =
+    resolveSpecItems(path)?.filterIsInstance<SpecItem.Row>()?.map { it.label to it.value }?.takeIf { it.isNotEmpty() }
 
 /**
  * Color list is an array of objects with `name` and `hex` keys.

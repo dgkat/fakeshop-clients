@@ -23,5 +23,8 @@ fun buildPdpBindData(brief: UiBriefProduct, detailed: DetailedProduct): JsonObje
     put("category", JsonPrimitive(brief.category))
     put("fullDescription", detailed.fullDescription?.let(::JsonPrimitive) ?: JsonNull)
     put("galleryUrls", JsonArray(detailed.galleryUrls.map(::JsonPrimitive)))
+    // Spread data keys at top level for direct bind paths (e.g. "bduiTitle")
     detailed.data.forEach { (key, value) -> put(key, value) }
+    // Also nest under "data" so paths like "data.specs" resolve correctly
+    put("data", detailed.data)
 }

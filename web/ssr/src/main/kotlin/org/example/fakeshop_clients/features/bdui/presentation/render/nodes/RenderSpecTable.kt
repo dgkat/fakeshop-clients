@@ -2,19 +2,26 @@ package org.example.fakeshop_clients.features.bdui.presentation.render.nodes
 
 import kotlinx.html.FlowContent
 import kotlinx.html.dd
+import kotlinx.html.div
 import kotlinx.html.dl
 import kotlinx.html.dt
 import kotlinx.serialization.json.JsonObject
+import org.example.fakeshop_clients.features.bdui.domain.models.SpecItem
 import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
-import org.example.fakeshop_clients.features.bdui.domain.models.resolveSpecPairs
+import org.example.fakeshop_clients.features.bdui.domain.models.resolveSpecItems
 
 fun FlowContent.renderSpecTable(node: UiNode.SpecTable, data: JsonObject) {
-    val rows = node.bind?.let { data.resolveSpecPairs(it) }?.takeIf { it.isNotEmpty() } ?: return
+    val items = node.bind?.let { data.resolveSpecItems(it) }?.takeIf { it.isNotEmpty() } ?: return
     dl(classes = "bdui-spec-table") {
         applyNodeAttrs(node)
-        rows.forEach { (label, value) ->
-            dt(classes = "bdui-spec-label") { +label }
-            dd(classes = "bdui-spec-value") { +value }
+        items.forEach { item ->
+            when (item) {
+                is SpecItem.Group -> div(classes = "bdui-spec-group") { +item.title }
+                is SpecItem.Row -> {
+                    dt(classes = "bdui-spec-label") { +item.label }
+                    dd(classes = "bdui-spec-value") { +item.value }
+                }
+            }
         }
     }
 }

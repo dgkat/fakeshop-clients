@@ -11,17 +11,25 @@ struct SpecTableView: View {
     let data: BindData
 
     var body: some View {
-        let pairs: [KotlinPair<NSString, NSString>] = (node.bind.map { data.resolveSpecPairs(path: $0) } ?? nil) ?? []
-        if !pairs.isEmpty {
+        let items: [SpecItem] = (node.bind.map { data.resolveSpecItems(path: $0) } ?? nil) ?? []
+        if !items.isEmpty {
             VStack(alignment: .leading, spacing: 4) {
-                ForEach(Array(pairs.enumerated()), id: \.offset) { _, pair in
-                    HStack {
-                        Text((pair.first as String?) ?? "")
-                            .font(.system(size: 12))
-                            .foregroundColor(FakeShopColors.onSurfaceVariant)
-                        Spacer(minLength: 8)
-                        Text((pair.second as String?) ?? "")
-                            .font(.system(size: 12))
+                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                    switch onEnum(of: item) {
+                    case .group(let g):
+                        Text(g.title)
+                            .font(.system(size: 12, weight: .semibold))
+                            .padding(.top, 8)
+                            .padding(.bottom, 2)
+                    case .row(let r):
+                        HStack {
+                            Text(r.label)
+                                .font(.system(size: 12))
+                                .foregroundColor(FakeShopColors.onSurfaceVariant)
+                            Spacer(minLength: 8)
+                            Text(r.value)
+                                .font(.system(size: 12))
+                        }
                     }
                 }
             }

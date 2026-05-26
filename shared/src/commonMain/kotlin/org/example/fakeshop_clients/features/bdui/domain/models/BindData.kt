@@ -13,6 +13,7 @@ class BindData(val json: JsonObject) {
     fun resolveDouble(path: String): Double? = json.resolveDouble(path)
     fun resolveStringList(path: String): List<String>? = json.resolveStringList(path)
     fun resolveSpecPairs(path: String): List<Pair<String, String>>? = json.resolveSpecPairs(path)
+    fun resolveSpecItems(path: String): List<SpecItem>? = json.resolveSpecItems(path)
     fun resolveColorList(path: String): List<ColorEntry>? = json.resolveColorList(path)
 
     /**
