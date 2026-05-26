@@ -12,24 +12,16 @@ struct ImageNodeView: View {
 
     var body: some View {
         let url = (node.bind.map { data.resolveString(path: $0) } ?? nil) ?? ""
-        // Color.clear drives the layout size (responds purely to proposed width as a 1:1 square).
-        // AsyncImage is an overlay so its post-load natural dimensions never escape the frame.
-        Color.clear
+        if let u = URL(string: url), !url.isEmpty {
+            AsyncImage(url: u) { image in
+                image.resizable().aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Color.clear
+            }
             .aspectRatio(1, contentMode: .fit)
-            .overlay(
-                Group {
-                    if let u = URL(string: url), !url.isEmpty {
-                        AsyncImage(url: u) { image in
-                            image.resizable().aspectRatio(contentMode: .fill)
-                        } placeholder: {
-                            Rectangle().fill(FakeShopColors.surfaceVariant)
-                        }
-                    } else {
-                        Rectangle().fill(FakeShopColors.surfaceVariant)
-                    }
-                }
-            )
+            .frame(maxWidth: .infinity)
             .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
     }
 }
 

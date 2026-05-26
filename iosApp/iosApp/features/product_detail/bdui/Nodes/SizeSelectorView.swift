@@ -15,26 +15,28 @@ struct SizeSelectorView: View {
         let sizes = (node.bind.map { data.resolveStringList(path: $0) } ?? nil) ?? []
         let selected = data.resolveString(path: "data.selectedSize")
 
-        FlowHStack(spacing: 8) {
-            ForEach(Array(sizes.enumerated()), id: \.offset) { _, size in
-                Button(action: {
-                    guard !node.actionId.isEmpty else { return }
-                    let ctx = buildActionContext(bindings: node.contextBindings, data: data, extra: ["size": size])
-                    onAction(node.actionId, ctx)
-                }) {
-                    Text(size)
-                        .font(.system(size: 13))
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 14)
-                        .background(selected == size ? FakeShopColors.primary : Color.clear)
-                        .foregroundColor(selected == size ? FakeShopColors.onPrimary : FakeShopColors.onSurface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 999)
-                                .stroke(selected == size ? FakeShopColors.primary : FakeShopColors.outline, lineWidth: 1)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 999))
+        if !sizes.isEmpty {
+            FlowHStack(spacing: 8) {
+                ForEach(Array(sizes.enumerated()), id: \.offset) { _, size in
+                    Button(action: {
+                        guard !node.actionId.isEmpty else { return }
+                        let ctx = buildActionContext(bindings: node.contextBindings, data: data, extra: ["size": size])
+                        onAction(node.actionId, ctx)
+                    }) {
+                        Text(size)
+                            .font(.system(size: 13))
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 14)
+                            .background(selected == size ? FakeShopColors.primary : Color.clear)
+                            .foregroundColor(selected == size ? FakeShopColors.onPrimary : FakeShopColors.onSurface)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 999)
+                                    .stroke(selected == size ? FakeShopColors.primary : FakeShopColors.outline, lineWidth: 1)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 999))
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .buttonStyle(PlainButtonStyle())
             }
         }
     }

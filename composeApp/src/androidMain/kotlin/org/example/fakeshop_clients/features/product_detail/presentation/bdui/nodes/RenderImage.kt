@@ -26,16 +26,13 @@ import org.example.fakeshop_clients.features.bdui.domain.models.resolveStringLis
 @Composable
 fun RenderImage(node: UiNode.Image, data: JsonObject) {
     val url = node.bind?.let { data.resolveString(it) }
-    if (url.isNullOrBlank()) {
-        ImagePlaceholder(label = "image", modifier = Modifier.fillMaxWidth().aspectRatio(1f))
-    } else {
-        AsyncImage(
-            model = url,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(8.dp))
-        )
-    }
+    if (url.isNullOrBlank()) return
+    AsyncImage(
+        model = url,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(8.dp))
+    )
 }
 
 @Composable

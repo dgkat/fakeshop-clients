@@ -26,7 +26,7 @@ import org.example.fakeshop_clients.features.product_detail.presentation.bdui.bu
 
 @Composable
 fun RenderColorSwatchPicker(node: UiNode.ColorSwatchPicker, data: JsonObject) {
-    val entries = node.bind?.let { data.resolveColorList(it) } ?: emptyList()
+    val entries = node.bind?.let { data.resolveColorList(it) }?.takeIf { it.isNotEmpty() } ?: return
     val selectedName: String? = data.resolveString("data.selectedColor")
     val onAction = LocalBduiActionHandler.current
 

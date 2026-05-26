@@ -19,7 +19,7 @@ import org.example.fakeshop_clients.features.product_detail.presentation.bdui.bu
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RenderSizeSelector(node: UiNode.SizeSelector, data: JsonObject) {
-    val sizes: List<String> = node.bind?.let { data.resolveStringList(it) } ?: emptyList()
+    val sizes: List<String> = node.bind?.let { data.resolveStringList(it) }?.takeIf { it.isNotEmpty() } ?: return
     val selected: String? = data.resolveString("data.selectedSize")
     val onAction = LocalBduiActionHandler.current
 

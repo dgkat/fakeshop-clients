@@ -14,7 +14,8 @@ import org.example.fakeshop_clients.features.bdui.domain.models.tokens.TextStyle
 
 @Composable
 fun RenderText(node: UiNode.Text, data: JsonObject) {
-    val value = node.bind?.let { data.resolveString(it) } ?: ""
+    val value = node.bind?.let { data.resolveString(it) }
+    if (value.isNullOrBlank()) return
     val textStyle = when (node.style) {
         TextStyle.title -> MaterialTheme.typography.headlineSmall
         TextStyle.subtitle -> MaterialTheme.typography.titleMedium

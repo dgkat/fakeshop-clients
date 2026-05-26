@@ -12,8 +12,10 @@ struct PriceBlockView: View {
 
     var body: some View {
         let price = (node.bind.map { data.resolveDouble(path: $0)?.doubleValue } ?? nil)
-        Text(price.map { String(format: "$%.2f", $0) } ?? "—")
-            .font(.system(size: 28, weight: .semibold))
-            .foregroundColor(FakeShopColors.primary)
+        if let price {
+            Text(String(format: "$%.2f", price))
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundColor(FakeShopColors.primary)
+        }
     }
 }
