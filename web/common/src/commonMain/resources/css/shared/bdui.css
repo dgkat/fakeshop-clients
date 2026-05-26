@@ -116,6 +116,7 @@
 .bdui-spec-value {
   font-size: 12px;
   margin: 0;
+  text-align: right;
 }
 
 /* ===== Size selector ===== */
