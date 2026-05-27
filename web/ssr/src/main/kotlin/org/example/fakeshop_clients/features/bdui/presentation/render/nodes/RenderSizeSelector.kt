@@ -18,6 +18,7 @@ fun FlowContent.renderSizeSelector(node: UiNode.SizeSelector, data: JsonObject, 
             button(classes = if (isSelected) "bdui-size-chip selected" else "bdui-size-chip") {
                 attributes["data-value"] = size
                 attributes["type"] = "button"
+                attributes["aria-pressed"] = isSelected.toString()
 
                 if (node.actionId.isNotEmpty()) {
                     val ctx = buildResolvedContext(node.contextBindings, data)
