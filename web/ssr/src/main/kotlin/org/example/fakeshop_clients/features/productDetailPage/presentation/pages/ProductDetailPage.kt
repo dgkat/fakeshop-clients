@@ -44,9 +44,20 @@ fun HTML.productDetailPage(
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
         title { +brief.name }
         link(rel = "icon", type = "image/x-icon", href = "/static/favicon_io/favicon.ico")
-        link(rel = "icon", type = "image/png", href = "/static/favicon_io/favicon-32x32.png") { attributes["sizes"] = "32x32" }
-        link(rel = "icon", type = "image/png", href = "/static/favicon_io/favicon-16x16.png") { attributes["sizes"] = "16x16" }
-        link(rel = "apple-touch-icon", href = "/static/favicon_io/apple-touch-icon.png") { attributes["sizes"] = "180x180" }
+        link(
+            rel = "icon",
+            type = "image/png",
+            href = "/static/favicon_io/favicon-32x32.png"
+        ) { attributes["sizes"] = "32x32" }
+        link(
+            rel = "icon",
+            type = "image/png",
+            href = "/static/favicon_io/favicon-16x16.png"
+        ) { attributes["sizes"] = "16x16" }
+        link(
+            rel = "apple-touch-icon",
+            href = "/static/favicon_io/apple-touch-icon.png"
+        ) { attributes["sizes"] = "180x180" }
         link(rel = "manifest", href = "/static/favicon_io/site.webmanifest")
 
         // SEO: hreflang alternate links
@@ -220,22 +231,28 @@ fun HTML.productDetailPage(
         script(src = "/static/js/universal-hydrator.js") {}
         script(src = "/static/js/view-transitions.js") {}
 
-        // ===== BDUI selection update handler =====
+        // ===== BDUI selection — driven by click, not by server response =====
+        // Navigate to new URL when a size or color chip is clicked in future
         script {
             unsafe {
                 +"""
-document.addEventListener('bdui:selectionUpdate', function(e) {
-    var patch = e.detail;
-    if (!patch || !patch.data) return;
-    if (patch.data.selectedSize !== undefined) {
-        document.querySelectorAll('.bdui-size-chip').forEach(function(chip) {
-            chip.classList.toggle('selected', chip.dataset.value === patch.data.selectedSize);
+document.addEventListener('click', function(e) {
+    var chip = e.target.closest('.bdui-size-chip');
+    if (chip) {
+        chip.closest('.bdui-size-selector').querySelectorAll('.bdui-size-chip').forEach(function(c) {
+            c.classList.remove('selected');
+            c.setAttribute('aria-pressed', 'false');
         });
+        chip.classList.add('selected');
+        chip.setAttribute('aria-pressed', 'true');
     }
-    if (patch.data.selectedColor !== undefined) {
-        document.querySelectorAll('.bdui-color-swatch').forEach(function(swatch) {
-            swatch.classList.toggle('selected', swatch.dataset.value === patch.data.selectedColor);
+
+    var swatch = e.target.closest('.bdui-color-swatch');
+    if (swatch) {
+        swatch.closest('.bdui-color-swatch-picker').querySelectorAll('.bdui-color-swatch').forEach(function(s) {
+            s.classList.remove('selected');
         });
+        swatch.classList.add('selected');
     }
 });
 """.trimIndent()

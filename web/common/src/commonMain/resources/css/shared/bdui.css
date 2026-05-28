@@ -165,6 +165,8 @@
 
 .bdui-color-swatch:focus { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
+.bdui-color-swatch.selected { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
 /* ===== Buttons ===== */
 .bdui-btn {
   display: inline-flex;
