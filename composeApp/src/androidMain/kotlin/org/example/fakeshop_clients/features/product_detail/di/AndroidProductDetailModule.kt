@@ -17,6 +17,7 @@ val androidProductDetailModule = module {
             productDetailService = get(),
             bduiTemplateService = get(),
             bduiActionService = get(),
+            replaceService = get(),
             favoritesService = get(),
             briefProductMapper = get(),
             sessionObserver = get()
