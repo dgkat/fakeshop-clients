@@ -1,11 +1,15 @@
 package org.example.fakeshop_clients.features.bdui.presentation.render.nodes
 
 import kotlinx.html.CommonAttributeGroupFacade
+import org.example.fakeshop_clients.features.bdui.domain.BduiReplaceResolver
 import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
 import org.example.fakeshop_clients.features.bdui.domain.models.tokens.NodeAlignment
 import org.example.fakeshop_clients.features.bdui.domain.models.tokens.Spacing
 
 internal fun CommonAttributeGroupFacade.applyNodeAttrs(node: UiNode) {
+    // A container slot's `id` makes it an htmx swap target for the Replace feature. Scoped to the
+    // same container set the swap honors (Column/Row/Section) via slotIdOf — never other nodes.
+    BduiReplaceResolver.slotIdOf(node)?.let { attributes["id"] = it }
     val tokens = mutableListOf<String>()
     node.alignment?.let { tokens += alignmentClass(it) }
     node.widthFraction?.let { tokens += "bdui-w-${(it * 100).toInt()}" }

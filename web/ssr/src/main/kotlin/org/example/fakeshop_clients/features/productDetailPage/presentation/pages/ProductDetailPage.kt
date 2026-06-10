@@ -201,7 +201,7 @@ fun HTML.productDetailPage(
 
                 // BDUI body — server-driven bottom half
                 div(classes = "product-detail-bdui") {
-                    renderBduiNode(pdpData.template.root, pdpData.bindData, "pdp")
+                    renderBduiNode(pdpData.template.root, pdpData.bindData, "pdp", brief.id)
                 }
 
                 // Toast region for BDUI action feedback (HTMX swaps content here)

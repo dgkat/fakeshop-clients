@@ -17,11 +17,11 @@ import org.example.fakeshop_clients.features.bdui.presentation.render.nodes.rend
 import org.example.fakeshop_clients.features.bdui.presentation.render.nodes.renderSpecTable
 import org.example.fakeshop_clients.features.bdui.presentation.render.nodes.renderText
 
-fun FlowContent.renderBduiNode(node: UiNode, data: JsonObject, screen: String) {
+fun FlowContent.renderBduiNode(node: UiNode, data: JsonObject, screen: String, productId: String) {
     when (node) {
-        is UiNode.Column -> renderColumn(node, data, screen)
-        is UiNode.Row -> renderRow(node, data, screen)
-        is UiNode.Section -> renderSection(node, data, screen)
+        is UiNode.Column -> renderColumn(node, data, screen, productId)
+        is UiNode.Row -> renderRow(node, data, screen, productId)
+        is UiNode.Section -> renderSection(node, data, screen, productId)
         is UiNode.Text -> renderText(node, data)
         is UiNode.Image -> renderImage(node, data)
         is UiNode.ImageGallery -> renderImageGallery(node, data)
@@ -29,7 +29,7 @@ fun FlowContent.renderBduiNode(node: UiNode, data: JsonObject, screen: String) {
         is UiNode.SpecTable -> renderSpecTable(node, data)
         is UiNode.SizeSelector -> renderSizeSelector(node, data, screen)
         is UiNode.ColorSwatchPicker -> renderColorSwatchPicker(node, data, screen)
-        is UiNode.Button -> renderButton(node, data, screen)
+        is UiNode.Button -> renderButton(node, data, screen, productId)
         is UiNode.Spacer -> renderSpacer(node)
         is UiNode.Divider -> renderDivider()
     }

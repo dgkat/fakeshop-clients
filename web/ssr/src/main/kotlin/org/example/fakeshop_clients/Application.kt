@@ -18,6 +18,7 @@ import org.example.fakeshop_clients.core.i18n.WebStrings
 import org.example.fakeshop_clients.features.homePage.presentation.homeRoute
 import org.example.fakeshop_clients.features.bdui.di.ssrBduiModule
 import org.example.fakeshop_clients.features.bdui.presentation.bduiActionRoute
+import org.example.fakeshop_clients.features.bdui.presentation.bduiReplaceRoute
 import org.example.fakeshop_clients.features.productDetailPage.di.ssrProductDetailModule
 import org.example.fakeshop_clients.features.productDetailPage.presentation.productApiRoutes
 import org.example.fakeshop_clients.features.productDetailPage.presentation.productRoutes
@@ -93,6 +94,7 @@ fun Application.configureRouting() {
         // HTMX API routes (no locale prefix)
         productApiRoutes()
         bduiActionRoute()
+        bduiReplaceRoute()
 
         get("/health") {
             call.respondText("OK", status = HttpStatusCode.OK)
