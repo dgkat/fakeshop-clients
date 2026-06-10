@@ -10,18 +10,52 @@ typealias JsonObject = [String: Kotlinx_serialization_jsonJsonElement]
 typealias BduiActionHandler = (String, JsonObject) -> Void
 
 /// Resolves contextBindings from BindData and merges extra literal values into a JsonObject.
+/// `targetSlotId` (replace action) is authored as a verbatim literal, not a bind path, so it is
+/// pulled out of the path-resolved bindings and passed through as a literal instead.
 func buildActionContext(bindings: [String: String], data: BindData, extra: [String: String] = [:]) -> JsonObject {
-    return data.resolveActionContext(bindings: bindings, extra: extra)
+    let targetKey = BduiConstants.shared.TARGET_SLOT_ID_KEY
+    var pathBindings = bindings
+    var literals = extra
+    if let targetSlotId = pathBindings.removeValue(forKey: targetKey) {
+        literals[targetKey] = targetSlotId
+    }
+    return data.resolveActionContext(bindings: pathBindings, extra: literals)
+}
+
+/// Replaced slots in scope for the current subtree, keyed by `targetSlotId`. Empty by default and
+/// re-scoped to empty inside a replacement so the standalone layout never re-triggers a swap.
+private struct BduiReplacedSlotsKey: EnvironmentKey {
+    static let defaultValue: [String: ResolvedReplace] = [:]
+}
+
+extension EnvironmentValues {
+    var bduiReplacedSlots: [String: ResolvedReplace] {
+        get { self[BduiReplacedSlotsKey.self] }
+        set { self[BduiReplacedSlotsKey.self] = newValue }
+    }
 }
 
 struct BduiNodeView: View {
     let node: UiNode
     let data: BindData
     let onAction: BduiActionHandler
+    @Environment(\.bduiReplacedSlots) private var replacedSlots
 
     var body: some View {
-        renderedBody
-            .modifier(NodeLayoutModifier(node: node))
+        if let replacement = BduiReplaceResolver.shared.replacementFor(node: node, replacedSlots: replacedSlots) {
+            // Standalone-scope replace: render the replacement layout against its own `values`
+            // instead of the original subtree + product bindData. Clear replacedSlots for the
+            // subtree so the standalone layout can't recursively re-trigger a swap.
+            BduiNodeView(
+                node: replacement.node,
+                data: BindData(json: replacement.values),
+                onAction: onAction
+            )
+            .environment(\.bduiReplacedSlots, [:])
+        } else {
+            renderedBody
+                .modifier(NodeLayoutModifier(node: node))
+        }
     }
 
     @ViewBuilder

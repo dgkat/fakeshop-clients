@@ -37,6 +37,7 @@ struct BduiBodySection: View {
                 data: ready.bindData,
                 onAction: onAction
             )
+            .environment(\.bduiReplacedSlots, ready.replacedSlots)
         }
     }
 
