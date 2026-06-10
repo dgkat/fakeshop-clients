@@ -3,11 +3,16 @@ package org.example.fakeshop_clients.features.product_detail.presentation.bdui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import org.example.fakeshop_clients.features.bdui.BduiConstants
+import org.example.fakeshop_clients.features.bdui.domain.BduiReplaceResolver
+import org.example.fakeshop_clients.features.bdui.domain.models.ResolvedReplace
 import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
 import org.example.fakeshop_clients.features.bdui.domain.models.resolve
 import org.example.fakeshop_clients.features.bdui.domain.models.tokens.NodeAlignment
@@ -27,20 +32,50 @@ import org.example.fakeshop_clients.features.product_detail.presentation.bdui.no
 
 val LocalBduiActionHandler = compositionLocalOf<(String, JsonObject) -> Unit> { { _, _ -> } }
 
+/**
+ * Replaced slots in scope for the current subtree, keyed by `targetSlotId`. Empty by default
+ * and re-scoped to empty inside a replacement so the standalone layout never re-triggers a swap.
+ */
+val LocalReplacedSlots = compositionLocalOf<Map<String, ResolvedReplace>> { emptyMap() }
+
 fun buildActionContext(bindings: Map<String, String>, data: JsonObject): JsonObject =
-    buildJsonObject { bindings.forEach { (key, path) -> data.resolve(path)?.let { put(key, it) } } }
+    buildJsonObject {
+        bindings.forEach { (key, value) ->
+            if (key == BduiConstants.TARGET_SLOT_ID_KEY) {
+                // `targetSlotId` is authored as a verbatim literal (replace action), not a
+                // bind path — pass it through unresolved so the slot swap can find its target.
+                put(key, value)
+            } else {
+                data.resolve(value)?.let { put(key, it) }
+            }
+        }
+    }
 
 @Composable
 fun BduiRenderer(
     root: UiNode,
     data: JsonObject,
+    replacedSlots: Map<String, ResolvedReplace> = emptyMap(),
     modifier: Modifier = Modifier
 ) {
-    RenderNode(root, data, modifier)
+    CompositionLocalProvider(LocalReplacedSlots provides replacedSlots) {
+        RenderNode(root, data, modifier)
+    }
 }
 
 @Composable
 fun RenderNode(node: UiNode, data: JsonObject, modifier: Modifier = Modifier) {
+    // Standalone-scope replace: if this container's slot was replaced, render the replacement
+    // layout against its own `values` instead of the original subtree + product bindData.
+    // Re-scope replacedSlots to empty so the replacement is self-contained (no recursive swap).
+    val replacement = BduiReplaceResolver.replacementFor(node, LocalReplacedSlots.current)
+    if (replacement != null) {
+        CompositionLocalProvider(LocalReplacedSlots provides emptyMap()) {
+            RenderNode(replacement.node, replacement.values, modifier)
+        }
+        return
+    }
+
     val widthFraction = node.widthFraction
     val alignment = node.alignment
 

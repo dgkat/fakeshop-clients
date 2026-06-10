@@ -22,7 +22,12 @@ fun BduiBodySection(state: BduiBodyState, modifier: Modifier = Modifier) {
     when (state) {
         is BduiBodyState.Loading -> BduiLoadingIndicator(modifier)
         is BduiBodyState.Error -> BduiErrorIndicator(state.error, modifier)
-        is BduiBodyState.Ready -> BduiRenderer(state.template.root, state.bindData.json, modifier)
+        is BduiBodyState.Ready -> BduiRenderer(
+            root = state.template.root,
+            data = state.bindData.json,
+            replacedSlots = state.replacedSlots,
+            modifier = modifier
+        )
     }
 }
 
