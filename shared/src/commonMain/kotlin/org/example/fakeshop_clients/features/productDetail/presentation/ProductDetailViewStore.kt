@@ -12,15 +12,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.fold
+import org.example.fakeshop_clients.features.bdui.BduiConstants
 import org.example.fakeshop_clients.features.bdui.domain.BduiActionService
 import org.example.fakeshop_clients.features.bdui.domain.BduiMutationApplier
 import org.example.fakeshop_clients.features.bdui.domain.BduiTemplateService
+import org.example.fakeshop_clients.features.bdui.domain.ReplaceService
 import org.example.fakeshop_clients.features.bdui.domain.buildPdpBindData
 import org.example.fakeshop_clients.features.bdui.domain.models.BduiMutation
 import org.example.fakeshop_clients.features.bdui.domain.models.BindData
+import org.example.fakeshop_clients.features.bdui.domain.models.ReplaceBinding
 import org.example.fakeshop_clients.features.bdui.domain.models.ToastSeverity
 import org.example.fakeshop_clients.features.bdui.presentation.BduiError
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
@@ -32,6 +37,7 @@ class ProductDetailViewStore(
     private val productDetailService: ProductDetailService,
     private val bduiTemplateService: BduiTemplateService,
     private val bduiActionService: BduiActionService,
+    private val replaceService: ReplaceService,
     private val favoritesService: FavoritesService,
     private val briefProductMapper: DomainToPresentationBriefProductMapper,
     private val sessionObserver: SessionObserver
@@ -44,6 +50,13 @@ class ProductDetailViewStore(
     val effects: SharedFlow<ProductDetailEffect> = _effects.asSharedFlow()
 
     private var currentProductId: String? = null
+
+    /**
+     * Latest replace wiring for the current product, cached so it can be folded into
+     * `Ready` regardless of whether the (non-blocking) bindings call resolves before or
+     * after the BDUI body becomes `Ready`. Reset on every product load.
+     */
+    private var currentReplaceBindings: List<ReplaceBinding> = emptyList()
 
     fun onEvent(event: ProductDetailEvent) {
         when (event) {
@@ -58,6 +71,7 @@ class ProductDetailViewStore(
 
     private fun loadProduct(productId: String) {
         currentProductId = productId
+        currentReplaceBindings = emptyList()
         _state.update {
             it.copy(
                 briefState = BriefProductState.Loading,
@@ -70,12 +84,31 @@ class ProductDetailViewStore(
         scope.launch {
             coroutineScope {
                 launch { loadBriefAndBdui(productId) }
+                launch { loadReplaceBindings(productId) }
                 launch {
                     val isFav = isFavorite(productId)
                     _state.update { it.copy(isFavorited = isFav) }
                 }
             }
         }
+    }
+
+    /**
+     * 4th, non-blocking PDP call. Never gates the body render: on success we cache the
+     * wiring and fold it into `Ready` if it already exists. Failure → leave it empty, so
+     * replace simply never fires (not a screen error).
+     */
+    private suspend fun loadReplaceBindings(productId: String) {
+        replaceService.getReplaceBindings(productId).fold(
+            onSuccess = { bindings ->
+                currentReplaceBindings = bindings
+                _state.update { state ->
+                    val ready = state.bduiBodyState as? BduiBodyState.Ready ?: return@update state
+                    state.copy(bduiBodyState = ready.copy(replaceBindings = bindings))
+                }
+            },
+            onError = { /* no-op: replace wiring stays empty */ }
+        )
     }
 
     private suspend fun isFavorite(productId: String): Boolean {
@@ -144,7 +177,13 @@ class ProductDetailViewStore(
                     )
                 )
                 _state.update {
-                    it.copy(bduiBodyState = BduiBodyState.Ready(templateRes.data, bindData))
+                    it.copy(
+                        bduiBodyState = BduiBodyState.Ready(
+                            template = templateRes.data,
+                            bindData = bindData,
+                            replaceBindings = currentReplaceBindings
+                        )
+                    )
                 }
             }
         }
@@ -178,6 +217,14 @@ class ProductDetailViewStore(
         idempotencyKey: String?
     ) {
         val ready = _state.value.bduiBodyState as? BduiBodyState.Ready ?: return
+
+        // `replace` is resolved entirely client-side — it is NOT a server action and must
+        // never be POSTed to /ui/action (the allowlist would 404 it).
+        if (actionId == BduiConstants.REPLACE_ACTION_ID) {
+            handleReplace(ready, context)
+            return
+        }
+
         scope.launch {
             bduiActionService.dispatch(
                 actionId = actionId,
@@ -197,6 +244,37 @@ class ProductDetailViewStore(
                         )
                     )
                 }
+            )
+        }
+    }
+
+    /**
+     * Resolves a `replace` action client-side and swaps the slot via the standalone-scope
+     * `replacedSlots` map. One-way: an already-replaced slot is ignored. A no-op result
+     * (no binding for the slot, or layout/data drift) leaves the UI untouched.
+     */
+    private fun handleReplace(ready: BduiBodyState.Ready, context: JsonObject) {
+        val targetSlotId = (context[BduiConstants.TARGET_SLOT_ID_KEY] as? JsonPrimitive)
+            ?.contentOrNull
+            ?: return
+        if (ready.replacedSlots.containsKey(targetSlotId)) return
+
+        scope.launch {
+            replaceService.resolve(ready.replaceBindings, targetSlotId).fold(
+                onSuccess = { resolved ->
+                    if (resolved != null) {
+                        _state.update { state ->
+                            val current = state.bduiBodyState as? BduiBodyState.Ready
+                                ?: return@update state
+                            state.copy(
+                                bduiBodyState = current.copy(
+                                    replacedSlots = current.replacedSlots + (targetSlotId to resolved)
+                                )
+                            )
+                        }
+                    }
+                },
+                onError = { /* best-effort: leave the original subtree in place */ }
             )
         }
     }
