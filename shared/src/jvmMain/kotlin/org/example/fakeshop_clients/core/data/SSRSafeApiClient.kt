@@ -10,7 +10,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.util.reflect.TypeInfo
+import io.ktor.util.reflect.typeInfo
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.features.core.models.Cookies
@@ -32,7 +32,7 @@ class SSRSafeApiClient(
             val response = httpClient.get(path) {
                 configureCookiesAndAuth(cookies)
             }
-            Result.Success(response.body(TypeInfo(T::class)))
+            Result.Success(response.body(typeInfo<T>()))
         } catch (e: Exception) {
             Result.Error(exceptionMapper.map(e))
         }
@@ -41,19 +41,18 @@ class SSRSafeApiClient(
     /**
      * Performs a POST request with body, cookie forwarding and automatic error handling.
      */
-    suspend inline fun <reified T : Any, B : Any> post(
+    suspend inline fun <reified T : Any, reified B : Any> post(
         path: String,
         body: B,
         cookies: Cookies
     ): Result<T, NetworkError> {
         return try {
-            val bodyType = TypeInfo(body::class)
             val response = httpClient.post(path) {
                 contentType(ContentType.Application.Json)
-                setBody(body, bodyType)
+                setBody(body, typeInfo<B>())
                 configureCookiesAndAuth(cookies)
             }
-            Result.Success(response.body(TypeInfo(T::class)))
+            Result.Success(response.body(typeInfo<T>()))
         } catch (e: Exception) {
             Result.Error(exceptionMapper.map(e))
         }
@@ -70,7 +69,7 @@ class SSRSafeApiClient(
             val response = httpClient.post(path) {
                 configureCookiesAndAuth(cookies)
             }
-            Result.Success(response.body(TypeInfo(T::class)))
+            Result.Success(response.body(typeInfo<T>()))
         } catch (e: Exception) {
             Result.Error(exceptionMapper.map(e))
         }
@@ -87,7 +86,7 @@ class SSRSafeApiClient(
             val response = httpClient.delete(path) {
                 configureCookiesAndAuth(cookies)
             }
-            Result.Success(response.body(TypeInfo(T::class)))
+            Result.Success(response.body(typeInfo<T>()))
         } catch (e: Exception) {
             Result.Error(exceptionMapper.map(e))
         }
