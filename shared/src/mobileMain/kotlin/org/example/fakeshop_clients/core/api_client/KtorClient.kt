@@ -23,8 +23,13 @@ class KtorClient(val http: HttpClient) : ApiClient, TokenCacheInvalidator {
     /**
      * Builds Ktor [TypeInfo] from a full [KType] so generic responses (e.g. `List<Foo>`)
      * keep their type argument — a bare `KClass` would erase it and break deserialization.
+     *
+     * Note: `kotlinType` MUST be set explicitly. Kotlin/Native has no reflection fallback, so the
+     * kotlinx.serialization converter resolves the serializer from `kotlinType`; leaving it null
+     * (the deprecated `reifiedType` constructor) erases the generic arg and fails on iOS with
+     * "Serializer for class 'List' is not found" while still working on the JVM.
      */
-    private fun KType.toTypeInfo(): TypeInfo = TypeInfo(classifier as KClass<*>, this)
+    private fun KType.toTypeInfo(): TypeInfo = TypeInfo(classifier as KClass<*>, kotlinType = this)
 
     override suspend fun <T : Any> get(path: String, responseType: KType): T {
         val response = http.get(path)
