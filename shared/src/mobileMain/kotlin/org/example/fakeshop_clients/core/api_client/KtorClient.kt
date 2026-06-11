@@ -16,32 +16,39 @@ import io.ktor.util.reflect.TypeInfo
 import org.example.fakeshop_clients.core.auth.data.TokenCacheInvalidator
 import org.example.fakeshop_clients.core.data.ApiClient
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 class KtorClient(val http: HttpClient) : ApiClient, TokenCacheInvalidator {
 
-    override suspend fun <T : Any> get(path: String, responseType: KClass<T>): T {
+    /**
+     * Builds Ktor [TypeInfo] from a full [KType] so generic responses (e.g. `List<Foo>`)
+     * keep their type argument — a bare `KClass` would erase it and break deserialization.
+     */
+    private fun KType.toTypeInfo(): TypeInfo = TypeInfo(classifier as KClass<*>, this)
+
+    override suspend fun <T : Any> get(path: String, responseType: KType): T {
         val response = http.get(path)
-        return response.body(TypeInfo(responseType)) as T
+        return response.body(responseType.toTypeInfo()) as T
     }
 
     override suspend fun <T : Any, B : Any> post(
         path: String,
         body: B,
-        responseType: KClass<T>
+        responseType: KType
     ): T {
         val bodyType = TypeInfo(body::class)
         val response = http.post(path) {
             contentType(ContentType.Application.Json)
             setBody(body, bodyType)
         }
-        return response.body(TypeInfo(responseType)) as T
+        return response.body(responseType.toTypeInfo()) as T
     }
 
     override suspend fun <T : Any, B : Any> postWithHeaders(
         path: String,
         body: B,
         headers: Map<String, String>,
-        responseType: KClass<T>
+        responseType: KType
     ): T {
         val bodyType = TypeInfo(body::class)
         val response = http.post(path) {
@@ -49,21 +56,21 @@ class KtorClient(val http: HttpClient) : ApiClient, TokenCacheInvalidator {
             setBody(body, bodyType)
             headers.forEach { (key, value) -> header(key, value) }
         }
-        return response.body(TypeInfo(responseType)) as T
+        return response.body(responseType.toTypeInfo()) as T
     }
 
-    override suspend fun <T : Any, B : Any> put(path: String, body: B, responseType: KClass<T>): T {
+    override suspend fun <T : Any, B : Any> put(path: String, body: B, responseType: KType): T {
         val bodyType = TypeInfo(body::class)
         val response = http.put(path) {
             contentType(ContentType.Application.Json)
             setBody(body, bodyType)
         }
-        return response.body(TypeInfo(responseType)) as T
+        return response.body(responseType.toTypeInfo()) as T
     }
 
-    override suspend fun <T : Any> delete(path: String, responseType: KClass<T>): T {
+    override suspend fun <T : Any> delete(path: String, responseType: KType): T {
         val response = http.delete(path)
-        return response.body(TypeInfo(responseType)) as T
+        return response.body(responseType.toTypeInfo()) as T
     }
 
     override suspend fun <B : Any> postNoContent(path: String, body: B, bodyType: KClass<B>) {

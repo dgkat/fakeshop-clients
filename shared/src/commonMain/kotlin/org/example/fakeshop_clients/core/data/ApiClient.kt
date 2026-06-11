@@ -1,43 +1,45 @@
 package org.example.fakeshop_clients.core.data
 
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 interface ApiClient {
-    suspend fun <T : Any> get(path: String, responseType: KClass<T>): T
-    suspend fun <T : Any, B : Any> post(path: String, body: B, responseType: KClass<T>): T
+    suspend fun <T : Any> get(path: String, responseType: KType): T
+    suspend fun <T : Any, B : Any> post(path: String, body: B, responseType: KType): T
     suspend fun <T : Any, B : Any> postWithHeaders(
         path: String,
         body: B,
         headers: Map<String, String>,
-        responseType: KClass<T>
+        responseType: KType
     ): T = post(path, body, responseType)
-    suspend fun <T : Any, B : Any> put(path: String, body: B, responseType: KClass<T>): T
-    suspend fun <T : Any> delete(path: String, responseType: KClass<T>): T
+    suspend fun <T : Any, B : Any> put(path: String, body: B, responseType: KType): T
+    suspend fun <T : Any> delete(path: String, responseType: KType): T
     suspend fun <B : Any> postNoContent(path: String, body: B, bodyType: KClass<B>)
     suspend fun <B : Any> putNoContent(path: String, body: B, bodyType: KClass<B>)
     suspend fun deleteNoContent(path: String)
 }
 
 suspend inline fun <reified T : Any> ApiClient.get(path: String): T {
-    return get(path, T::class)
+    return get(path, typeOf<T>())
 }
 
 suspend inline fun <reified T : Any, B : Any> ApiClient.post(path: String, body: B): T {
-    return post(path, body, T::class)
+    return post(path, body, typeOf<T>())
 }
 
 suspend inline fun <reified T : Any, B : Any> ApiClient.postWithHeaders(
     path: String,
     body: B,
     headers: Map<String, String>
-): T = postWithHeaders(path, body, headers, T::class)
+): T = postWithHeaders(path, body, headers, typeOf<T>())
 
 suspend inline fun <reified T : Any, B : Any> ApiClient.put(path: String, body: B): T {
-    return put(path, body, T::class)
+    return put(path, body, typeOf<T>())
 }
 
 suspend inline fun <reified T : Any> ApiClient.delete(path: String): T {
-    return delete(path, T::class)
+    return delete(path, typeOf<T>())
 }
 
 suspend inline fun <reified B : Any> ApiClient.postNoContent(path: String, body: B) {
