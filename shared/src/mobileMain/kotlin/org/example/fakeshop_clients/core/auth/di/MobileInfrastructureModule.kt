@@ -145,11 +145,11 @@ val mobileInfrastructureModule = module {
 
     // Low-level ApiClient wrappers (KtorClient)
     single<ApiClient>(named("publicApiClient")) {
-        KtorClient(get(named("publicHttpClient")))
+        KtorClient(get(named("publicHttpClient")), get())
     }
 
     single<ApiClient>(named("authApiClient")) {
-        KtorClient(get(named("authHttpClient")))
+        KtorClient(get(named("authHttpClient")), get())
     }
 
     single<TokenCacheInvalidator> {

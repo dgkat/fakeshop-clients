@@ -23,6 +23,7 @@ import org.example.fakeshop_clients.features.bdui.domain.BduiMutationApplier
 import org.example.fakeshop_clients.features.bdui.domain.BduiTemplateService
 import org.example.fakeshop_clients.features.bdui.domain.ReplaceService
 import org.example.fakeshop_clients.features.bdui.domain.buildPdpBindData
+import org.example.fakeshop_clients.features.bdui.domain.models.ActionContext
 import org.example.fakeshop_clients.features.bdui.domain.models.BduiMutation
 import org.example.fakeshop_clients.features.bdui.domain.models.BindData
 import org.example.fakeshop_clients.features.bdui.domain.models.ReplaceBinding
@@ -57,6 +58,17 @@ class ProductDetailViewStore(
      * after the BDUI body becomes `Ready`. Reset on every product load.
      */
     private var currentReplaceBindings: List<ReplaceBinding> = emptyList()
+
+    /**
+     * The single, cross-platform entry point for dispatching a BDUI action. Takes the opaque
+     * [ActionContext] and unwraps its [JsonObject] **here in Kotlin**, so the context is built and
+     * read entirely Kotlin-side and never crosses the SKIE bridge as a Swift `Dictionary` (which
+     * would mangle it / crash on `Map#get`). Every platform routes through here; the
+     * [ProductDetailEvent.DispatchAction] constructor is `internal` to enforce it.
+     */
+    fun dispatchBduiAction(actionId: String, context: ActionContext, idempotencyKey: String? = null) {
+        onEvent(ProductDetailEvent.DispatchAction(actionId, context.json, idempotencyKey))
+    }
 
     fun onEvent(event: ProductDetailEvent) {
         when (event) {

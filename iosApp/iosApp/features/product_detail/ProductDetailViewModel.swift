@@ -54,12 +54,9 @@ class ProductDetailViewModel: ObservableObject {
         viewStore.onEvent(event: event)
     }
 
-    func dispatchAction(actionId: String, context: JsonObject) {
-        viewStore.onEvent(event: ProductDetailEvent.DispatchAction(
-            actionId: actionId,
-            context: context,
-            idempotencyKey: nil
-        ))
+    func dispatchAction(actionId: String, context: ActionContext) {
+        // Unwrap happens in Kotlin (dispatchBduiAction) so the JsonObject never crosses the bridge.
+        viewStore.dispatchBduiAction(actionId: actionId, context: context, idempotencyKey: nil)
     }
 
     deinit {

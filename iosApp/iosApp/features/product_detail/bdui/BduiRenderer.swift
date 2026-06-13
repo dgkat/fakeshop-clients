@@ -6,13 +6,16 @@
 import SwiftUI
 import ComposeApp
 
-typealias JsonObject = [String: Kotlinx_serialization_jsonJsonElement]
-typealias BduiActionHandler = (String, JsonObject) -> Void
+/// Action context is an OPAQUE Kotlin `ActionContext` (not a Swift `Dictionary`) on purpose: it must
+/// never be bridged to/from `[String: JsonElement]`, or the round trip yields a dangling Kotlin `Map`
+/// that crashes on `Map#get`. The wrapped `JsonObject` is only ever unwrapped in Kotlin
+/// (`ProductDetailViewStore.dispatchBduiAction`). See `ActionContext` in shared.
+typealias BduiActionHandler = (String, ActionContext) -> Void
 
-/// Resolves contextBindings from BindData and merges extra literal values into a JsonObject.
+/// Resolves contextBindings from BindData and merges extra literal values into an opaque ActionContext.
 /// `targetSlotId` (replace action) is authored as a verbatim literal, not a bind path, so it is
 /// pulled out of the path-resolved bindings and passed through as a literal instead.
-func buildActionContext(bindings: [String: String], data: BindData, extra: [String: String] = [:]) -> JsonObject {
+func buildActionContext(bindings: [String: String], data: BindData, extra: [String: String] = [:]) -> ActionContext {
     let targetKey = BduiConstants.shared.TARGET_SLOT_ID_KEY
     var pathBindings = bindings
     var literals = extra
@@ -46,12 +49,21 @@ struct BduiNodeView: View {
             // Standalone-scope replace: render the replacement layout against its own `values`
             // instead of the original subtree + product bindData. Clear replacedSlots for the
             // subtree so the standalone layout can't recursively re-trigger a swap.
-            BduiNodeView(
-                node: replacement.node,
-                data: BindData(json: replacement.values),
-                onAction: onAction
+            //
+            // AnyView is REQUIRED here, not cosmetic: this branch embeds `BduiNodeView` directly
+            // (not via a ForEach), so without erasure SwiftUI's static `_viewListCount` would
+            // recurse `_ConditionalContent` → BduiNodeView → _ConditionalContent → … forever and
+            // hang the render thread (the body never commits, so the loader stays on screen).
+            // AnyView gives this branch a dynamic count and terminates the static recursion. The
+            // normal subtree (else branch) is safe because it only recurses through ForEach.
+            AnyView(
+                BduiNodeView(
+                    node: replacement.node,
+                    data: replacement.bindData,
+                    onAction: onAction
+                )
+                .environment(\.bduiReplacedSlots, [:])
             )
-            .environment(\.bduiReplacedSlots, [:])
         } else {
             renderedBody
                 .modifier(NodeLayoutModifier(node: node))
