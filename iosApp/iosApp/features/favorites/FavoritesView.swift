@@ -10,6 +10,7 @@ import ComposeApp
 struct FavoritesView: View {
     @StateObject private var viewModel = FavoritesViewModel()
     @Binding var navigationPath: NavigationPath
+    let isActive: Bool
     let onScrollOffsetChange: (CGFloat) -> Void
 
     var body: some View {
@@ -28,6 +29,11 @@ struct FavoritesView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: isActive) { _, active in
+            if active {
+                viewModel.onFavoritesEvent(FavoritesEvent.LoadFavorites())
+            }
+        }
     }
 }
 
@@ -113,9 +119,10 @@ private struct FavoritesTabContent: View {
                 )
             }
         }
-        .onAppear {
-            viewModel.onFavoritesEvent(FavoritesEvent.LoadFavorites())
-        }
+        // No onAppear reload here: the FavoritesView-level ProgressView gate tears this view down
+        // and re-adds it on every load, so reloading in onAppear creates an infinite loop whenever a
+        // load finishes empty or errors (e.g. a 429). Initial load comes from the ViewStore init;
+        // re-entry comes from FavoritesView's onChange(of: isActive).
     }
 }
 

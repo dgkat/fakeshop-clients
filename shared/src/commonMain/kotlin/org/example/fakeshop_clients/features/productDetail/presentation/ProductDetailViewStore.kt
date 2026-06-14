@@ -209,7 +209,8 @@ class ProductDetailViewStore(
         if (sessionObserver.upgradeInProgress.value) return
         val productId = currentProductId ?: return
         val currentlyFavorited = _state.value.isFavorited
-        _state.update { it.copy(isFavoriteLoading = true) }
+
+        _state.update { it.copy(isFavorited = !currentlyFavorited, isFavoriteLoading = true) }
 
         scope.launch {
             favoritesService.toggleFavorite(productId, currentlyFavorited).fold(
@@ -217,7 +218,7 @@ class ProductDetailViewStore(
                     _state.update { it.copy(isFavoriteLoading = false) }
                 },
                 onError = {
-                    _state.update { it.copy(isFavoriteLoading = false) }
+                    _state.update { it.copy(isFavorited = currentlyFavorited, isFavoriteLoading = false) }
                 }
             )
         }

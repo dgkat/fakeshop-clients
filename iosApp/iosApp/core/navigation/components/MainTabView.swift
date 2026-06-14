@@ -107,6 +107,7 @@ struct MainTabView: View {
         NavigationStack(path: $favoritesPath) {
             FavoritesView(
                 navigationPath: $favoritesPath,
+                isActive: selectedTab == .favorites,
                 onScrollOffsetChange: { offset in scrollOffset = offset }
             )
             .navigationDestination(for: String.self) { productId in
