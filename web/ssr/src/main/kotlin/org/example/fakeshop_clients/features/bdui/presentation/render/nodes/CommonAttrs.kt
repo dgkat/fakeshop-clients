@@ -7,8 +7,8 @@ import org.example.fakeshop_clients.features.bdui.domain.models.tokens.NodeAlign
 import org.example.fakeshop_clients.features.bdui.domain.models.tokens.Spacing
 
 internal fun CommonAttributeGroupFacade.applyNodeAttrs(node: UiNode) {
-    // A container slot's `id` makes it an htmx swap target for the Replace feature. Scoped to the
-    // same container set the swap honors (Column/Row/Section) via slotIdOf — never other nodes.
+    // A slotted node's `id` makes it an htmx swap target for the Replace feature. Any node the
+    // CMS can author a slotId on is eligible (every type except Divider) via slotIdOf.
     BduiReplaceResolver.slotIdOf(node)?.let { attributes["id"] = it }
     val tokens = mutableListOf<String>()
     node.alignment?.let { tokens += alignmentClass(it) }

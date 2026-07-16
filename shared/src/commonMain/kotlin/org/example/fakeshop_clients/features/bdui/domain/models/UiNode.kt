@@ -52,6 +52,7 @@ sealed interface UiNode {
     data class Text(
         val style: TextStyle = TextStyle.body,
         val bind: String? = null,
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null
@@ -61,6 +62,7 @@ sealed interface UiNode {
     @SerialName("Image")
     data class Image(
         val bind: String? = null,
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null
@@ -70,6 +72,7 @@ sealed interface UiNode {
     @SerialName("ImageGallery")
     data class ImageGallery(
         val bind: String? = null,
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null
@@ -79,6 +82,7 @@ sealed interface UiNode {
     @SerialName("PriceBlock")
     data class PriceBlock(
         val bind: String? = null,
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null
@@ -88,6 +92,7 @@ sealed interface UiNode {
     @SerialName("SpecTable")
     data class SpecTable(
         val bind: String? = null,
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null
@@ -134,6 +139,7 @@ sealed interface UiNode {
     @SerialName("Spacer")
     data class Spacer(
         val size: SpacerSize = SpacerSize.md,
+        val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null

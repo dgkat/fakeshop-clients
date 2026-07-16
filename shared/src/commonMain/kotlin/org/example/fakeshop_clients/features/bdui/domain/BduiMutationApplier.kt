@@ -33,19 +33,13 @@ object BduiMutationApplier {
     }
 
     private fun replaceInNode(node: UiNode, slotId: String, replacement: UiNode): UiNode {
+        // Match any node type via the shared resolver so this stays in sync with the
+        // render-time swap. On a miss, recurse into container children; leaves are returned as-is.
+        if (BduiReplaceResolver.slotIdOf(node) == slotId) return replacement
         return when (node) {
-            is UiNode.Column -> {
-                if (node.slotId == slotId) replacement
-                else node.copy(children = node.children.map { replaceInNode(it, slotId, replacement) })
-            }
-            is UiNode.Row -> {
-                if (node.slotId == slotId) replacement
-                else node.copy(children = node.children.map { replaceInNode(it, slotId, replacement) })
-            }
-            is UiNode.Section -> {
-                if (node.slotId == slotId) replacement
-                else node.copy(children = node.children.map { replaceInNode(it, slotId, replacement) })
-            }
+            is UiNode.Column -> node.copy(children = node.children.map { replaceInNode(it, slotId, replacement) })
+            is UiNode.Row -> node.copy(children = node.children.map { replaceInNode(it, slotId, replacement) })
+            is UiNode.Section -> node.copy(children = node.children.map { replaceInNode(it, slotId, replacement) })
             else -> node
         }
     }

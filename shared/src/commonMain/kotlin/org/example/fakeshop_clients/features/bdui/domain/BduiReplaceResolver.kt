@@ -12,23 +12,33 @@ import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
  * `BindData(values)` instead of the original subtree + product `bindData`. This keeps the
  * replacement self-contained and avoids bind-key collisions.
  *
- * Slot matching mirrors the container set handled by
- * [BduiMutationApplier.applyReplaceSlot] (Column / Row / Section) — a slot is an authored
- * container subtree.
+ * Slot matching covers every node type the CMS can author a `slotId` on — every variant
+ * except [UiNode.Divider]. This stays in sync with the set handled by
+ * [BduiMutationApplier.applyReplaceSlot] via the shared [slotIdOf] helper, so a slot may be
+ * any authored subtree (container or leaf).
  */
 object BduiReplaceResolver {
 
-    /** The `slotId` of a container node, or `null` for non-container / unslotted nodes. */
+    /** The `slotId` of [node], or `null` for an unslotted node ([UiNode.Divider] is never slotted). */
     fun slotIdOf(node: UiNode): String? = when (node) {
         is UiNode.Column -> node.slotId
         is UiNode.Row -> node.slotId
         is UiNode.Section -> node.slotId
-        else -> null
+        is UiNode.Text -> node.slotId
+        is UiNode.Image -> node.slotId
+        is UiNode.ImageGallery -> node.slotId
+        is UiNode.PriceBlock -> node.slotId
+        is UiNode.SpecTable -> node.slotId
+        is UiNode.SizeSelector -> node.slotId
+        is UiNode.ColorSwatchPicker -> node.slotId
+        is UiNode.Button -> node.slotId
+        is UiNode.Spacer -> node.slotId
+        is UiNode.Divider -> null
     }
 
     /**
      * The replacement to render in place of [node], or `null` to render [node] normally.
-     * Returns a hit only when [node] is a container whose `slotId` is in [replacedSlots].
+     * Returns a hit only when [node]'s `slotId` is in [replacedSlots].
      */
     fun replacementFor(
         node: UiNode,

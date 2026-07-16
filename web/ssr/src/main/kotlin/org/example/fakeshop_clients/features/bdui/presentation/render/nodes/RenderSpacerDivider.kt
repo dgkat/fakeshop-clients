@@ -13,7 +13,9 @@ fun FlowContent.renderSpacer(node: UiNode.Spacer) {
         SpacerSize.lg -> "bdui-spacer-lg"
         SpacerSize.xl -> "bdui-spacer-xl"
     }
-    div(classes = "bdui-spacer $sizeClass") {}
+    div(classes = "bdui-spacer $sizeClass") {
+        applyNodeAttrs(node)
+    }
 }
 
 fun FlowContent.renderDivider() {
