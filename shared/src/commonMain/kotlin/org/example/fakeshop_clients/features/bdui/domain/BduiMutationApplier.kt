@@ -16,7 +16,8 @@ object BduiMutationApplier {
     }
 
     /**
-     * Walks the UiNode tree and replaces the first node whose slotId matches.
+     * Walks the UiNode tree and replaces every node whose slotId matches (slotIds are
+     * unique per product — bdui rejects duplicates at write — so at most one node matches).
      * Returns the original tree unchanged if no matching slotId is found.
      */
     fun applyReplaceSlot(root: UiNode, mutation: BduiMutation.ReplaceSlot): UiNode {
