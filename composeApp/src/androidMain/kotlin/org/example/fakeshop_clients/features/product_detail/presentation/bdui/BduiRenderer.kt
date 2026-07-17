@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.features.product_detail.presentation.bdui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -41,9 +42,9 @@ val LocalReplacedSlots = compositionLocalOf<Map<String, ResolvedReplace>> { empt
 fun buildActionContext(bindings: Map<String, String>, data: JsonObject): JsonObject =
     buildJsonObject {
         bindings.forEach { (key, value) ->
-            if (key == BduiConstants.TARGET_SLOT_ID_KEY) {
-                // `targetSlotId` is authored as a verbatim literal (replace action), not a
-                // bind path — pass it through unresolved so the slot swap can find its target.
+            if (key in BduiConstants.LITERAL_CONTEXT_KEYS) {
+                // Literal keys (targetSlotId, url, replace) are authored verbatim, not
+                // bind paths — pass them through unresolved.
                 put(key, value)
             } else {
                 data.resolve(value)?.let { put(key, it) }
@@ -79,6 +80,14 @@ fun RenderNode(node: UiNode, data: JsonObject, modifier: Modifier = Modifier) {
     val widthFraction = node.widthFraction
     val alignment = node.alignment
 
+    // Children with their own click handling (e.g. Button) consume taps before this
+    // wrapper, giving the innermost-handler-wins rule for free.
+    val onTap = node.onTap
+    val onAction = LocalBduiActionHandler.current
+    val tapModifier = if (onTap != null) {
+        Modifier.clickable { onAction(onTap.actionId, buildActionContext(onTap.contextBindings, data)) }
+    } else Modifier
+
     if (alignment != null) {
         val contentAlignment = when (alignment) {
             NodeAlignment.start -> Alignment.CenterStart
@@ -90,13 +99,13 @@ fun RenderNode(node: UiNode, data: JsonObject, modifier: Modifier = Modifier) {
             contentAlignment = contentAlignment
         ) {
             val innerWidthMod = if (widthFraction != null) Modifier.fillMaxWidth(widthFraction) else Modifier
-            Box(modifier = innerWidthMod) {
+            Box(modifier = innerWidthMod.then(tapModifier)) {
                 RenderNodeContent(node, data)
             }
         }
     } else {
         val widthMod = if (widthFraction != null) Modifier.fillMaxWidth(widthFraction) else Modifier
-        Box(modifier = modifier.then(widthMod)) {
+        Box(modifier = modifier.then(widthMod).then(tapModifier)) {
             RenderNodeContent(node, data)
         }
     }

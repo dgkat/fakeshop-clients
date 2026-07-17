@@ -98,6 +98,9 @@ android {
         // version code = yymmddxx
         versionCode = 26050701
         versionName = "1.0.1"
+
+        // App Links host — replace with the real public domain at deploy time.
+        manifestPlaceholders["appLinkHost"] = "fakeshop.example.com"
     }
     packaging {
         resources {
