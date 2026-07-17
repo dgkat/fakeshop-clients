@@ -16,6 +16,14 @@ struct iOSApp: App {
     var body: some Scene {
         WindowGroup {
             AppRootView()
+                .onOpenURL { url in
+                    NavigationRouter.shared.navigate(url: url.absoluteString)
+                }
+                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                    if let url = activity.webpageURL {
+                        NavigationRouter.shared.navigate(url: url.absoluteString)
+                    }
+                }
         }
     }
 

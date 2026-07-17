@@ -5,10 +5,12 @@
 //  Created by Dimitrios Katoudis on 1/12/25.
 //
 import SwiftUI
+import ComposeApp
 
 struct MainTabView: View {
     @StateObject private var searchViewModel = SearchViewModel()
     @StateObject private var notificationRouter = NotificationRouter.shared
+    @StateObject private var navigationRouter = NavigationRouter.shared
 
     @State private var selectedTab: Tab = .home
     @State private var homePath = NavigationPath()
@@ -25,6 +27,20 @@ struct MainTabView: View {
     }
 
     var body: some View {
+        mainContent
+            .environment(\.scrollResetToken, scrollResetToken)
+            .onChange(of: selectedTab) { old, new in handleTabSwitch(oldValue: old, newValue: new) }
+            .onChange(of: homePath) { old, new in handleNavigationChange(oldPath: old, newPath: new, tab: .home) }
+            .onChange(of: favoritesPath) { old, new in handleNavigationChange(oldPath: old, newPath: new, tab: .favorites) }
+            .onChange(of: notificationsPath) { old, new in handleNavigationChange(oldPath: old, newPath: new, tab: .notifications) }
+            .onChange(of: profilePath) { old, new in handleNavigationChange(oldPath: old, newPath: new, tab: .profile) }
+            .onChange(of: notificationRouter.productIdToNavigate) { _, productId in handleNotificationNavigate(productId) }
+            .onChange(of: navigationRouter.requestToken) { _, _ in consumePendingRoute() }
+            // Cold-start Universal Link: the request may land before this view mounts.
+            .onAppear { consumePendingRoute() }
+    }
+
+    private var mainContent: some View {
         SearchBarContainer(
             searchViewModel: searchViewModel,
             currentTab: selectedTab,
@@ -64,27 +80,64 @@ struct MainTabView: View {
                 }
             }
         }
-        .environment(\.scrollResetToken, scrollResetToken)
-        .onChange(of: selectedTab) { oldValue, newValue in
-            scrollOffset = 0
-            scrollResetToken = UUID()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                if newValue != .home { homePath = NavigationPath() }
-                if newValue != .favorites { favoritesPath = NavigationPath() }
-                if newValue != .notifications { notificationsPath = NavigationPath() }
-                if newValue != .profile { profilePath = NavigationPath() }
-            }
+    }
+
+    private func handleTabSwitch(oldValue: Tab, newValue: Tab) {
+        scrollOffset = 0
+        scrollResetToken = UUID()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            if newValue != .home { homePath = NavigationPath() }
+            if newValue != .favorites { favoritesPath = NavigationPath() }
+            if newValue != .notifications { notificationsPath = NavigationPath() }
+            if newValue != .profile { profilePath = NavigationPath() }
         }
-        .onChange(of: homePath) { old, new in handleNavigationChange(oldPath: old, newPath: new, tab: .home) }
-        .onChange(of: favoritesPath) { old, new in handleNavigationChange(oldPath: old, newPath: new, tab: .favorites) }
-        .onChange(of: notificationsPath) { old, new in handleNavigationChange(oldPath: old, newPath: new, tab: .notifications) }
-        .onChange(of: profilePath) { old, new in handleNavigationChange(oldPath: old, newPath: new, tab: .profile) }
-        .onChange(of: notificationRouter.productIdToNavigate) { _, productId in
-            if let productId {
-                selectedTab = .home
-                homePath.append(productId)
-                notificationRouter.clearNavigation()
-            }
+    }
+
+    private func handleNotificationNavigate(_ productId: String?) {
+        guard let productId else { return }
+        selectedTab = .home
+        homePath.append(productId)
+        notificationRouter.clearNavigation()
+    }
+
+    private func consumePendingRoute() {
+        guard let route = navigationRouter.pendingRoute else { return }
+        let replace = navigationRouter.pendingReplace
+        navigationRouter.clear()
+        switch onEnum(of: route) {
+        case .home:
+            homePath = NavigationPath()
+            selectedTab = .home
+        case .favorites:
+            favoritesPath = NavigationPath()
+            selectedTab = .favorites
+        case .notifications:
+            notificationsPath = NavigationPath()
+            selectedTab = .notifications
+        case .profile:
+            profilePath = NavigationPath()
+            selectedTab = .profile
+        case .productDetail(let r):
+            pushProduct(r.productId, replace: replace)
+        }
+    }
+
+    /// Pushes a PDP onto the active tab's stack; `replace` swaps the top entry instead
+    /// (BDUI navigate's back-stack-replace flag).
+    private func pushProduct(_ productId: String, replace: Bool) {
+        switch selectedTab {
+        case .home:
+            if replace && homePath.count > 0 { homePath.removeLast() }
+            homePath.append(productId)
+        case .favorites:
+            if replace && favoritesPath.count > 0 { favoritesPath.removeLast() }
+            favoritesPath.append(productId)
+        case .notifications:
+            if replace && notificationsPath.count > 0 { notificationsPath.removeLast() }
+            notificationsPath.append(productId)
+        case .profile:
+            if replace && profilePath.count > 0 { profilePath.removeLast() }
+            profilePath.append(productId)
         }
     }
 
@@ -97,7 +150,8 @@ struct MainTabView: View {
             .navigationDestination(for: String.self) { productId in
                 ProductDetailView(
                     productId: productId,
-                    onScrollOffsetChange: { offset in scrollOffset = offset }
+                    onScrollOffsetChange: { offset in scrollOffset = offset },
+                    onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                 )
             }
         }
@@ -113,7 +167,8 @@ struct MainTabView: View {
             .navigationDestination(for: String.self) { productId in
                 ProductDetailView(
                     productId: productId,
-                    onScrollOffsetChange: { offset in scrollOffset = offset }
+                    onScrollOffsetChange: { offset in scrollOffset = offset },
+                    onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                 )
             }
         }
@@ -125,7 +180,8 @@ struct MainTabView: View {
                 .navigationDestination(for: String.self) { productId in
                     ProductDetailView(
                         productId: productId,
-                        onScrollOffsetChange: { offset in scrollOffset = offset }
+                        onScrollOffsetChange: { offset in scrollOffset = offset },
+                        onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                     )
                 }
         }
@@ -138,7 +194,8 @@ struct MainTabView: View {
                 .navigationDestination(for: String.self) { productId in
                     ProductDetailView(
                         productId: productId,
-                        onScrollOffsetChange: { offset in scrollOffset = offset }
+                        onScrollOffsetChange: { offset in scrollOffset = offset },
+                        onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                     )
                 }
         }

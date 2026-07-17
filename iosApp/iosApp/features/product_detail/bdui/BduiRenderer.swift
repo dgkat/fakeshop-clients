@@ -13,14 +13,16 @@ import ComposeApp
 typealias BduiActionHandler = (String, ActionContext) -> Void
 
 /// Resolves contextBindings from BindData and merges extra literal values into an opaque ActionContext.
-/// `targetSlotId` (replace action) is authored as a verbatim literal, not a bind path, so it is
-/// pulled out of the path-resolved bindings and passed through as a literal instead.
+/// Literal keys (targetSlotId, url, replace — shared `LITERAL_CONTEXT_KEYS`) are authored verbatim,
+/// not as bind paths, so they are pulled out of the path-resolved bindings and passed through as-is.
 func buildActionContext(bindings: [String: String], data: BindData, extra: [String: String] = [:]) -> ActionContext {
-    let targetKey = BduiConstants.shared.TARGET_SLOT_ID_KEY
+    let literalKeys = BduiConstants.shared.LITERAL_CONTEXT_KEYS
     var pathBindings = bindings
     var literals = extra
-    if let targetSlotId = pathBindings.removeValue(forKey: targetKey) {
-        literals[targetKey] = targetSlotId
+    for key in literalKeys {
+        if let value = pathBindings.removeValue(forKey: key) {
+            literals[key] = value
+        }
     }
     return data.resolveActionContext(bindings: pathBindings, extra: literals)
 }
@@ -66,6 +68,7 @@ struct BduiNodeView: View {
             )
         } else {
             renderedBody
+                .modifier(NodeTapModifier(node: node, data: data, onAction: onAction))
                 .modifier(NodeLayoutModifier(node: node))
         }
     }
@@ -86,6 +89,27 @@ struct BduiNodeView: View {
         case .button(let n): ButtonNodeView(node: n, data: data, onAction: onAction)
         case .spacer(let n): SpacerNodeView(node: n)
         case .divider: DividerNodeView()
+        }
+    }
+}
+
+/// Dispatches a node's optional `onTap` action. Applied inside NodeLayoutModifier so the tap
+/// area matches the node's visual bounds. Children with their own tap handling (e.g. Button)
+/// consume taps before this gesture, giving the innermost-handler-wins rule for free.
+private struct NodeTapModifier: ViewModifier {
+    let node: UiNode
+    let data: BindData
+    let onAction: BduiActionHandler
+
+    func body(content: Content) -> some View {
+        if let onTap = node.onTap {
+            content
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    onAction(onTap.actionId, buildActionContext(bindings: onTap.contextBindings, data: data))
+                }
+        } else {
+            content
         }
     }
 }
