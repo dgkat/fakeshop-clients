@@ -15,6 +15,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
+import org.example.fakeshop_clients.core.navigation.AppRouteParser
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.bdui.BduiConstants
@@ -231,10 +232,14 @@ class ProductDetailViewStore(
     ) {
         val ready = _state.value.bduiBodyState as? BduiBodyState.Ready ?: return
 
-        // `replace` is resolved entirely client-side — it is NOT a server action and must
-        // never be POSTed to /ui/action (the allowlist would 404 it).
+        // `replace` and `navigate` are resolved entirely client-side — they are NOT server
+        // actions and must never be POSTed to /ui/action (the allowlist would 404 them).
         if (actionId == BduiConstants.REPLACE_ACTION_ID) {
             handleReplace(ready, context)
+            return
+        }
+        if (actionId == BduiConstants.NAVIGATE_ACTION_ID) {
+            handleNavigate(context)
             return
         }
 
@@ -289,6 +294,18 @@ class ProductDetailViewStore(
                 },
                 onError = { /* best-effort: leave the original subtree in place */ }
             )
+        }
+    }
+
+    private fun handleNavigate(context: JsonObject) {
+        val url = (context[BduiConstants.URL_KEY] as? JsonPrimitive)
+            ?.contentOrNull
+            ?: return
+        AppRouteParser.parse(url) ?: return
+        val replace = (context[BduiConstants.REPLACE_STACK_KEY] as? JsonPrimitive)
+            ?.contentOrNull == "true"
+        scope.launch {
+            _effects.emit(ProductDetailEffect.Navigate(url, replace))
         }
     }
 

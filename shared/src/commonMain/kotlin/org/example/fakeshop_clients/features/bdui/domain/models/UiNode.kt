@@ -9,10 +9,19 @@ import org.example.fakeshop_clients.features.bdui.domain.models.tokens.Spacing
 import org.example.fakeshop_clients.features.bdui.domain.models.tokens.TextStyle
 
 @Serializable
+data class NodeAction(
+    val actionId: String,
+    val contextBindings: Map<String, String> = emptyMap()
+)
+
+@Serializable
 sealed interface UiNode {
     val weight: Float?
     val widthFraction: Float?
     val alignment: NodeAlignment?
+
+    /** Optional tap action. Never present on Divider or the interactive nodes (BE rejects it there). */
+    val onTap: NodeAction?
 
     @Serializable
     @SerialName("Column")
@@ -22,7 +31,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -33,7 +43,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -44,7 +55,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -55,7 +67,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -65,7 +78,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -75,7 +89,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -85,7 +100,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -95,7 +111,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -107,7 +124,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -119,7 +137,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -132,7 +151,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -142,7 +162,8 @@ sealed interface UiNode {
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
-        override val alignment: NodeAlignment? = null
+        override val alignment: NodeAlignment? = null,
+        override val onTap: NodeAction? = null
     ) : UiNode
 
     @Serializable
@@ -151,5 +172,6 @@ sealed interface UiNode {
         override val weight: Float? = null
         override val widthFraction: Float? = null
         override val alignment: NodeAlignment? = null
+        override val onTap: NodeAction? = null
     }
 }
