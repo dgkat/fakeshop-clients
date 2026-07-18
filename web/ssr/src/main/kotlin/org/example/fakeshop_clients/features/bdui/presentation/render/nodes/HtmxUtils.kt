@@ -8,7 +8,14 @@ import org.example.fakeshop_clients.features.bdui.BduiConstants
 import org.example.fakeshop_clients.features.bdui.domain.models.resolveString
 
 internal fun buildResolvedContext(bindings: Map<String, String>, data: JsonObject): Map<String, String> =
-    bindings.mapNotNull { (key, path) -> data.resolveString(path)?.let { key to it } }.toMap()
+    bindings.mapNotNull { (key, value) ->
+        if (key in BduiConstants.LITERAL_CONTEXT_KEYS) {
+            // Literal keys (targetSlotId, url, replace) are authored verbatim, not bind paths.
+            key to value
+        } else {
+            data.resolveString(value)?.let { key to it }
+        }
+    }.toMap()
 
 internal fun buildHxVals(
     actionId: String,

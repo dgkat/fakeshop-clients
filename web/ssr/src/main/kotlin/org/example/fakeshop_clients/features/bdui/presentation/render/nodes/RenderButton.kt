@@ -10,7 +10,7 @@ import org.example.fakeshop_clients.features.bdui.BduiConstants
 import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
 import org.example.fakeshop_clients.features.bdui.domain.models.tokens.ButtonStyle
 
-fun FlowContent.renderButton(node: UiNode.Button, data: JsonObject, screen: String, productId: String) {
+fun FlowContent.renderButton(node: UiNode.Button, data: JsonObject, screen: String, productId: String, locale: String) {
     val styleClass = when (node.style) {
         ButtonStyle.primary -> "bdui-btn bdui-btn-primary"
         ButtonStyle.secondary -> "bdui-btn bdui-btn-secondary"
@@ -28,7 +28,7 @@ fun FlowContent.renderButton(node: UiNode.Button, data: JsonObject, screen: Stri
                 val targetSlotId = node.contextBindings[BduiConstants.TARGET_SLOT_ID_KEY]
                 if (targetSlotId != null) {
                     attributes["hx-post"] = "/bdui/replace"
-                    attributes["hx-vals"] = buildReplaceHxVals(productId, targetSlotId)
+                    attributes["hx-vals"] = buildReplaceHxVals(productId, targetSlotId, locale)
                     attributes["hx-target"] = "#$targetSlotId"
                     attributes["hx-swap"] = "outerHTML"
                 }
@@ -46,10 +46,13 @@ fun FlowContent.renderButton(node: UiNode.Button, data: JsonObject, screen: Stri
     }
 }
 
-private fun buildReplaceHxVals(productId: String, targetSlotId: String): String {
+// The replace fragment is rendered outside the /{locale} group, so the page's locale
+// travels with the POST — replacement subtrees may contain locale-prefixed navigate links.
+internal fun buildReplaceHxVals(productId: String, targetSlotId: String, locale: String): String {
     val obj = buildJsonObject {
         put("productId", productId)
         put(BduiConstants.TARGET_SLOT_ID_KEY, targetSlotId)
+        put("locale", locale)
     }
     return encodeToString(JsonObject.serializer(), obj)
 }

@@ -201,7 +201,7 @@ fun HTML.productDetailPage(
 
                 // BDUI body — server-driven bottom half
                 div(classes = "product-detail-bdui") {
-                    renderBduiNode(pdpData.template.root, pdpData.bindData, "pdp", brief.id)
+                    renderBduiNode(pdpData.template.root, pdpData.bindData, "pdp", brief.id, locale)
                 }
 
                 // Toast region for BDUI action feedback (HTMX swaps content here)
@@ -253,6 +253,19 @@ document.addEventListener('click', function(e) {
             s.classList.remove('selected');
         });
         swatch.classList.add('selected');
+    }
+
+    // BDUI navigate on subtrees with interactive content render as [data-href] divs
+    // (a real <a> would nest interactive HTML). Innermost handler wins: if the nearest
+    // interactive ancestor of the click is a link/button, it handles the click itself.
+    var tappable = e.target.closest('a,button,[data-href]');
+    if (tappable && tappable.hasAttribute('data-href')) {
+        var href = tappable.getAttribute('data-href');
+        if (tappable.getAttribute('data-replace') === 'true') {
+            window.location.replace(href);
+        } else {
+            window.location.assign(href);
+        }
     }
 });
 """.trimIndent()

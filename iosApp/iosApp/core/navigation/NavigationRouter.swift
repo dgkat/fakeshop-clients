@@ -4,6 +4,7 @@ import ComposeApp
 class NavigationRouter: ObservableObject {
     static let shared = NavigationRouter()
 
+    @Published private(set) var requestToken = UUID()
     private(set) var pendingRoute: AppRoute?
     private(set) var pendingReplace = false
 

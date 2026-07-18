@@ -14,6 +14,7 @@ import kotlinx.html.id
 import kotlinx.html.stream.createHTML
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.extensions.extractCookies
+import org.example.fakeshop_clients.core.i18n.WebStrings
 import org.example.fakeshop_clients.features.bdui.BduiConstants
 import org.example.fakeshop_clients.features.bdui.BduiJson
 import org.example.fakeshop_clients.features.bdui.data.SSRReplaceDatasource
@@ -39,6 +40,9 @@ fun Route.bduiReplaceRoute() {
             ?: return@post call.respond(HttpStatusCode.BadRequest)
         val targetSlotId = params[BduiConstants.TARGET_SLOT_ID_KEY]
             ?: return@post call.respond(HttpStatusCode.BadRequest)
+        // Sent by buildReplaceHxVals; validated so an arbitrary posted value can't end up
+        // inside rendered hrefs. Fallback keeps older cached pages working.
+        val locale = params["locale"]?.takeIf { it in WebStrings.SUPPORTED_LOCALES } ?: "en"
 
         val cookies = call.extractCookies()
 
@@ -69,7 +73,7 @@ fun Route.bduiReplaceRoute() {
         // replacement against `values` standalone — no product bindData merge.
         val fragment = createHTML().div {
             id = targetSlotId
-            renderBduiNode(node, values, "pdp", productId)
+            renderBduiNode(node, values, "pdp", productId, locale)
         }
         call.respondText(fragment, ContentType.Text.Html, HttpStatusCode.OK)
     }
