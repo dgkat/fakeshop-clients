@@ -123,7 +123,7 @@ private fun FlowContent.renderNodeContent(node: UiNode, data: JsonObject, screen
         is UiNode.PriceBlock -> renderPriceBlock(node, data)
         is UiNode.SpecTable -> renderSpecTable(node, data)
         is UiNode.SizeSelector -> renderSizeSelector(node, data, screen)
-        is UiNode.ColorSwatchPicker -> renderColorSwatchPicker(node, data, screen)
+        is UiNode.ColorSwatchPicker -> renderColorSwatchPicker(node, data, screen, productId, locale)
         is UiNode.Button -> renderButton(node, data, screen, productId, locale)
         is UiNode.Spacer -> renderSpacer(node)
         is UiNode.Divider -> renderDivider()

@@ -19,6 +19,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
+import org.example.fakeshop_clients.features.bdui.domain.models.actionFor
+import org.example.fakeshop_clients.features.bdui.domain.models.isSwatchInert
 import org.example.fakeshop_clients.features.bdui.domain.models.resolveColorList
 import org.example.fakeshop_clients.features.bdui.domain.models.resolveString
 import org.example.fakeshop_clients.features.product_detail.presentation.bdui.LocalBduiActionHandler
@@ -34,6 +36,8 @@ fun RenderColorSwatchPicker(node: UiNode.ColorSwatchPicker, data: JsonObject) {
         entries.forEach { entry ->
             val color = parseHexColor(entry.hex) ?: return@forEach
             val isSelected = selectedName == entry.name
+            // Re-tap guard: the selected swatch (or one with no resolved action) is inert.
+            val action = if (node.isSwatchInert(entry.name, selectedName)) null else node.actionFor(entry.name)
             Box(
                 modifier = Modifier
                     .size(28.dp)
@@ -43,15 +47,19 @@ fun RenderColorSwatchPicker(node: UiNode.ColorSwatchPicker, data: JsonObject) {
                         if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
                         else Modifier.border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                     )
-                    .clickable {
-                        if (node.actionId.isNotBlank()) {
-                            val ctx = buildJsonObject {
-                                put("color", entry.name)
-                                buildActionContext(node.contextBindings, data).forEach { (k, v) -> put(k, v) }
+                    .then(
+                        if (action != null) {
+                            Modifier.clickable {
+                                val ctx = buildJsonObject {
+                                    put("color", entry.name)
+                                    buildActionContext(action.contextBindings, data).forEach { (k, v) -> put(k, v) }
+                                }
+                                onAction(action.actionId, ctx)
                             }
-                            onAction(node.actionId, ctx)
+                        } else {
+                            Modifier
                         }
-                    }
+                    )
                     .padding(if (isSelected) 2.dp else 0.dp)
             )
         }

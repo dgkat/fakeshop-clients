@@ -19,26 +19,48 @@ struct ColorSwatchPickerView: View {
             HStack(spacing: 8) {
                 ForEach(Array(entries.enumerated()), id: \.offset) { _, entry in
                     let isSelected = selectedName == entry.name
-                    Button(action: {
-                        guard !node.actionId.isEmpty else { return }
-                        let ctx = buildActionContext(bindings: node.contextBindings, data: data, extra: ["color": entry.name])
-                        onAction(node.actionId, ctx)
-                    }) {
-                        Circle()
-                            .fill(color(from: entry.hex))
-                            .frame(width: 28, height: 28)
-                            .overlay(
-                                Circle().stroke(
-                                    isSelected ? FakeShopColors.primary : FakeShopColors.outline,
-                                    lineWidth: isSelected ? 2 : 1
-                                )
-                            )
+                    // Re-tap guard: the selected swatch (or one with no resolved action) is inert —
+                    // render it without a Button so re-tapping the current color never re-fires.
+                    if let action = resolvedAction(for: entry.name, isSelected: isSelected) {
+                        Button(action: {
+                            let ctx = buildActionContext(bindings: action.bindings, data: data, extra: ["color": entry.name])
+                            onAction(action.actionId, ctx)
+                        }) {
+                            swatch(entry: entry, isSelected: isSelected)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .accessibilityLabel(entry.name)
+                    } else {
+                        swatch(entry: entry, isSelected: isSelected)
+                            .accessibilityLabel(entry.name)
                     }
-                    .buttonStyle(PlainButtonStyle())
-                    .accessibilityLabel(entry.name)
                 }
             }
         }
+    }
+
+    private func swatch(entry: ColorEntry, isSelected: Bool) -> some View {
+        Circle()
+            .fill(color(from: entry.hex))
+            .frame(width: 28, height: 28)
+            .overlay(
+                Circle().stroke(
+                    isSelected ? FakeShopColors.primary : FakeShopColors.outline,
+                    lineWidth: isSelected ? 2 : 1
+                )
+            )
+    }
+
+    /// Effective per-swatch action: the `swatchActions` override for this color, else the node's
+    /// default (`actionId` + `contextBindings`). Returns `nil` when the swatch is the selected one
+    /// (re-tap guard) or resolves to no action — mirrors the shared `isSwatchInert` / `actionFor`.
+    private func resolvedAction(for colorName: String, isSelected: Bool) -> (actionId: String, bindings: [String: String])? {
+        if isSelected { return nil }
+        if let override = node.swatchActions[colorName] {
+            return (override.actionId, override.contextBindings)
+        }
+        guard !node.actionId.isEmpty else { return nil }
+        return (node.actionId, node.contextBindings)
     }
 
     private func color(from hex: String) -> Color {

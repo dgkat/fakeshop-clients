@@ -134,6 +134,7 @@ sealed interface UiNode {
         val bind: String? = null,
         val actionId: String = "",
         val contextBindings: Map<String, String> = emptyMap(),
+        val swatchActions: Map<String, NodeAction> = emptyMap(),
         val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
