@@ -21,22 +21,12 @@ class WebSafePublicApiClient(
 suspend inline fun <reified T : Any, B : Any> WebSafePublicApiClient.post(
     path: String,
     body: B
-): Result<T, NetworkError> {
-    return try {
-        Result.Success(publicApiClient.post(path, body, typeOf<T>()))
-    } catch (e: Exception) {
-        Result.Error(exceptionMapper.map(e))
-    }
-}
+): Result<T, NetworkError> =
+    safeResult(exceptionMapper) { publicApiClient.post(path, body, typeOf<T>()) }
 
 suspend inline fun <reified T : Any, B : Any> WebSafePublicApiClient.postWithHeaders(
     path: String,
     body: B,
     headers: Map<String, String>
-): Result<T, NetworkError> {
-    return try {
-        Result.Success(publicApiClient.postWithHeaders(path, body, headers, typeOf<T>()))
-    } catch (e: Exception) {
-        Result.Error(exceptionMapper.map(e))
-    }
-}
+): Result<T, NetworkError> =
+    safeResult(exceptionMapper) { publicApiClient.postWithHeaders(path, body, headers, typeOf<T>()) }

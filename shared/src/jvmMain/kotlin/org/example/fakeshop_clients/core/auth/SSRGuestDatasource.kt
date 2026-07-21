@@ -5,6 +5,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.client.request.post
+import kotlin.coroutines.cancellation.CancellationException
 import org.slf4j.LoggerFactory
 
 class SSRGuestDatasource(private val httpClient: HttpClient) {
@@ -25,6 +26,8 @@ class SSRGuestDatasource(private val httpClient: HttpClient) {
                 logger.error("POST /api/web/auth/guest failed with status ${response.status.value}")
                 null
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             logger.error("POST /api/web/auth/guest threw an exception: ${e::class.simpleName}: ${e.message}")
             null
