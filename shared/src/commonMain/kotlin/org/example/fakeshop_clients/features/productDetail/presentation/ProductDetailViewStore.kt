@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.features.productDetail.presentation
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -53,6 +54,10 @@ class ProductDetailViewStore(
 
     private var currentProductId: String? = null
 
+    /** In-flight product load; cancelled when a new product loads so a stale product's brief/bdui
+     * responses can't overwrite the newer load (item 8). */
+    private var loadJob: Job? = null
+
     /**
      * Latest replace wiring for the current product, cached so it can be folded into
      * `Ready` regardless of whether the (non-blocking) bindings call resolves before or
@@ -83,6 +88,7 @@ class ProductDetailViewStore(
     }
 
     private fun loadProduct(productId: String) {
+        loadJob?.cancel()
         currentProductId = productId
         currentReplaceBindings = emptyList()
         _state.update {
@@ -94,7 +100,7 @@ class ProductDetailViewStore(
             )
         }
 
-        scope.launch {
+        loadJob = scope.launch {
             coroutineScope {
                 launch { loadBriefAndBdui(productId) }
                 launch { loadReplaceBindings(productId) }

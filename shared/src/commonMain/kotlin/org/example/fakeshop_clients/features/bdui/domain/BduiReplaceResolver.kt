@@ -19,22 +19,12 @@ import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
  */
 object BduiReplaceResolver {
 
-    /** The `slotId` of [node], or `null` for an unslotted node ([UiNode.Divider] is never slotted). */
-    fun slotIdOf(node: UiNode): String? = when (node) {
-        is UiNode.Column -> node.slotId
-        is UiNode.Row -> node.slotId
-        is UiNode.Section -> node.slotId
-        is UiNode.Text -> node.slotId
-        is UiNode.Image -> node.slotId
-        is UiNode.ImageGallery -> node.slotId
-        is UiNode.PriceBlock -> node.slotId
-        is UiNode.SpecTable -> node.slotId
-        is UiNode.SizeSelector -> node.slotId
-        is UiNode.ColorSwatchPicker -> node.slotId
-        is UiNode.Button -> node.slotId
-        is UiNode.Spacer -> node.slotId
-        is UiNode.Divider -> null
-    }
+    /**
+     * The `slotId` of [node], or `null` for an unslotted node ([UiNode.Divider] is never slotted).
+     * `slotId` is a first-class [UiNode] property, so this is now a direct read — the old
+     * hand-maintained per-type `when` is gone and new node types are covered automatically.
+     */
+    fun slotIdOf(node: UiNode): String? = node.slotId
 
     /**
      * The replacement to render in place of [node], or `null` to render [node] normally.

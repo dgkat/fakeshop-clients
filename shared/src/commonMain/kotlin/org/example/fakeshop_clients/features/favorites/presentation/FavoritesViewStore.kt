@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.features.favorites.presentation
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +30,8 @@ class FavoritesViewStore(
 
     private val _state = MutableStateFlow(FavoritesState())
     val state: StateFlow<FavoritesState> = _state.asStateFlow()
+
+    private var loadJob: Job? = null
 
     init {
         scope.launch {
@@ -100,8 +103,9 @@ class FavoritesViewStore(
     }
 
     private fun loadFavorites() {
+        loadJob?.cancel()
         _state.update { it.copy(isLoading = true, error = null) }
-        scope.launch {
+        loadJob = scope.launch {
             favoritesService.getFavorites().fold(
                 onSuccess = { products ->
                     checkNotificationPermission()

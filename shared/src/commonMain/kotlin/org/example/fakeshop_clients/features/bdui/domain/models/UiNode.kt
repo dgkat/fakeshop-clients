@@ -20,6 +20,13 @@ sealed interface UiNode {
     val widthFraction: Float?
     val alignment: NodeAlignment?
 
+    /**
+     * Optional replace/anchor slot id the CMS can author on any node except [Divider].
+     * Hoisted onto the interface so `slotId` is uniformly reachable (no hand-maintained `when`)
+     * and the compiler forces every new node type to declare it.
+     */
+    val slotId: String?
+
     /** Optional tap action. Never present on Divider or the interactive nodes (BE rejects it there). */
     val onTap: NodeAction?
 
@@ -28,7 +35,7 @@ sealed interface UiNode {
     data class Column(
         val spacing: Spacing = Spacing.md,
         val children: List<UiNode> = emptyList(),
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -40,7 +47,7 @@ sealed interface UiNode {
     data class Row(
         val spacing: Spacing = Spacing.md,
         val children: List<UiNode> = emptyList(),
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -52,7 +59,7 @@ sealed interface UiNode {
     data class Section(
         val title: String? = null,
         val children: List<UiNode> = emptyList(),
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -64,7 +71,7 @@ sealed interface UiNode {
     data class Text(
         val style: TextStyle = TextStyle.body,
         val bind: String? = null,
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -75,7 +82,7 @@ sealed interface UiNode {
     @SerialName("Image")
     data class Image(
         val bind: String? = null,
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -86,7 +93,7 @@ sealed interface UiNode {
     @SerialName("ImageGallery")
     data class ImageGallery(
         val bind: String? = null,
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -97,7 +104,7 @@ sealed interface UiNode {
     @SerialName("PriceBlock")
     data class PriceBlock(
         val bind: String? = null,
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -108,7 +115,7 @@ sealed interface UiNode {
     @SerialName("SpecTable")
     data class SpecTable(
         val bind: String? = null,
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -121,7 +128,7 @@ sealed interface UiNode {
         val bind: String? = null,
         val actionId: String = "",
         val contextBindings: Map<String, String> = emptyMap(),
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -135,7 +142,7 @@ sealed interface UiNode {
         val actionId: String = "",
         val contextBindings: Map<String, String> = emptyMap(),
         val swatchActions: Map<String, NodeAction> = emptyMap(),
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -149,7 +156,7 @@ sealed interface UiNode {
         val style: ButtonStyle = ButtonStyle.primary,
         val actionId: String = "",
         val contextBindings: Map<String, String> = emptyMap(),
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -160,7 +167,7 @@ sealed interface UiNode {
     @SerialName("Spacer")
     data class Spacer(
         val size: SpacerSize = SpacerSize.md,
-        val slotId: String? = null,
+        override val slotId: String? = null,
         override val weight: Float? = null,
         override val widthFraction: Float? = null,
         override val alignment: NodeAlignment? = null,
@@ -173,6 +180,7 @@ sealed interface UiNode {
         override val weight: Float? = null
         override val widthFraction: Float? = null
         override val alignment: NodeAlignment? = null
+        override val slotId: String? = null
         override val onTap: NodeAction? = null
     }
 }

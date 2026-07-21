@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.features.recents.presentation
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +20,8 @@ class RecentsViewStore(
     private val _state = MutableStateFlow(RecentsState())
     val state: StateFlow<RecentsState> = _state.asStateFlow()
 
+    private var loadJob: Job? = null
+
     fun onEvent(event: RecentsEvent) {
         when (event) {
             RecentsEvent.LoadRecents -> loadRecents()
@@ -27,8 +30,11 @@ class RecentsViewStore(
     }
 
     private fun loadRecents() {
+        // Cancel any in-flight load so a rapid Retry/LoadRecents can't let a stale response
+        // win the race and overwrite a newer one (item 8).
+        loadJob?.cancel()
         _state.update { it.copy(isLoading = true, error = null) }
-        scope.launch {
+        loadJob = scope.launch {
             recentsService.getRecentlyViewed().fold(
                 onSuccess = { products ->
                     _state.update {
