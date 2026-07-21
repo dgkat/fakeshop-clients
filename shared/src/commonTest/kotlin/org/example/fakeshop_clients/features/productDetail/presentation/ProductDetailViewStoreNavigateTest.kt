@@ -301,4 +301,46 @@ class ProductDetailViewStoreNavigateTest {
             )
         }
     }
+
+    /**
+     * Regression for item 30: effects are a [kotlinx.coroutines.channels.Channel], not a replay-0
+     * `SharedFlow`. An effect emitted while **no collector is attached** (an Android config-change
+     * teardown, or the iOS observation Task re-attaching around navigation) must be buffered and
+     * delivered when a collector next subscribes — the old replay-0 SharedFlow dropped it outright.
+     */
+    @Test
+    fun effectEmittedWithNoCollectorIsBufferedAndDeliveredOnLateSubscribe() = runTest {
+        val store = ProductDetailViewStore(
+            scope = this,
+            productDetailService = FakeProductDetailService(),
+            bduiTemplateService = FakeBduiTemplateService(),
+            bduiActionService = RecordingBduiActionService(),
+            replaceService = FakeReplaceService(),
+            favoritesService = FakeFavoritesService(),
+            briefProductMapper = DomainToPresentationBriefProductMapper(),
+            sessionObserver = FakeSessionObserver()
+        )
+
+        store.onEvent(ProductDetailEvent.LoadProduct("socks-123"))
+        testScheduler.advanceUntilIdle()
+        assertIs<BduiBodyState.Ready>(store.state.value.bduiBodyState)
+
+        // Emit with NO collector attached — this is the dropped-event window under a SharedFlow.
+        store.dispatchBduiAction(
+            BduiConstants.NAVIGATE_ACTION_ID,
+            navigateContext("/product/other-456")
+        )
+        testScheduler.advanceUntilIdle()
+
+        // Subscribe only afterwards; the buffered effect must still arrive.
+        val received = mutableListOf<ProductDetailEffect>()
+        val collectorJob = launch { store.effects.collect { received += it } }
+        testScheduler.advanceUntilIdle()
+        collectorJob.cancel()
+
+        assertEquals(
+            listOf<ProductDetailEffect>(ProductDetailEffect.Navigate("/product/other-456", replace = false)),
+            received
+        )
+    }
 }

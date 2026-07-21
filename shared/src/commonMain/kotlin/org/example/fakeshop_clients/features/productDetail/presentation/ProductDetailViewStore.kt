@@ -3,13 +3,13 @@ package org.example.fakeshop_clients.features.productDetail.presentation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
@@ -49,8 +49,8 @@ class ProductDetailViewStore(
     private val _state = MutableStateFlow(ProductDetailState())
     val state: StateFlow<ProductDetailState> = _state.asStateFlow()
 
-    private val _effects = MutableSharedFlow<ProductDetailEffect>(extraBufferCapacity = 8)
-    val effects: SharedFlow<ProductDetailEffect> = _effects.asSharedFlow()
+    private val _effects = Channel<ProductDetailEffect>(Channel.BUFFERED)
+    val effects: Flow<ProductDetailEffect> = _effects.receiveAsFlow()
 
     private var currentProductId: String? = null
 
@@ -261,7 +261,7 @@ class ProductDetailViewStore(
                     response.mutations.forEach { applyMutation(it) }
                 },
                 onError = {
-                    _effects.emit(
+                    _effects.send(
                         ProductDetailEffect.ShowToast(
                             message = "Action failed. Please try again.",
                             severity = ToastSeverity.error
@@ -311,7 +311,7 @@ class ProductDetailViewStore(
         val replace = (context[BduiConstants.REPLACE_STACK_KEY] as? JsonPrimitive)
             ?.contentOrNull == "true"
         scope.launch {
-            _effects.emit(ProductDetailEffect.Navigate(url, replace))
+            _effects.send(ProductDetailEffect.Navigate(url, replace))
         }
     }
 
@@ -350,11 +350,11 @@ class ProductDetailViewStore(
             }
 
             is BduiMutation.Navigate -> {
-                _effects.emit(ProductDetailEffect.Navigate(mutation.url, mutation.replace))
+                _effects.send(ProductDetailEffect.Navigate(mutation.url, mutation.replace))
             }
 
             is BduiMutation.ShowToast -> {
-                _effects.emit(ProductDetailEffect.ShowToast(mutation.message, mutation.severity))
+                _effects.send(ProductDetailEffect.ShowToast(mutation.message, mutation.severity))
             }
         }
     }

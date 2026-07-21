@@ -9,7 +9,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import org.example.fakeshop_clients.features.productDetail.presentation.BriefProductState
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailEffect
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailEvent
@@ -32,18 +35,21 @@ fun ProductDetailScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val appContext = LocalContext.current
     val scrollState = rememberSearchBarScrollState(onScrollOffsetChange = onScrollOffsetChange)
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(productId) {
         viewModel.onEvent(ProductDetailEvent.LoadProduct(productId))
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                is ProductDetailEffect.ShowToast ->
-                    Toast.makeText(appContext, effect.message, Toast.LENGTH_SHORT).show()
-                is ProductDetailEffect.Navigate ->
-                    onNavigate(effect.url, effect.replace)
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    is ProductDetailEffect.ShowToast ->
+                        Toast.makeText(appContext, effect.message, Toast.LENGTH_SHORT).show()
+                    is ProductDetailEffect.Navigate ->
+                        onNavigate(effect.url, effect.replace)
+                }
             }
         }
     }
