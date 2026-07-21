@@ -29,9 +29,11 @@ class FavoritesViewModel: ObservableObject {
     }
 
     private func observeFavoritesState() {
-        favoritesObservationTask = Task { @MainActor in
+        favoritesObservationTask = Task { @MainActor [weak self] in
+            guard let stateFlow = self?.favoritesStore.state else { return }
             do {
-                for try await newState in favoritesStore.state {
+                for try await newState in stateFlow {
+                    guard let self else { return }
                     self.favoritesState = newState
                 }
             } catch {
@@ -41,9 +43,11 @@ class FavoritesViewModel: ObservableObject {
     }
 
     private func observeRecentsState() {
-        recentsObservationTask = Task { @MainActor in
+        recentsObservationTask = Task { @MainActor [weak self] in
+            guard let stateFlow = self?.recentsStore.state else { return }
             do {
-                for try await newState in recentsStore.state {
+                for try await newState in stateFlow {
+                    guard let self else { return }
                     self.recentsState = newState
                 }
             } catch {

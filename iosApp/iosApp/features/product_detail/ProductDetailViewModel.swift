@@ -26,9 +26,11 @@ class ProductDetailViewModel: ObservableObject {
     }
 
     private func observeState() {
-        stateTask = Task { @MainActor in
+        stateTask = Task { @MainActor [weak self] in
+            guard let stateFlow = self?.viewStore.state else { return }
             do {
-                for try await newState in viewStore.state {
+                for try await newState in stateFlow {
+                    guard let self else { return }
                     self.state = newState
                 }
             } catch {
@@ -38,9 +40,11 @@ class ProductDetailViewModel: ObservableObject {
     }
 
     private func observeEffects() {
-        effectsTask = Task { @MainActor in
+        effectsTask = Task { @MainActor [weak self] in
+            guard let effectsFlow = self?.viewStore.effects else { return }
             do {
-                for try await effect in viewStore.effects {
+                for try await effect in effectsFlow {
+                    guard let self else { return }
                     self.pendingEffect = effect
                     self.effectTick += 1
                 }
