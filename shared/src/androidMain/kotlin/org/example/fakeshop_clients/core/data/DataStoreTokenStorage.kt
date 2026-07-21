@@ -19,6 +19,10 @@ import android.util.Base64
 import kotlinx.coroutines.withContext
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
+import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.error_handling.StorageError
+import org.example.fakeshop_clients.core.logging.AppLogger
+import kotlin.coroutines.cancellation.CancellationException
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = "secure_token_storage"
@@ -26,7 +30,8 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
 
 class DataStoreTokenStorage(
     private val context: Context,
-    private val dispatcherProvider: DispatcherProvider
+    private val dispatcherProvider: DispatcherProvider,
+    private val logger: AppLogger
 ) : TokenStorage {
 
     private val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
@@ -34,18 +39,26 @@ class DataStoreTokenStorage(
     @Volatile
     private var cachedAccessToken: String? = null
 
-    override suspend fun saveTokens(accessToken: String, refreshToken: String) {
-        cachedAccessToken = accessToken
+    override suspend fun saveTokens(accessToken: String, refreshToken: String): Result<Unit, StorageError> =
+        writeTokens(accessToken, refreshToken)
 
-        try {
+    override suspend fun replaceTokens(accessToken: String, refreshToken: String): Result<Unit, StorageError> =
+        writeTokens(accessToken, refreshToken)
+
+    private suspend fun writeTokens(accessToken: String, refreshToken: String): Result<Unit, StorageError> {
+        cachedAccessToken = accessToken
+        return try {
             withContext(dispatcherProvider.io) {
                 context.dataStore.edit { preferences ->
                     preferences[ACCESS_TOKEN_KEY] = encrypt(accessToken)
                     preferences[REFRESH_TOKEN_KEY] = encrypt(refreshToken)
                 }
             }
+            Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            throw SecurityException("Failed to save tokens securely", e)
+            Result.Error(StorageError.WriteFailed("Failed to save tokens securely", e))
         }
     }
 
@@ -58,7 +71,10 @@ class DataStoreTokenStorage(
                     ?.let { decrypt(it) }
                     ?.also { cachedAccessToken = it }
             }
-        } catch (_: Exception) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.warn(TAG, "Failed to read/decrypt access token; treating as absent", e)
             null
         }
     }
@@ -71,18 +87,11 @@ class DataStoreTokenStorage(
                     .first()
                     ?.let { decrypt(it) }
             }
-        } catch (_: Exception) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.warn(TAG, "Failed to read/decrypt refresh token; treating as absent", e)
             null
-        }
-    }
-
-    override suspend fun replaceTokens(accessToken: String, refreshToken: String) {
-        cachedAccessToken = accessToken
-        withContext(dispatcherProvider.io) {
-            context.dataStore.edit { preferences ->
-                preferences[ACCESS_TOKEN_KEY] = encrypt(accessToken)
-                preferences[REFRESH_TOKEN_KEY] = encrypt(refreshToken)
-            }
         }
     }
 
@@ -135,6 +144,7 @@ class DataStoreTokenStorage(
     }
 
     companion object {
+        private const val TAG = "DataStoreTokenStorage"
         private const val KEY_ALIAS = "token_encryption_key"
         private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")

@@ -96,6 +96,17 @@ kotlin {
             }
         }
 
+        val iosX64Test by getting
+        val iosArm64Test by getting
+        val iosSimulatorArm64Test by getting
+
+        val iosTest by creating {
+            dependsOn(commonTest.get())
+            iosX64Test.dependsOn(this)
+            iosArm64Test.dependsOn(this)
+            iosSimulatorArm64Test.dependsOn(this)
+        }
+
         jvmMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
 

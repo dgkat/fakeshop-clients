@@ -13,6 +13,9 @@ import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
 import org.example.fakeshop_clients.core.concurrency.IosDispatcherProvider
 import org.example.fakeshop_clients.core.data.KeychainTokenStorage
+import org.example.fakeshop_clients.core.logging.AppLogger
+import org.example.fakeshop_clients.core.logging.IosAppLogger
+import org.example.fakeshop_clients.core.logging.NoOpLogger
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -36,6 +39,9 @@ fun iosInfrastructureModule(baseUrl: String, isDebug: Boolean) = module {
             }
         }
     }
+
+    // Debug builds log to the Xcode console; release builds drop everything via NoOpLogger.
+    single<AppLogger> { if (isDebug) IosAppLogger() else NoOpLogger }
 
     single<TokenStorage> {
         KeychainTokenStorage(dispatcherProvider = get())
