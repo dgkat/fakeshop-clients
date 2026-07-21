@@ -7,6 +7,7 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.serialization.JsonConvertException
 import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.io.IOException
+import org.example.fakeshop_clients.core.error_handling.ApiException
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 
 /**
@@ -16,6 +17,12 @@ import org.example.fakeshop_clients.core.error_handling.NetworkError
 class KtorNetworkExceptionMapper : NetworkExceptionMapper {
     override fun map(exception: Exception): NetworkError {
         return when (exception) {
+            is ApiException -> NetworkError.HttpError(
+                code = exception.status,
+                message = exception.envelope?.message ?: exception.statusDescription,
+                body = exception.rawBody
+            )
+
             is ResponseException -> NetworkError.HttpError(
                 code = exception.response.status.value,
                 message = exception.response.status.description,

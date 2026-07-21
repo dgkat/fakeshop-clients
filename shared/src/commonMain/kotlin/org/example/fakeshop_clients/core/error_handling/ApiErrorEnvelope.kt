@@ -14,11 +14,13 @@ private val envelopeJson = Json {
     isLenient = true
 }
 
-fun NetworkError.HttpError.parseEnvelope(): ApiErrorEnvelope? {
-    val raw = body ?: return null
+fun decodeApiErrorEnvelope(raw: String?): ApiErrorEnvelope? {
+    if (raw.isNullOrBlank()) return null
     return try {
         envelopeJson.decodeFromString(ApiErrorEnvelope.serializer(), raw)
     } catch (_: Exception) {
         null
     }
 }
+
+fun NetworkError.HttpError.parseEnvelope(): ApiErrorEnvelope? = decodeApiErrorEnvelope(body)

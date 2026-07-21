@@ -77,39 +77,36 @@ class AxiosClient(
 
                     return@use Promise<AxiosResponse> { resolve, reject ->
                         scope.promise {
-                            val refreshSucceeded = try {
-                                val refreshResult = webAuthDatasource.refreshSession()
-                                refreshResult is Result.Success && refreshResult.data
-                            } catch (_: Throwable) {
-                                false
-                            } finally {
-                                isRefreshing = false
-                            }
-
-                            if (refreshSucceeded) {
-                                onSessionRefreshed()
-                                retryRequest(originalRequest)
-                                    .then { resolve(it) }
-                                    .catch { reject(wrapAxiosError(it.asDynamic())) }
-                            } else {
-                                val installId = installIdProvider.get()
-                                val guestSucceeded = try {
-                                    val guestResult = webAuthDatasource.guest(installId)
-                                    guestResult is Result.Success && guestResult.data
+                            var recovered = false
+                            try {
+                                recovered = try {
+                                    val refreshResult = webAuthDatasource.refreshSession()
+                                    refreshResult is Result.Success && refreshResult.data
                                 } catch (_: Throwable) {
                                     false
                                 }
 
-                                if (guestSucceeded) {
-                                    sessionMutator.setAuthenticated(Role.GUEST)
-                                    onSessionRefreshed()
-                                    retryRequest(originalRequest)
-                                        .then { resolve(it) }
-                                        .catch { reject(wrapAxiosError(it.asDynamic())) }
-                                } else {
-                                    onSessionRefreshFailed()
-                                    reject(wrapAxiosError(error))
+                                if (!recovered) {
+                                    val installId = installIdProvider.get()
+                                    recovered = try {
+                                        val guestResult = webAuthDatasource.guest(installId)
+                                        guestResult is Result.Success && guestResult.data
+                                    } catch (_: Throwable) {
+                                        false
+                                    }
+                                    if (recovered) sessionMutator.setAuthenticated(Role.GUEST)
                                 }
+                            } finally {
+                                isRefreshing = false
+                                if (recovered) onSessionRefreshed() else onSessionRefreshFailed()
+                            }
+
+                            if (recovered) {
+                                retryRequest(originalRequest)
+                                    .then { resolve(it) }
+                                    .catch { reject(wrapAxiosError(it.asDynamic())) }
+                            } else {
+                                reject(wrapAxiosError(error))
                             }
                         }
                     }

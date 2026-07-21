@@ -34,6 +34,7 @@ import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.auth.domain.SessionStore
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.KtorNetworkExceptionMapper
+import org.example.fakeshop_clients.core.data.installApiErrorValidator
 import org.example.fakeshop_clients.core.data.NetworkExceptionMapper
 import org.example.fakeshop_clients.core.data.SafeAuthenticatedApiClient
 import org.example.fakeshop_clients.core.data.SafePublicApiClient
@@ -75,6 +76,7 @@ val mobileInfrastructureModule = module {
 
         HttpClient(get<HttpClientEngine>()) {
             expectSuccess = true
+            installApiErrorValidator()
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true
@@ -107,6 +109,7 @@ val mobileInfrastructureModule = module {
 
         HttpClient(get<HttpClientEngine>()) {
             expectSuccess = true
+            installApiErrorValidator()
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true

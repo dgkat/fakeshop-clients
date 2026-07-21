@@ -117,6 +117,15 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
         }
 
+        jvmTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            // MockEngine to drive the SSR HttpClient (validator + mapper) end-to-end.
+            implementation(libs.ktor.client.mock)
+            implementation(libs.ktor.client.content)
+            implementation(libs.ktor.serialization.kotlinx.json)
+        }
+
         jsMain.dependencies {
             implementation(npm("axios", "1.13.2"))
         }
