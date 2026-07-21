@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.auth.domain.SessionState
-import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.home.domain.mappers.DomainToPresentationBriefProductMapper
@@ -125,10 +124,6 @@ class FavoritesViewStore(
             )
         }
     }
-
-    private fun NetworkError.toFavoritesError(): FavoritesError =
-        if (this is NetworkError.HttpError && code == 401) FavoritesError.NotLoggedIn
-        else FavoritesError.Network(this)
 
     private fun removeFavorite(productId: String) {
         if (_state.value.writesBlocked) return

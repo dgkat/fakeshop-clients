@@ -6,6 +6,7 @@ import org.example.fakeshop_clients.features.favorites.presentation.FavoritesVie
 import org.example.fakeshop_clients.features.recents.di.recentsModule
 import org.example.fakeshop_clients.features.recents.presentation.RecentsViewStore
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val androidFavoritesModule = module {
@@ -21,6 +22,9 @@ val androidFavoritesModule = module {
     }
 
     viewModel {
-        FavoritesViewModel()
+        FavoritesViewModel(
+            favoritesStoreFactory = { scope -> get { parametersOf(scope) } },
+            recentsStoreFactory = { scope -> get { parametersOf(scope) } }
+        )
     }
 }

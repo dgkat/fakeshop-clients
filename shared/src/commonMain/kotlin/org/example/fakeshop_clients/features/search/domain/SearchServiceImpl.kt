@@ -1,9 +1,7 @@
-package org.example.fakeshop_clients.features.search.data
+package org.example.fakeshop_clients.features.search.domain
 
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
-import org.example.fakeshop_clients.features.search.domain.SearchRepository
-import org.example.fakeshop_clients.features.search.domain.SearchService
 import org.example.fakeshop_clients.features.search.domain.models.SearchResult
 
 class SearchServiceImpl(private val repository: SearchRepository) : SearchService {

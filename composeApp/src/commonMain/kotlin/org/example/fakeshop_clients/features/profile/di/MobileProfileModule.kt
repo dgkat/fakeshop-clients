@@ -5,6 +5,7 @@ import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.features.profile.presentation.ProfileViewModel
 import org.example.fakeshop_clients.features.profile.presentation.ProfileViewStore
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val mobileProfileModule = module {
@@ -22,6 +23,6 @@ val mobileProfileModule = module {
     }
 
     viewModel {
-        ProfileViewModel()
+        ProfileViewModel(storeFactory = { scope -> get { parametersOf(scope) } })
     }
 }

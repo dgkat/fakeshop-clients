@@ -5,6 +5,7 @@ import org.example.fakeshop_clients.features.productDetail.di.productDetailModul
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailViewStore
 import org.example.fakeshop_clients.features.product_detail.presentation.ProductDetailViewModel
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val androidProductDetailModule = module {
@@ -25,6 +26,6 @@ val androidProductDetailModule = module {
     }
 
     viewModel {
-        ProductDetailViewModel()
+        ProductDetailViewModel(storeFactory = { scope -> get { parametersOf(scope) } })
     }
 }
