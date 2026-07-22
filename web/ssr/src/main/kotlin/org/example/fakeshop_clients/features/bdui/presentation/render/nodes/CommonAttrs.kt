@@ -1,10 +1,18 @@
 package org.example.fakeshop_clients.features.bdui.presentation.render.nodes
 
 import kotlinx.html.CommonAttributeGroupFacade
+import kotlinx.html.FlowContent
+import kotlinx.html.span
 import org.example.fakeshop_clients.features.bdui.domain.BduiReplaceResolver
 import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
 import org.example.fakeshop_clients.features.bdui.domain.models.tokens.NodeAlignment
 import org.example.fakeshop_clients.features.bdui.domain.models.tokens.Spacing
+
+
+internal fun FlowContent.renderEmptySlotAnchor(node: UiNode) {
+    val slotId = BduiReplaceResolver.slotIdOf(node) ?: return
+    span(classes = "bdui-empty-slot") { attributes["id"] = slotId }
+}
 
 internal fun CommonAttributeGroupFacade.applyNodeAttrs(node: UiNode) {
     // A slotted node's `id` makes it an htmx swap target for the Replace feature. Any node the

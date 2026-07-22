@@ -11,7 +11,10 @@ import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
 import org.example.fakeshop_clients.features.bdui.domain.models.resolveSpecItems
 
 fun FlowContent.renderSpecTable(node: UiNode.SpecTable, data: JsonObject) {
-    val items = node.bind?.let { data.resolveSpecItems(it) }?.takeIf { it.isNotEmpty() } ?: return
+    val items = node.bind?.let { data.resolveSpecItems(it) }?.takeIf { it.isNotEmpty() } ?: run {
+        renderEmptySlotAnchor(node)
+        return
+    }
     dl(classes = "bdui-spec-table") {
         applyNodeAttrs(node)
         items.forEach { item ->

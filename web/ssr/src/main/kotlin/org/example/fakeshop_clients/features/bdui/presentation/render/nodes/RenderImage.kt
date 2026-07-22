@@ -10,7 +10,10 @@ import org.example.fakeshop_clients.features.bdui.domain.models.resolveStringLis
 
 fun FlowContent.renderImage(node: UiNode.Image, data: JsonObject) {
     val url = node.bind?.let { data.resolveString(it) }
-    if (url.isNullOrBlank()) return
+    if (url.isNullOrBlank()) {
+        renderEmptySlotAnchor(node)
+        return
+    }
     img(src = url, alt = "", classes = "bdui-image") {
         applyNodeAttrs(node)
     }

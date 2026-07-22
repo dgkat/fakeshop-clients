@@ -9,7 +9,10 @@ import org.example.fakeshop_clients.features.bdui.domain.models.tokens.TextStyle
 
 fun FlowContent.renderText(node: UiNode.Text, data: JsonObject) {
     val value = node.bind?.let { data.resolveString(it) }
-    if (value.isNullOrBlank()) return
+    if (value.isNullOrBlank()) {
+        renderEmptySlotAnchor(node)
+        return
+    }
     val styleClass = when (node.style) {
         TextStyle.title -> "bdui-text-title"
         TextStyle.subtitle -> "bdui-text-subtitle"
