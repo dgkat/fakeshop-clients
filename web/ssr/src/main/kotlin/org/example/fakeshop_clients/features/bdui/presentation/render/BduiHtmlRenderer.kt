@@ -75,6 +75,7 @@ private fun FlowContent.renderTappable(
                 attributes["hx-vals"] = buildReplaceHxVals(productId, targetSlotId, locale)
                 attributes["hx-target"] = "#$targetSlotId"
                 attributes["hx-swap"] = "outerHTML"
+                attributes["hx-trigger"] = "click once"
                 renderNodeContent(node, data, screen, productId, locale)
             }
         }

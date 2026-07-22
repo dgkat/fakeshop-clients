@@ -31,6 +31,7 @@ fun FlowContent.renderButton(node: UiNode.Button, data: JsonObject, screen: Stri
                     attributes["hx-vals"] = buildReplaceHxVals(productId, targetSlotId, locale)
                     attributes["hx-target"] = "#$targetSlotId"
                     attributes["hx-swap"] = "outerHTML"
+                    attributes["hx-trigger"] = "click once"
                 }
             }
 
