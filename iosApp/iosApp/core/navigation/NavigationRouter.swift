@@ -1,6 +1,15 @@
 import SwiftUI
 import ComposeApp
 
+struct ProductRoute: Hashable {
+    let productId: String
+    private let token = UUID()
+
+    init(_ productId: String) {
+        self.productId = productId
+    }
+}
+
 class NavigationRouter: ObservableObject {
     static let shared = NavigationRouter()
 

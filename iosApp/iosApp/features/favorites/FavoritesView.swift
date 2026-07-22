@@ -110,7 +110,7 @@ private struct FavoritesTabContent: View {
                 ProductGrid(
                     products: state.products,
                     onProductClick: { productId in
-                        navigationPath.append(productId)
+                        navigationPath.append(ProductRoute(productId))
                     },
                     onRemoveFavorite: { productId in
                         viewModel.onFavoritesEvent(FavoritesEvent.RemoveFavorite(productId: productId))
@@ -151,7 +151,7 @@ private struct RecentsTabContent: View {
                 ProductGrid(
                     products: state.products,
                     onProductClick: { productId in
-                        navigationPath.append(productId)
+                        navigationPath.append(ProductRoute(productId))
                     },
                     onRemoveFavorite: nil,
                     onScrollOffsetChange: onScrollOffsetChange

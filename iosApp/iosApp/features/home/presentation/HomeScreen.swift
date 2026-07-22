@@ -32,7 +32,7 @@ struct HomeView: View {
                     categories: productListViewModel.state.categories,
                     favoritedProductIds: Set(productListViewModel.state.favoritedProductIds),
                     onProductClick: { productId in
-                        navigationPath.append(productId)
+                        navigationPath.append(ProductRoute(productId))
                     },
                     onToggleFavorite: { productId in
                         productListViewModel.toggleFavorite(productId: productId)

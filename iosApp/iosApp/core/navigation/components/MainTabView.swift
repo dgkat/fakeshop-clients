@@ -47,10 +47,10 @@ struct MainTabView: View {
             scrollOffset: $scrollOffset,
             onResultClick: { result in
                 switch selectedTab {
-                case .home: homePath.append(result.productId)
-                case .favorites: favoritesPath.append(result.productId)
-                case .notifications: notificationsPath.append(result.productId)
-                case .profile: profilePath.append(result.productId)
+                case .home: homePath.append(ProductRoute(result.productId))
+                case .favorites: favoritesPath.append(ProductRoute(result.productId))
+                case .notifications: notificationsPath.append(ProductRoute(result.productId))
+                case .profile: profilePath.append(ProductRoute(result.productId))
                 }
             }
         ) {
@@ -96,7 +96,7 @@ struct MainTabView: View {
     private func handleNotificationNavigate(_ productId: String?) {
         guard let productId else { return }
         selectedTab = .home
-        homePath.append(productId)
+        homePath.append(ProductRoute(productId))
         notificationRouter.clearNavigation()
     }
 
@@ -122,22 +122,23 @@ struct MainTabView: View {
         }
     }
 
-    /// Pushes a PDP onto the active tab's stack; `replace` swaps the top entry instead
-    /// (BDUI navigate's back-stack-replace flag).
+    /// Pushes a PDP onto the active tab's stack.
+    ///
+    /// The `replace` flag (BDUI navigate's back-stack-replace) is intentionally **ignored on
+    /// iOS for now** — a `replace` is treated as a plain push. Honouring it requires popping
+    /// the current top and pushing on the next runloop tick (a single pop+append mutation is
+    /// dropped by NavigationStack), which produces a visible pop→push double transition and an
+    /// extra back-stack entry. Tracked as a deferred improvement in `code-review-findings.md`
+    /// (item 31). The pushed entry is a `ProductRoute` (not a bare `String`) so navigating to a
+    /// product already in the stack forms a distinct entry instead of a duplicate hashable
+    /// value that NavigationStack no-ops on.
     private func pushProduct(_ productId: String, replace: Bool) {
+        let route = ProductRoute(productId)
         switch selectedTab {
-        case .home:
-            if replace && homePath.count > 0 { homePath.removeLast() }
-            homePath.append(productId)
-        case .favorites:
-            if replace && favoritesPath.count > 0 { favoritesPath.removeLast() }
-            favoritesPath.append(productId)
-        case .notifications:
-            if replace && notificationsPath.count > 0 { notificationsPath.removeLast() }
-            notificationsPath.append(productId)
-        case .profile:
-            if replace && profilePath.count > 0 { profilePath.removeLast() }
-            profilePath.append(productId)
+        case .home: homePath.append(route)
+        case .favorites: favoritesPath.append(route)
+        case .notifications: notificationsPath.append(route)
+        case .profile: profilePath.append(route)
         }
     }
 
@@ -147,9 +148,9 @@ struct MainTabView: View {
                 navigationPath: $homePath,
                 onScrollOffsetChange: { offset in scrollOffset = offset }
             )
-            .navigationDestination(for: String.self) { productId in
+            .navigationDestination(for: ProductRoute.self) { route in
                 ProductDetailView(
-                    productId: productId,
+                    productId: route.productId,
                     onScrollOffsetChange: { offset in scrollOffset = offset },
                     onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                 )
@@ -164,9 +165,9 @@ struct MainTabView: View {
                 isActive: selectedTab == .favorites,
                 onScrollOffsetChange: { offset in scrollOffset = offset }
             )
-            .navigationDestination(for: String.self) { productId in
+            .navigationDestination(for: ProductRoute.self) { route in
                 ProductDetailView(
-                    productId: productId,
+                    productId: route.productId,
                     onScrollOffsetChange: { offset in scrollOffset = offset },
                     onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                 )
@@ -177,9 +178,9 @@ struct MainTabView: View {
     @ViewBuilder private var notificationsTab: some View {
         NavigationStack(path: $notificationsPath) {
             NotificationsView()
-                .navigationDestination(for: String.self) { productId in
+                .navigationDestination(for: ProductRoute.self) { route in
                     ProductDetailView(
-                        productId: productId,
+                        productId: route.productId,
                         onScrollOffsetChange: { offset in scrollOffset = offset },
                         onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                     )
@@ -191,9 +192,9 @@ struct MainTabView: View {
         NavigationStack(path: $profilePath) {
             ComposeProfileView()
                 .toolbar(.hidden, for: .navigationBar)
-                .navigationDestination(for: String.self) { productId in
+                .navigationDestination(for: ProductRoute.self) { route in
                     ProductDetailView(
-                        productId: productId,
+                        productId: route.productId,
                         onScrollOffsetChange: { offset in scrollOffset = offset },
                         onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                     )
