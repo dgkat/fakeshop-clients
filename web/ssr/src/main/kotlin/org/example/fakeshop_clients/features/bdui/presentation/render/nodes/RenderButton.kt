@@ -6,6 +6,7 @@ import kotlinx.serialization.json.Json.Default.encodeToString
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import org.example.fakeshop_clients.core.navigation.AppRouteParser
 import org.example.fakeshop_clients.features.bdui.BduiConstants
 import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
 import org.example.fakeshop_clients.features.bdui.domain.models.tokens.ButtonStyle
@@ -22,6 +23,17 @@ fun FlowContent.renderButton(node: UiNode.Button, data: JsonObject, screen: Stri
         attributes["type"] = "button"
 
         when {
+            node.actionId == BduiConstants.NAVIGATE_ACTION_ID -> {
+
+                val url = node.contextBindings[BduiConstants.URL_KEY]
+                if (url != null && AppRouteParser.parse(url) != null) {
+                    attributes["data-href"] = "/$locale$url"
+                    if (node.contextBindings[BduiConstants.REPLACE_STACK_KEY] == "true") {
+                        attributes["data-replace"] = "true"
+                    }
+                }
+            }
+
             node.actionId == BduiConstants.REPLACE_ACTION_ID -> {
                 // `replace` is resolved server-side by /bdui/replace, NOT the /ui/action allowlist.
                 // targetSlotId is a verbatim literal in contextBindings, not a bind path.
