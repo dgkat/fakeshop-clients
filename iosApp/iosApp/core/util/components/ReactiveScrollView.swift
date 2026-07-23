@@ -168,7 +168,9 @@ private class ScrollTrackerView: UIView {
     private func snap() {
         let threshold = totalHeight / 2
         searchBarOffset = searchBarOffset < -threshold ? -totalHeight : 0
-        onSearchBarOffset?(searchBarOffset)
+         withAnimation(.easeInOut(duration: 0.3)) {
+            onSearchBarOffset?(searchBarOffset)
+        }
     }
 
     deinit { detach() }

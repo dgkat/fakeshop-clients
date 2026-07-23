@@ -15,21 +15,23 @@ struct SearchBarContainer<Content: View>: View {
     let onResultClick: (SearchResult) -> Void
     let content: Content
 
-    @Binding var scrollOffset: CGFloat
+    // Only this container observes the offset, so scrolling re-renders the search bar alone —
+    // not MainTabView and its four always-alive tabs. See code-review-findings.md item 23.
+    @ObservedObject var offsetModel: SearchBarOffsetModel
     @State private var searchBarHeight: CGFloat = 72
     @State private var statusBarHeight: CGFloat = 0
 
     init(
         searchViewModel: SearchViewModel,
         currentTab: Tab,
-        scrollOffset: Binding<CGFloat>,
+        offsetModel: SearchBarOffsetModel,
         onResultClick: @escaping (SearchResult) -> Void,
         @ViewBuilder content: () -> Content
     ) {
         self.searchViewModel = searchViewModel
         self.currentTab = currentTab
         self.behavior = currentTab.searchBarBehavior
-        self._scrollOffset = scrollOffset
+        self.offsetModel = offsetModel
         self.onResultClick = onResultClick
         self.content = content()
     }
@@ -97,17 +99,19 @@ struct SearchBarContainer<Content: View>: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .top)
                 .offset(y: calculateOffset())
-                .animation(.easeInOut(duration: 0.3), value: scrollOffset)
+                // No `.animation(value: scrollOffset)` — continuous drag follows the finger 1:1 and
+                // the snap is animated at its source in ReactiveScrollView (item 23). Behavior
+                // changes (route-level, rare) stay animated.
                 .animation(.easeInOut(duration: 0.3), value: behavior)
             }
             .ignoresSafeArea(edges: .top)
         }
         .onChange(of: currentTab) { _, _ in
-            scrollOffset = 0
+            withAnimation(.easeInOut(duration: 0.3)) { offsetModel.offset = 0 }
         }
         .onChange(of: behavior) { _, newBehavior in
             if newBehavior != .hidden {
-                scrollOffset = 0
+                withAnimation(.easeInOut(duration: 0.3)) { offsetModel.offset = 0 }
             }
         }
     }
@@ -127,7 +131,7 @@ struct SearchBarContainer<Content: View>: View {
         case .hidden:
             offset = -searchBarHeight
         case .scrollReactive:
-            offset = statusBarHeight + scrollOffset
+            offset = statusBarHeight + offsetModel.offset
         case .static:
             offset = statusBarHeight
         default:
@@ -138,6 +142,6 @@ struct SearchBarContainer<Content: View>: View {
     }
 
     private var showShadow: Bool {
-        scrollOffset < -5 || behavior == .static
+        offsetModel.offset < -5 || behavior == .static
     }
 }

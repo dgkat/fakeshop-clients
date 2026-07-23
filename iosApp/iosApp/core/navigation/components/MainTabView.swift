@@ -17,8 +17,7 @@ struct MainTabView: View {
     @State private var favoritesPath = NavigationPath()
     @State private var notificationsPath = NavigationPath()
     @State private var profilePath = NavigationPath()
-
-    @State private var scrollOffset: CGFloat = 0
+    @State private var offsetModel = SearchBarOffsetModel()
     @State private var scrollResetToken = UUID()
 
     private var isOnDetailScreen: Bool {
@@ -44,7 +43,7 @@ struct MainTabView: View {
         SearchBarContainer(
             searchViewModel: searchViewModel,
             currentTab: selectedTab,
-            scrollOffset: $scrollOffset,
+            offsetModel: offsetModel,
             onResultClick: { result in
                 switch selectedTab {
                 case .home: homePath.append(ProductRoute(result.productId))
@@ -83,7 +82,7 @@ struct MainTabView: View {
     }
 
     private func handleTabSwitch(oldValue: Tab, newValue: Tab) {
-        scrollOffset = 0
+        withAnimation(.easeInOut(duration: 0.3)) { offsetModel.offset = 0 }
         scrollResetToken = UUID()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             if newValue != .home { homePath = NavigationPath() }
@@ -146,12 +145,12 @@ struct MainTabView: View {
         NavigationStack(path: $homePath) {
             HomeView(
                 navigationPath: $homePath,
-                onScrollOffsetChange: { offset in scrollOffset = offset }
+                onScrollOffsetChange: { offset in offsetModel.offset = offset }
             )
             .navigationDestination(for: ProductRoute.self) { route in
                 ProductDetailView(
                     productId: route.productId,
-                    onScrollOffsetChange: { offset in scrollOffset = offset },
+                    onScrollOffsetChange: { offset in offsetModel.offset = offset },
                     onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                 )
             }
@@ -163,12 +162,12 @@ struct MainTabView: View {
             FavoritesView(
                 navigationPath: $favoritesPath,
                 isActive: selectedTab == .favorites,
-                onScrollOffsetChange: { offset in scrollOffset = offset }
+                onScrollOffsetChange: { offset in offsetModel.offset = offset }
             )
             .navigationDestination(for: ProductRoute.self) { route in
                 ProductDetailView(
                     productId: route.productId,
-                    onScrollOffsetChange: { offset in scrollOffset = offset },
+                    onScrollOffsetChange: { offset in offsetModel.offset = offset },
                     onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                 )
             }
@@ -181,7 +180,7 @@ struct MainTabView: View {
                 .navigationDestination(for: ProductRoute.self) { route in
                     ProductDetailView(
                         productId: route.productId,
-                        onScrollOffsetChange: { offset in scrollOffset = offset },
+                        onScrollOffsetChange: { offset in offsetModel.offset = offset },
                         onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                     )
                 }
@@ -195,7 +194,7 @@ struct MainTabView: View {
                 .navigationDestination(for: ProductRoute.self) { route in
                     ProductDetailView(
                         productId: route.productId,
-                        onScrollOffsetChange: { offset in scrollOffset = offset },
+                        onScrollOffsetChange: { offset in offsetModel.offset = offset },
                         onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                     )
                 }
@@ -205,7 +204,7 @@ struct MainTabView: View {
     private func handleNavigationChange(oldPath: NavigationPath, newPath: NavigationPath, tab: Tab) {
         let hasVisibleSearchBar = tab.searchBarBehavior != .hidden
         if hasVisibleSearchBar && newPath.count != oldPath.count {
-            scrollOffset = 0
+            withAnimation(.easeInOut(duration: 0.3)) { offsetModel.offset = 0 }
             scrollResetToken = UUID()
         }
     }

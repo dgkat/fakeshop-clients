@@ -21,20 +21,19 @@ import org.example.fakeshop_clients.features.product_detail.presentation.bdui.re
 import org.example.fakeshop_clients.features.product_detail.presentation.components.ErrorContent
 import org.example.fakeshop_clients.features.product_detail.presentation.components.LoadingContent
 import org.example.fakeshop_clients.features.product_detail.presentation.components.ProductContent
-import org.example.fakeshop_clients.features.search_bar.presentation.components.rememberSearchBarScrollState
+import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarScrollState
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ProductDetailScreen(
     productId: String,
     contentPadding: PaddingValues,
-    onScrollOffsetChange: (Float) -> Unit,
+    scrollState: SearchBarScrollState,
     onNavigate: (url: String, replace: Boolean) -> Unit = { _, _ -> },
     viewModel: ProductDetailViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val appContext = LocalContext.current
-    val scrollState = rememberSearchBarScrollState(onScrollOffsetChange = onScrollOffsetChange)
     val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(productId) {

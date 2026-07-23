@@ -13,9 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.util.Consumer
@@ -45,6 +43,7 @@ import org.example.fakeshop_clients.features.search.presentation.SearchEvent
 import org.example.fakeshop_clients.features.search_bar.presentation.SearchViewModel
 import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarLayout
 import org.example.fakeshop_clients.features.search_bar.presentation.components.rememberSearchBarDimensions
+import org.example.fakeshop_clients.features.search_bar.presentation.components.rememberSearchBarScrollState
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -81,7 +80,7 @@ fun MainNavigation(initialProductId: String? = null, initialRoute: AppRoute? = n
     val searchViewModel: SearchViewModel = koinViewModel()
     val searchUiState by searchViewModel.state.collectAsStateWithLifecycle()
 
-    var scrollOffset by remember { mutableFloatStateOf(0f) }
+    val scrollState = rememberSearchBarScrollState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
@@ -123,13 +122,13 @@ fun MainNavigation(initialProductId: String? = null, initialRoute: AppRoute? = n
         //     searchViewModel.clearQuery()
         // }
         if (searchBarBehavior != SearchBarBehavior.HIDDEN) {
-            scrollOffset = 0f
+            scrollState.reset()
         }
     }
 
     SearchBarLayout(
         searchUiState = searchUiState,
-        scrollOffset = scrollOffset,
+        scrollState = scrollState,
         behavior = searchBarBehavior,
         onQueryChange = { searchViewModel.onEvent(SearchEvent.QueryChanged(query = it)) },
         onClearQuery = { searchViewModel.onEvent(SearchEvent.ClearQuery) },
@@ -166,7 +165,7 @@ fun MainNavigation(initialProductId: String? = null, initialRoute: AppRoute? = n
                             navController.navigate(Route.ProductDetail.createRoute(productId))
                         },
                         contentPadding = searchBarPadding,
-                        onScrollOffsetChange = { scrollOffset = it }
+                        scrollState = scrollState
                     )
                 }
 
@@ -207,7 +206,7 @@ fun MainNavigation(initialProductId: String? = null, initialRoute: AppRoute? = n
                     ProductDetailScreen(
                         productId = productId,
                         contentPadding = searchBarPadding,
-                        onScrollOffsetChange = { scrollOffset = it },
+                        scrollState = scrollState,
                         onNavigate = { url, replace ->
                             // Unparseable url ⇒ safe no-op (BDUI must never dead-end).
                             AppRouteParser.parse(url)?.let { route ->

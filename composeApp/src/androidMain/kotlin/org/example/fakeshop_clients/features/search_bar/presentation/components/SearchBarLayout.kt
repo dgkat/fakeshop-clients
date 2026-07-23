@@ -19,7 +19,7 @@ import org.example.fakeshop_clients.features.search.presentation.SearchState
 @Composable
 fun SearchBarLayout(
     searchUiState: SearchState,
-    scrollOffset: Float,
+    scrollState: SearchBarScrollState,
     behavior: SearchBarBehavior,
     onQueryChange: (String) -> Unit,
     onClearQuery: () -> Unit,
@@ -59,7 +59,7 @@ fun SearchBarLayout(
         // Search bar overlay
         SearchBarOverlay(
             uiState = searchUiState,
-            scrollOffset = scrollOffset,
+            scrollState = scrollState,
             behavior = behavior,
             onQueryChange = onQueryChange,
             onClearQuery = onClearQuery,

@@ -22,7 +22,7 @@ import fakeshop_clients.composeapp.generated.resources.error_generic
 import fakeshop_clients.composeapp.generated.resources.loading_products
 import fakeshop_clients.composeapp.generated.resources.retry
 import org.example.fakeshop_clients.features.home.presentation.components.HomeContent
-import org.example.fakeshop_clients.features.search_bar.presentation.components.rememberSearchBarScrollState
+import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarScrollState
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -31,13 +31,9 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     productListViewModel: ProductListViewModel = koinViewModel(),
     contentPadding: PaddingValues,
-    onScrollOffsetChange: (Float) -> Unit,
+    scrollState: SearchBarScrollState,
     onProductClick: (String) -> Unit,
 ) {
-    val scrollState = rememberSearchBarScrollState(
-        onScrollOffsetChange = onScrollOffsetChange
-    )
-
     val uiState by productListViewModel.uiState.collectAsStateWithLifecycle()
     HomeContent(
         productListState = uiState,

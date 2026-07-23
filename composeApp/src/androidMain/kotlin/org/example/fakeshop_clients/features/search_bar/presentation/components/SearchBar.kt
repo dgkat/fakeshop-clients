@@ -50,7 +50,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun SearchBarOverlay(
     uiState: SearchState,
-    scrollOffset: Float,
+    scrollState: SearchBarScrollState,
     behavior: SearchBarBehavior,
     onQueryChange: (String) -> Unit,
     onClearQuery: () -> Unit,
@@ -60,20 +60,13 @@ fun SearchBarOverlay(
 ) {
     val dimensions = rememberSearchBarDimensions()
 
-    // Calculate offset based on behavior
-    val targetOffset = when (behavior) {
-        SearchBarBehavior.HIDDEN -> -dimensions.totalHeightPx
-        SearchBarBehavior.SCROLL_REACTIVE -> scrollOffset
-        SearchBarBehavior.STATIC -> 0f
-    }
-
-    val animatedOffset by animateFloatAsState(
-        targetValue = targetOffset,
-        label = "searchBarOffset"
+    val baseOffset by animateFloatAsState(
+        targetValue = if (behavior == SearchBarBehavior.HIDDEN) -dimensions.totalHeightPx else 0f,
+        label = "searchBarBaseOffset"
     )
 
-    val showShadow by remember {
-        derivedStateOf { scrollOffset < -5f || behavior == SearchBarBehavior.STATIC }
+    val showShadow by remember(behavior) {
+        derivedStateOf { behavior == SearchBarBehavior.STATIC || scrollState.offset < -5f }
     }
 
     Column(
@@ -81,7 +74,8 @@ fun SearchBarOverlay(
             .fillMaxWidth()
             .statusBarsPadding()
             .graphicsLayer {
-                translationY = animatedOffset
+                translationY = baseOffset +
+                    if (behavior == SearchBarBehavior.SCROLL_REACTIVE) scrollState.offset else 0f
             }
     ) {
         // Search Bar with background
