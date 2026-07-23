@@ -88,15 +88,13 @@ fun HTML.productDetailPage(
             attributes["defer"] = ""
         }
 
-        // Google Fonts
-        link(rel = "preconnect", href = "https://fonts.googleapis.com")
-        link(rel = "preconnect", href = "https://fonts.gstatic.com") {
+        // Fonts: self-hosted Inter (@font-face in base.css). Preload the primary latin subset so it
+        // downloads before the CSS bundle is parsed; crossorigin is required even for same-origin fonts.
+        link(rel = "preload", href = "/static/fonts/inter-latin-wght-normal.woff2") {
+            attributes["as"] = "font"
+            attributes["type"] = "font/woff2"
             attributes["crossorigin"] = ""
         }
-        link(
-            rel = "stylesheet",
-            href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-        )
 
         // CSS Bundles (split bundle approach for optimal caching)
         link(rel = "stylesheet", href = AssetManifest.commonCss)         // Cached across all pages
