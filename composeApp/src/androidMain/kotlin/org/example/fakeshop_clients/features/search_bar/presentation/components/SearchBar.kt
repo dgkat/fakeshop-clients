@@ -1,7 +1,6 @@
 package org.example.fakeshop_clients.features.search_bar.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
@@ -60,11 +59,6 @@ fun SearchBarOverlay(
 ) {
     val dimensions = rememberSearchBarDimensions()
 
-    val baseOffset by animateFloatAsState(
-        targetValue = if (behavior == SearchBarBehavior.HIDDEN) -dimensions.totalHeightPx else 0f,
-        label = "searchBarBaseOffset"
-    )
-
     val showShadow by remember(behavior) {
         derivedStateOf { behavior == SearchBarBehavior.STATIC || scrollState.offset < -5f }
     }
@@ -74,8 +68,7 @@ fun SearchBarOverlay(
             .fillMaxWidth()
             .statusBarsPadding()
             .graphicsLayer {
-                translationY = baseOffset +
-                    if (behavior == SearchBarBehavior.SCROLL_REACTIVE) scrollState.offset else 0f
+                translationY = scrollState.offset
             }
     ) {
         // Search Bar with background

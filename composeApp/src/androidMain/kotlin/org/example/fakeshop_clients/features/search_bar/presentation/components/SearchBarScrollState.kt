@@ -2,8 +2,8 @@ package org.example.fakeshop_clients.features.search_bar.presentation.components
 
 import androidx.compose.animation.core.animate
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -21,36 +21,33 @@ class SearchBarScrollState(
 ) {
     private var scrollOffset by mutableFloatStateOf(0f)
 
-    private var snapJob: Job? = null
+    private var animationJob: Job? = null
 
     val offset: Float get() = scrollOffset
 
-    fun reset() {
-        snapJob?.cancel()
-        scrollOffset = 0f
-    }
+    fun animateToShown() = animateTo(0f)
+
+    fun animateToHidden() = animateTo(-searchBarHeightPx)
 
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            snapJob?.cancel()
+            animationJob?.cancel()
             scrollOffset = (scrollOffset + available.y).coerceIn(-searchBarHeightPx, 0f)
             return Offset.Zero
         }
 
         override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-            snapToNearest()
+            animateTo(if (scrollOffset < -(searchBarHeightPx / 2)) -searchBarHeightPx else 0f)
             return Velocity.Zero
         }
     }
 
-    private fun snapToNearest() {
-        val target = if (scrollOffset < -(searchBarHeightPx / 2)) -searchBarHeightPx else 0f
-        snapJob?.cancel()
-        if (target != scrollOffset) {
-            snapJob = scope.launch {
-                animate(initialValue = scrollOffset, targetValue = target) { value, _ ->
-                    scrollOffset = value
-                }
+    private fun animateTo(target: Float) {
+        animationJob?.cancel()
+        if (target == scrollOffset) return
+        animationJob = scope.launch {
+            animate(initialValue = scrollOffset, targetValue = target) { value, _ ->
+                scrollOffset = value
             }
         }
     }

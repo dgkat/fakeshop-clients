@@ -32,12 +32,12 @@ import org.example.fakeshop_clients.core.navigation.Route
 import org.example.fakeshop_clients.core.navigation.utils.getSearchBarBehavior
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesScreen
 import org.example.fakeshop_clients.features.home.presentation.HomeScreen
+import org.example.fakeshop_clients.features.notifications.presentation.NotificationEventBus
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsScreen
+import org.example.fakeshop_clients.features.notifications.presentation.PushNotificationEvent
 import org.example.fakeshop_clients.features.product_detail.presentation.ProductDetailScreen
 import org.example.fakeshop_clients.features.profile.presentation.ProfileScreen
 import org.example.fakeshop_clients.features.profile.presentation.components.LanguagePickerSection
-import org.example.fakeshop_clients.features.notifications.presentation.NotificationEventBus
-import org.example.fakeshop_clients.features.notifications.presentation.PushNotificationEvent
 import org.example.fakeshop_clients.features.search.presentation.SearchBarBehavior
 import org.example.fakeshop_clients.features.search.presentation.SearchEvent
 import org.example.fakeshop_clients.features.search_bar.presentation.SearchViewModel
@@ -115,14 +115,11 @@ fun MainNavigation(initialProductId: String? = null, initialRoute: AppRoute? = n
         getSearchBarBehavior(currentRoute)
     }
 
-    // Clear search when navigating to certain screens if needed
     LaunchedEffect(currentRoute, searchBarBehavior) {
-        // Example: Clear search when going to payment screen
-        // if (currentRoute == Route.Payment.route) {
-        //     searchViewModel.clearQuery()
-        // }
-        if (searchBarBehavior != SearchBarBehavior.HIDDEN) {
-            scrollState.reset()
+        if (searchBarBehavior == SearchBarBehavior.HIDDEN) {
+            scrollState.animateToHidden()
+        } else {
+            scrollState.animateToShown()
         }
     }
 
