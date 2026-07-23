@@ -199,7 +199,7 @@ private fun BriefProductInfo(
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "$${String.format("%.2f", briefProduct.price)}",
+            text = briefProduct.formattedPrice,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold

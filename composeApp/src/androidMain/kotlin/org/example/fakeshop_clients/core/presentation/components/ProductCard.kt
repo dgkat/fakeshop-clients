@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -83,7 +83,7 @@ fun ProductCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "$${String.format("%.2f", product.price)}",
+                    text = product.formattedPrice,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -109,8 +109,8 @@ private fun FavoriteCardButton(
                 contentDescription = null,
                 tint = Color.Black.copy(alpha = 0.25f),
                 modifier = Modifier
-                    .size(26.dp)
-                    .blur(6.dp)
+                    .size(22.dp)
+                    .offset(x = 0.5.dp, y = 1.dp)
             )
             Icon(
                 imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
