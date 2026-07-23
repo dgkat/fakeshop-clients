@@ -103,6 +103,8 @@ fun RenderNode(node: UiNode, data: JsonObject, modifier: Modifier = Modifier) {
                 RenderNodeContent(node, data)
             }
         }
+    } else if (widthFraction == null && onTap == null && modifier === Modifier) {
+        RenderNodeContent(node, data)
     } else {
         val widthMod = if (widthFraction != null) Modifier.fillMaxWidth(widthFraction) else Modifier
         Box(modifier = modifier.then(widthMod).then(tapModifier)) {
