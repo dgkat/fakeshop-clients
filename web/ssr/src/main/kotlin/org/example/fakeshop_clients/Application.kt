@@ -99,6 +99,9 @@ private fun assetLinksJson(cfg: AppLinksConfig): String = buildJsonArray {
     }
 }.toString()
 
+// Matches content-hashed static filenames like `common.44a74e0d.css` / `spa-bundle.52d816b8.js`.
+private val HASHED_ASSET_REGEX = Regex(""".*\.[a-f0-9]{8}\.(css|js)$""")
+
 // Paths mirror AppRouteParser's allowed destinations; "??" matches the 2-letter locale prefix.
 private val universalLinkPaths = listOf(
     "/", "/??/",
@@ -132,9 +135,14 @@ fun Application.configureRouting() {
         staticResources("/static", "static") {
             modify { url, call ->
                 val filename = url.path.substringAfterLast("/")
-                if (filename.matches(Regex(""".*\.[a-f0-9]{8}\.(css|js)$"""))) {
-                    call.response.headers.append(HttpHeaders.CacheControl, "public, max-age=31536000, immutable")
+                val cacheControl = if (HASHED_ASSET_REGEX.matches(filename)) {
+
+                    "public, max-age=31536000, immutable"
+                } else {
+                    // Unhashed assets (helper scripts, images): short cache, revalidate in bg.
+                    "public, max-age=86400, stale-while-revalidate=3600"
                 }
+                call.response.headers.append(HttpHeaders.CacheControl, cacheControl)
             }
         }
 
