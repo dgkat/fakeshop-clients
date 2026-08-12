@@ -2,14 +2,13 @@ package org.example.fakeshop_clients.features.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListViewStore
-import org.koin.core.parameter.parametersOf
-import org.koin.mp.KoinPlatform.getKoin
 
-class ProductListViewModel() : ViewModel() {
-    private val store: ProductListViewStore by lazy {
-        getKoin().get<ProductListViewStore> { parametersOf(viewModelScope) }
-    }
+class ProductListViewModel(
+    storeFactory: (CoroutineScope) -> ProductListViewStore
+) : ViewModel() {
+    private val store = storeFactory(viewModelScope)
     val uiState = store.productListState
 
     fun toggleFavorite(productId: String) {

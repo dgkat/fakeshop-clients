@@ -12,6 +12,7 @@ import org.example.fakeshop_clients.features.notifications.presentation.Notifica
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationPrefsViewStore
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val androidNotificationsModule = module {
@@ -41,5 +42,7 @@ val androidNotificationsModule = module {
         )
     }
 
-    viewModel { NotificationPrefsViewModel() }
+    viewModel {
+        NotificationPrefsViewModel(storeFactory = { scope -> get { parametersOf(scope) } })
+    }
 }

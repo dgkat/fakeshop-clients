@@ -14,6 +14,9 @@ import org.example.fakeshop_clients.core.concurrency.AndroidDispatcherProvider
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
 import org.example.fakeshop_clients.core.data.DataStoreTokenStorage
+import org.example.fakeshop_clients.core.logging.AndroidAppLogger
+import org.example.fakeshop_clients.core.logging.AppLogger
+import org.example.fakeshop_clients.core.logging.NoOpLogger
 import org.example.fakeshop_clients.shared.BuildConfig
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -35,8 +38,10 @@ val androidInfrastructureModule = module {
         }
     }
 
+    single<AppLogger> { if (BuildConfig.IS_DEBUG) AndroidAppLogger() else NoOpLogger }
+
     single<TokenStorage> {
-        DataStoreTokenStorage(context = get(), dispatcherProvider = get())
+        DataStoreTokenStorage(context = get(), dispatcherProvider = get(), logger = get())
     }
 
     single<InstallIdProvider> {

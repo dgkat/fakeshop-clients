@@ -17,6 +17,7 @@ import org.example.fakeshop_clients.core.data.KtorNetworkExceptionMapper
 import org.example.fakeshop_clients.core.data.NetworkExceptionMapper
 import org.example.fakeshop_clients.core.data.SSRSafeApiClient
 import org.example.fakeshop_clients.core.data.SafeAuthenticatedApiClient
+import org.example.fakeshop_clients.core.data.installApiErrorValidator
 import org.example.fakeshop_clients.core.network.JvmUrlProvider
 import org.example.fakeshop_clients.core.network.UrlProvider
 import org.koin.core.qualifier.named
@@ -41,6 +42,8 @@ val jvmInfrastructureModule = module {
                 else error("BACKEND_BASE_URL environment variable is required in production")
         )
         HttpClient(CIO) {
+            expectSuccess = true
+            installApiErrorValidator()
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true

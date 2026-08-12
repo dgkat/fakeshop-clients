@@ -8,11 +8,9 @@ import org.example.fakeshop_clients.features.productDetailPage.data.SSRProductDe
 import org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailRepository
 import org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailService
 import org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailServiceImpl
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val ssrProductDetailModule = module {
-    // Data
     single<ProductDetailDatasource> {
         SSRProductDetailDatasourceImpl(
             safeApiClient = get(),
@@ -20,15 +18,9 @@ val ssrProductDetailModule = module {
         )
     }
 
-    single {
-        DataToDomainBriefProductMapper()
-    }
+    single { DataToDomainBriefProductMapper() }
+    single { DataToDomainDetailedProductMapper() }
 
-    single {
-        DataToDomainDetailedProductMapper()
-    }
-
-    //Domain
     single<ProductDetailRepository> {
         SSRProductDetailRepositoryImpl(
             productDetailDatasource = get(),
@@ -39,8 +31,9 @@ val ssrProductDetailModule = module {
 
     single<ProductDetailService> {
         ProductDetailServiceImpl(
-            productDetailRepository = get()
+            productDetailRepository = get(),
+            bduiTemplateDatasource = get(),
+            bduiTemplateMapper = get()
         )
     }
-
 }

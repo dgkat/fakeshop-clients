@@ -6,9 +6,11 @@ import org.example.fakeshop_clients.features.productDetail.domain.models.Detaile
 class DataToDomainDetailedProductMapper {
     fun map(response: DetailedProductResponse): DetailedProduct {
         return DetailedProduct(
-            description = response.description,
-            specs = response.specs,
-            galleryUrls = response.galleryUrls
+            productId = response.productId,
+            category = response.category,
+            fullDescription = response.fullDescription,
+            galleryUrls = response.galleryUrls,
+            data = response.data
         )
     }
 }

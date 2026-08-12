@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.example.fakeshop_clients.features.home.presentation.ProductListViewModel
 import org.example.fakeshop_clients.features.home.presentation.productList.ProductListViewStore
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val androidHomeModule = module {
@@ -21,6 +22,6 @@ val androidHomeModule = module {
     }
 
     viewModel {
-        ProductListViewModel()
+        ProductListViewModel(storeFactory = { scope -> get { parametersOf(scope) } })
     }
 }

@@ -1,43 +1,61 @@
 package org.example.fakeshop_clients.features.productDetailPage.domain
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+
+import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
+import org.example.fakeshop_clients.features.bdui.data.SSRBduiTemplateDatasource
+import org.example.fakeshop_clients.features.bdui.data.mappers.DataToDomainBduiTemplateMapper
+import org.example.fakeshop_clients.features.bdui.domain.buildPdpBindData
 import org.example.fakeshop_clients.features.core.models.Cookies
-import org.example.fakeshop_clients.features.productDetailPage.domain.models.FullProduct
+import org.example.fakeshop_clients.features.productDetailPage.domain.models.PdpData
 
 class ProductDetailServiceImpl(
     private val productDetailRepository: ProductDetailRepository,
+    private val bduiTemplateDatasource: SSRBduiTemplateDatasource,
+    private val bduiTemplateMapper: DataToDomainBduiTemplateMapper
 ) : ProductDetailService {
 
-
-    override suspend fun getFullProductById(
+    override suspend fun getPdpData(
         id: String,
         cookies: Cookies
-    ): Result<FullProduct, NetworkError> {
-        val briefProduct = productDetailRepository.getBriefProductById(id, cookies)
-        val detailedProduct = productDetailRepository.getDetailedProductById(id, cookies)
+    ): Result<PdpData, NetworkError> = coroutineScope {
+        val briefDef = async { productDetailRepository.getBriefProductById(id, cookies) }
+        val detailedDef = async { productDetailRepository.getDetailedProductById(id, cookies) }
 
-        return if (briefProduct is Result.Success && detailedProduct is Result.Success) {
-            Result.Success(
-                FullProduct(
-                    id = briefProduct.data.id,
-                    name = briefProduct.data.name,
-                    price = briefProduct.data.price,
-                    imageUrl = briefProduct.data.imageUrl,
-                    category = briefProduct.data.category,
-                    description = detailedProduct.data.description,
-                    specs = detailedProduct.data.specs,
-                    galleryUrls = detailedProduct.data.galleryUrls,
-                    isLiked = false
+        val briefRes = briefDef.await()
+        if (briefRes is Result.Error) return@coroutineScope Result.Error(briefRes.error)
+        val brief = (briefRes as Result.Success).data
+
+        val templateDef = async { bduiTemplateDatasource.getPdpTemplate(brief.category, cookies) }
+
+        val detailedRes = detailedDef.await()
+        if (detailedRes is Result.Error) return@coroutineScope Result.Error(detailedRes.error)
+        val detailed = (detailedRes as Result.Success).data
+
+        when (val templateRes = templateDef.await()) {
+            is Result.Error -> Result.Error(templateRes.error)
+            is Result.Success -> {
+                val template = bduiTemplateMapper.map(templateRes.data)
+                val uiBrief = UiBriefProduct(
+                    id = brief.id,
+                    name = brief.name,
+                    price = brief.price,
+                    imageUrl = brief.imageUrl,
+                    category = brief.category
                 )
-            )
-        } else {
-            val error = when {
-                briefProduct is Result.Error -> briefProduct.error
-                detailedProduct is Result.Error -> detailedProduct.error
-                else -> NetworkError.Unknown(message = "Unknown error")
+                val bindData = buildPdpBindData(uiBrief, detailed)
+                Result.Success(
+                    PdpData(
+                        brief = brief,
+                        galleryUrls = detailed.galleryUrls,
+                        template = template,
+                        bindData = bindData
+                    )
+                )
             }
-            Result.Error(error)
         }
     }
 

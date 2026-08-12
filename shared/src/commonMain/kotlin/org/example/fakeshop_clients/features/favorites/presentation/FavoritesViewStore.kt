@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.features.favorites.presentation
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +13,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.auth.domain.SessionState
-import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.home.domain.mappers.DomainToPresentationBriefProductMapper
@@ -29,6 +29,8 @@ class FavoritesViewStore(
 
     private val _state = MutableStateFlow(FavoritesState())
     val state: StateFlow<FavoritesState> = _state.asStateFlow()
+
+    private var loadJob: Job? = null
 
     init {
         scope.launch {
@@ -100,8 +102,9 @@ class FavoritesViewStore(
     }
 
     private fun loadFavorites() {
+        loadJob?.cancel()
         _state.update { it.copy(isLoading = true, error = null) }
-        scope.launch {
+        loadJob = scope.launch {
             favoritesService.getFavorites().fold(
                 onSuccess = { products ->
                     checkNotificationPermission()
@@ -121,10 +124,6 @@ class FavoritesViewStore(
             )
         }
     }
-
-    private fun NetworkError.toFavoritesError(): FavoritesError =
-        if (this is NetworkError.HttpError && code == 401) FavoritesError.NotLoggedIn
-        else FavoritesError.Network(this)
 
     private fun removeFavorite(productId: String) {
         if (_state.value.writesBlocked) return

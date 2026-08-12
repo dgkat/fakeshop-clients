@@ -30,7 +30,7 @@ class SSRProductDetailDatasourceImpl(
         cookies: Cookies
     ): Result<DetailedProductResponse, NetworkError> {
         return safeApiClient.get(
-            path = "${baseUrl()}/products/detailed/$id",
+            path = "${baseUrl()}/products/v2/detailed/$id",
             cookies = cookies
         )
     }

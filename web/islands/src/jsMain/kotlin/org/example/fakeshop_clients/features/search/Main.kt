@@ -50,8 +50,10 @@ fun setupSearchIsland() {
         }
     )
 
-    window.addEventListener("beforeunload", {
-        viewModel.cleanup()
-        scope.cancel()
+    window.addEventListener("pagehide", { event ->
+        if (event.asDynamic().persisted != true) {
+            viewModel.cleanup()
+            scope.cancel()
+        }
     })
 }

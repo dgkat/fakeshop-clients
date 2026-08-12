@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.features.notifications.presentation
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +22,8 @@ class NotificationPrefsViewStore(
 ) {
     private val _state = MutableStateFlow(NotificationPrefsState())
     val state: StateFlow<NotificationPrefsState> = _state.asStateFlow()
+
+    private var loadJob: Job? = null
 
     init {
         sessionObserver.state
@@ -49,8 +52,9 @@ class NotificationPrefsViewStore(
     }
 
     private fun loadPreferences() {
+        loadJob?.cancel()
         _state.update { it.copy(isLoading = true, error = null) }
-        scope.launch {
+        loadJob = scope.launch {
             notificationsService.getPreferences().fold(
                 onSuccess = { prefs ->
                     _state.update {

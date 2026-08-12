@@ -1,5 +1,7 @@
 package org.example.fakeshop_clients.core.error_handling
 
+import kotlin.coroutines.cancellation.CancellationException
+
 /**
  * Result Extension Functions
  *
@@ -676,6 +678,8 @@ suspend inline fun <D, E : BaseError> Result<D, E>.onErrorAsync(
  */
 inline fun <D> resultOf(block: () -> D): Result<D, ThrowableError> = try {
     Result.Success(block())
+} catch (e: CancellationException) {
+    throw e
 } catch (e: Throwable) {
     Result.Error(ThrowableError(e))
 }
@@ -694,6 +698,8 @@ suspend inline fun <D> suspendResultOf(
     crossinline block: suspend () -> D
 ): Result<D, ThrowableError> = try {
     Result.Success(block())
+} catch (e: CancellationException) {
+    throw e
 } catch (e: Throwable) {
     Result.Error(ThrowableError(e))
 }

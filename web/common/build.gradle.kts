@@ -263,6 +263,7 @@ val cssBundles = mapOf(
     "product-detail" to listOf(
         "shared/view-transitions.css",
         "shared/search-bar.css",
+        "shared/bdui.css",              // BDUI tokens + node styles
         "pages/product-details.css"     // Product detail page layout
     ),
 
@@ -315,6 +316,7 @@ tasks.register("bundleCss") {
             "product-detail" to listOf(
                 "shared/view-transitions.css",
                 "shared/search-bar.css",
+                "shared/bdui.css",
                 "pages/product-details.css"
             ),
             "spa" to listOf(

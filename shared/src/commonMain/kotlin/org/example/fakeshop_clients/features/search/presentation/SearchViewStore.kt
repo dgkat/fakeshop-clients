@@ -1,16 +1,21 @@
 package org.example.fakeshop_clients.features.search.presentation
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.features.search.domain.SearchService
+import kotlin.time.Duration.Companion.milliseconds
 
 class SearchViewStore(
     private val scope: CoroutineScope,
@@ -36,44 +41,47 @@ class SearchViewStore(
         }
     }
 
-    @OptIn(FlowPreview::class)
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     private fun observeQueryChanges() {
-        scope.launch {
-            queryFlow
-                .debounce(300)
-                .filter { it.length >= 2 || it.isEmpty() }
-                .collect { query ->
-                    when {
-                        query.isEmpty() -> {
-                            _searchState.update { it.copy(results = emptyList(), error = null) }
-                        }
-                        query.length < 2 -> {
-                            _searchState.update {
-                                it.copy(results = emptyList(), error = SearchError.TooShort)
-                            }
-                        }
-                        else -> {
-                            _searchState.update { it.copy(isLoading = true, error = null) }
+        queryFlow
+            .debounce(300.milliseconds)
+            .filter { it.length >= 2 || it.isEmpty() }
+            // flatMapLatest cancels the previous query's in-flight search when a newer query
+            // arrives, so a slow earlier response can't land after (and clobber) a newer one (item 8).
+            .flatMapLatest { query -> reduceForQuery(query) }
+            .launchIn(scope)
+    }
 
-                            searchService.searchByQuery(query).fold(
-                                onSuccess = { results ->
-                                    _searchState.update {
-                                        it.copy(results = results, isLoading = false, error = null)
-                                    }
-                                },
-                                onError = { networkError ->
-                                    _searchState.update {
-                                        it.copy(
-                                            results = emptyList(),
-                                            isLoading = false,
-                                            error = SearchError.Network(networkError)
-                                        )
-                                    }
-                                }
+    private fun reduceForQuery(query: String): Flow<Unit> = flow {
+        when {
+            query.isEmpty() -> {
+                _searchState.update { it.copy(results = emptyList(), error = null) }
+            }
+            query.length < 2 -> {
+                _searchState.update {
+                    it.copy(results = emptyList(), error = SearchError.TooShort)
+                }
+            }
+            else -> {
+                _searchState.update { it.copy(isLoading = true, error = null) }
+
+                searchService.searchByQuery(query).fold(
+                    onSuccess = { results ->
+                        _searchState.update {
+                            it.copy(results = results, isLoading = false, error = null)
+                        }
+                    },
+                    onError = { networkError ->
+                        _searchState.update {
+                            it.copy(
+                                results = emptyList(),
+                                isLoading = false,
+                                error = SearchError.Network(networkError)
                             )
                         }
                     }
-                }
+                )
+            }
         }
     }
 

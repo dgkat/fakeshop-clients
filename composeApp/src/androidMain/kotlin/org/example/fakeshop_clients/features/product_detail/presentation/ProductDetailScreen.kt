@@ -1,34 +1,56 @@
 package org.example.fakeshop_clients.features.product_detail.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import org.example.fakeshop_clients.features.productDetail.presentation.BriefProductState
+import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailEffect
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailEvent
+import org.example.fakeshop_clients.features.product_detail.presentation.bdui.LocalBduiActionHandler
+import org.example.fakeshop_clients.features.product_detail.presentation.bdui.rememberBduiActionHandler
 import org.example.fakeshop_clients.features.product_detail.presentation.components.ErrorContent
 import org.example.fakeshop_clients.features.product_detail.presentation.components.LoadingContent
 import org.example.fakeshop_clients.features.product_detail.presentation.components.ProductContent
-import org.example.fakeshop_clients.features.search_bar.presentation.components.rememberSearchBarScrollState
+import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarScrollState
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ProductDetailScreen(
     productId: String,
     contentPadding: PaddingValues,
-    onScrollOffsetChange: (Float) -> Unit,
+    scrollState: SearchBarScrollState,
+    onNavigate: (url: String, replace: Boolean) -> Unit = { _, _ -> },
     viewModel: ProductDetailViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val scrollState = rememberSearchBarScrollState(
-        onScrollOffsetChange = onScrollOffsetChange
-    )
+    val appContext = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(productId) {
         viewModel.onEvent(ProductDetailEvent.LoadProduct(productId))
+    }
+
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    is ProductDetailEffect.ShowToast ->
+                        Toast.makeText(appContext, effect.message, Toast.LENGTH_SHORT).show()
+                    is ProductDetailEffect.Navigate ->
+                        onNavigate(effect.url, effect.replace)
+                }
+            }
+        }
     }
 
     when (val briefState = state.briefState) {
@@ -45,16 +67,20 @@ fun ProductDetailScreen(
         }
 
         is BriefProductState.Success -> {
-            ProductContent(
-                briefProduct = briefState.product,
-                detailedState = state.detailedState,
-                isFavorited = state.isFavorited,
-                isFavoriteLoading = state.isFavoriteLoading,
-                onToggleFavorite = { viewModel.onEvent(ProductDetailEvent.ToggleFavorite) },
-                scrollState = scrollState,
-                contentPadding = contentPadding,
-                modifier = Modifier
-            )
+            val actionHandler = rememberBduiActionHandler(viewModel)
+            CompositionLocalProvider(LocalBduiActionHandler provides actionHandler) {
+                ProductContent(
+                    briefProduct = briefState.product,
+                    galleryUrls = state.galleryUrls,
+                    bduiBodyState = state.bduiBodyState,
+                    isFavorited = state.isFavorited,
+                    isFavoriteLoading = state.isFavoriteLoading,
+                    onToggleFavorite = { viewModel.onEvent(ProductDetailEvent.ToggleFavorite) },
+                    scrollState = scrollState,
+                    contentPadding = contentPadding,
+                    modifier = Modifier
+                )
+            }
         }
     }
 }

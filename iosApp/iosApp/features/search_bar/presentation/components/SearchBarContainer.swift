@@ -14,22 +14,24 @@ struct SearchBarContainer<Content: View>: View {
     let behavior: SearchBarBehavior
     let onResultClick: (SearchResult) -> Void
     let content: Content
-    
-    @Binding var scrollOffset: CGFloat
+
+    // Only this container observes the offset, so scrolling re-renders the search bar alone —
+    // not MainTabView and its four always-alive tabs. See code-review-findings.md item 23.
+    @ObservedObject var offsetModel: SearchBarOffsetModel
     @State private var searchBarHeight: CGFloat = 72
     @State private var statusBarHeight: CGFloat = 0
-    
+
     init(
         searchViewModel: SearchViewModel,
         currentTab: Tab,
-        scrollOffset: Binding<CGFloat>,
+        offsetModel: SearchBarOffsetModel,
         onResultClick: @escaping (SearchResult) -> Void,
         @ViewBuilder content: () -> Content
     ) {
         self.searchViewModel = searchViewModel
         self.currentTab = currentTab
         self.behavior = currentTab.searchBarBehavior
-        self._scrollOffset = scrollOffset
+        self.offsetModel = offsetModel
         self.onResultClick = onResultClick
         self.content = content()
     }
@@ -45,7 +47,7 @@ struct SearchBarContainer<Content: View>: View {
                     .onAppear {
                         statusBarHeight = geometry.safeAreaInsets.top
                     }
-                
+
                 if state.isActive && behavior != .hidden {
                     Color.black.opacity(0.5)
                         .ignoresSafeArea()
@@ -54,7 +56,7 @@ struct SearchBarContainer<Content: View>: View {
                         }
                         .transition(.opacity)
                 }
-                
+
                 VStack(spacing: 0) {
                     SearchBarView(
                         query: state.query,
@@ -79,7 +81,7 @@ struct SearchBarContainer<Content: View>: View {
                         radius: 4,
                         y: 2
                     )
-                    
+
                     // Search results dropdown
                     if state.isActive && behavior != .hidden {
                         SearchResultsView(
@@ -97,50 +99,49 @@ struct SearchBarContainer<Content: View>: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .top)
                 .offset(y: calculateOffset())
-                .animation(.easeInOut(duration: 0.3), value: scrollOffset)
+                // No `.animation(value: scrollOffset)` — continuous drag follows the finger 1:1 and
+                // the snap is animated at its source in ReactiveScrollView (item 23). Behavior
+                // changes (route-level, rare) stay animated.
                 .animation(.easeInOut(duration: 0.3), value: behavior)
             }
             .ignoresSafeArea(edges: .top)
         }
         .onChange(of: currentTab) { _, _ in
-            scrollOffset = 0
+            withAnimation(.easeInOut(duration: 0.3)) { offsetModel.offset = 0 }
         }
         .onChange(of: behavior) { _, newBehavior in
             if newBehavior != .hidden {
-                scrollOffset = 0
+                withAnimation(.easeInOut(duration: 0.3)) { offsetModel.offset = 0 }
             }
         }
     }
-    
+
     private var contentTopPadding: CGFloat {
-        guard behavior != .hidden else { return 0 }
-        
-        let totalHeight = searchBarHeight + statusBarHeight
-        
-        let visiblePortion = totalHeight + scrollOffset
-        
-        return max(0, visiblePortion)
+        switch behavior {
+        case .hidden: return 0
+        case .scrollReactive: return statusBarHeight
+        default: return searchBarHeight + statusBarHeight
+        }
     }
-    
+
     private func calculateOffset() -> CGFloat {
-        let totalHeight = searchBarHeight + statusBarHeight
         let offset: CGFloat
-        
+
         switch behavior {
         case .hidden:
             offset = -searchBarHeight
         case .scrollReactive:
-            offset = statusBarHeight + scrollOffset
+            offset = statusBarHeight + offsetModel.offset
         case .static:
             offset = statusBarHeight
         default:
             offset = statusBarHeight
         }
-        
+
         return offset
     }
-    
+
     private var showShadow: Bool {
-        scrollOffset < -5 || behavior == .static
+        offsetModel.offset < -5 || behavior == .static
     }
 }

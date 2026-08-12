@@ -29,9 +29,11 @@ class AppRootViewModel: ObservableObject {
     }
 
     private func startObserving() {
-        observationTask = Task { @MainActor in
+        observationTask = Task { @MainActor [weak self] in
+            guard let stateFlow = self?.sessionObserver.state else { return }
             do {
-                for try await newState in sessionObserver.state {
+                for try await newState in stateFlow {
+                    guard let self else { return }
                     if newState is SessionStateAuthenticated {
                         self.sessionState = .ready
                     } else if newState is SessionStateBootstrapFailed {

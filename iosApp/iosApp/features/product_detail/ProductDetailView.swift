@@ -10,8 +10,10 @@ import ComposeApp
 struct ProductDetailView: View {
     let productId: String
     let onScrollOffsetChange: (CGFloat) -> Void
+    var onNavigate: (String, Bool) -> Void = { _, _ in }
 
     @StateObject private var viewModel = ProductDetailViewModel()
+    @StateObject private var toastState = BduiToastState()
 
     var body: some View {
         ZStack {
@@ -25,25 +27,36 @@ struct ProductDetailView: View {
             case .error(let errorState):
                 ErrorView(
                     error: errorState.error,
-                    onRetry: {
-                        viewModel.onEvent(ProductDetailEvent.Retry())
-                    }
+                    onRetry: { viewModel.onEvent(ProductDetailEvent.Retry()) }
                 )
 
             case .success(let successState):
                 ProductContentView(
                     briefProduct: successState.product,
-                    detailedState: viewModel.state.detailedState,
+                    galleryUrls: viewModel.state.galleryUrls,
+                    bduiBodyState: viewModel.state.bduiBodyState,
                     isFavorited: viewModel.state.isFavorited,
                     isFavoriteLoading: viewModel.state.isFavoriteLoading,
                     onToggleFavorite: { viewModel.onEvent(ProductDetailEvent.ToggleFavorite()) },
+                    onAction: { actionId, context in viewModel.dispatchAction(actionId: actionId, context: context) },
                     onScrollOffsetChange: onScrollOffsetChange
                 )
             }
+
+            BduiToastOverlay(state: toastState)
         }
-        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.onEvent(ProductDetailEvent.LoadProduct(productId: productId))
+        }
+        .onChange(of: viewModel.effectTick) { _ in
+            guard let effect = viewModel.pendingEffect else { return }
+            switch onEnum(of: effect) {
+            case .showToast(let e):
+                toastState.show(e.message)
+            case .navigate(let e):
+                onNavigate(e.url, e.replace)
+            }
         }
     }
 }
@@ -85,33 +98,32 @@ struct ErrorView: View {
 // MARK: - Product Content View
 struct ProductContentView: View {
     let briefProduct: UiBriefProduct
-    let detailedState: DetailedProductState
+    let galleryUrls: [String]
+    let bduiBodyState: BduiBodyState
     let isFavorited: Bool
     let isFavoriteLoading: Bool
     let onToggleFavorite: () -> Void
+    let onAction: BduiActionHandler
     let onScrollOffsetChange: (CGFloat) -> Void
 
     var body: some View {
-        ScrollableVStack(onScroll: onScrollOffsetChange) {
-            LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
-                // Image Section
+        ReactiveScrollView(onScroll: onScrollOffsetChange) {
+            VStack(alignment: .leading, spacing: 0) {
                 ImageSection(
                     briefProduct: briefProduct,
-                    detailedState: detailedState,
+                    galleryUrls: galleryUrls,
                     isFavorited: isFavorited,
                     isFavoriteLoading: isFavoriteLoading,
                     onToggleFavorite: onToggleFavorite
                 )
 
-                // Product Info Section
                 VStack(alignment: .leading, spacing: 16) {
                     BriefProductInfo(product: briefProduct)
 
                     Divider()
                         .padding(.vertical, 8)
 
-                    // Detailed Product Info
-                    DetailedProductSection(detailedState: detailedState)
+                    BduiBodySection(state: bduiBodyState, onAction: onAction)
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
@@ -123,22 +135,16 @@ struct ProductContentView: View {
 // MARK: - Image Section
 struct ImageSection: View {
     let briefProduct: UiBriefProduct
-    let detailedState: DetailedProductState
+    let galleryUrls: [String]
     let isFavorited: Bool
     let isFavoriteLoading: Bool
     let onToggleFavorite: () -> Void
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            switch onEnum(of: detailedState) {
-            case .success(let successState):
-                if let galleryUrls = successState.product.galleryUrls, !galleryUrls.isEmpty {
-                    ImageGallery(imageUrls: galleryUrls)
-                } else {
-                    SingleProductImage(imageUrl: briefProduct.imageUrl)
-                }
-
-            default:
+            if !galleryUrls.isEmpty {
+                ImageGallery(imageUrls: galleryUrls)
+            } else {
                 SingleProductImage(imageUrl: briefProduct.imageUrl)
             }
 
@@ -263,72 +269,3 @@ struct BriefProductInfo: View {
     }
 }
 
-// MARK: - Detailed Product Section
-struct DetailedProductSection: View {
-    let detailedState: DetailedProductState
-
-    var body: some View {
-        switch onEnum(of: detailedState) {
-        case .loading:
-            HStack(spacing: 8) {
-                ProgressView()
-                    .scaleEffect(0.8)
-                Text(String(localized: "loading_details"))
-                    .font(.body)
-                    .foregroundColor(FakeShopColors.onSurfaceVariant)
-            }
-
-        case .success(let successState):
-            DetailedProductInfo(product: successState.product)
-
-        case .error:
-            HStack(spacing: 8) {
-                Image(systemName: "exclamationmark.triangle")
-                    .foregroundColor(FakeShopColors.error)
-                Text(String(localized: "error_product_details"))
-                    .font(.body)
-                    .foregroundColor(FakeShopColors.onErrorContainer)
-            }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-            .background(FakeShopColors.errorContainer)
-            .cornerRadius(8)
-        }
-    }
-}
-
-// MARK: - Detailed Product Info
-struct DetailedProductInfo: View {
-    let product: UiDetailedProduct
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            if let description = product.description_ as String?, !description.isEmpty {
-                ProductSection(title: String(localized: "description"), content: description)
-            }
-
-            if let specs = product.specs as String?, !specs.isEmpty {
-                ProductSection(title: String(localized: "specifications"), content: specs)
-            }
-        }
-    }
-}
-
-// MARK: - Product Section
-struct ProductSection: View {
-    let title: String
-    let content: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.headline)
-                .fontWeight(.semibold)
-
-            Text(content)
-                .font(.body)
-                .foregroundColor(FakeShopColors.onSurfaceVariant)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-}

@@ -10,7 +10,7 @@ import org.w3c.fetch.INCLUDE
 import org.w3c.fetch.RequestCredentials
 import org.w3c.fetch.RequestInit
 import kotlin.js.json
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 class PublicFetchClient(private val baseUrl: String) : PublicApiClient {
 
@@ -23,7 +23,7 @@ class PublicFetchClient(private val baseUrl: String) : PublicApiClient {
     override suspend fun <T : Any, B : Any> post(
         path: String,
         body: B,
-        responseType: KClass<T>
+        responseType: KType
     ): T {
         @Suppress("UNCHECKED_CAST")
         val bodySerializer = body::class.serializer() as SerializationStrategy<B>
@@ -38,7 +38,7 @@ class PublicFetchClient(private val baseUrl: String) : PublicApiClient {
         path: String,
         body: B,
         headers: Map<String, String>,
-        responseType: KClass<T>
+        responseType: KType
     ): T {
         @Suppress("UNCHECKED_CAST")
         val bodySerializer = body::class.serializer() as SerializationStrategy<B>
@@ -46,12 +46,11 @@ class PublicFetchClient(private val baseUrl: String) : PublicApiClient {
         return fetchPost(path, bodyJson, headers, responseType)
     }
 
-    @OptIn(InternalSerializationApi::class)
     private suspend fun <T : Any> fetchPost(
         path: String,
         bodyJson: String,
         extraHeaders: Map<String, String>,
-        responseType: KClass<T>
+        responseType: KType
     ): T {
         val headersObj = json("Content-Type" to "application/json").apply {
             extraHeaders.forEach { (k, v) -> asDynamic()[k] = v }
@@ -70,6 +69,8 @@ class PublicFetchClient(private val baseUrl: String) : PublicApiClient {
         }
 
         val responseText = response.text().await()
-        return jsonParser.decodeFromString(responseType.serializer(), responseText)
+        @Suppress("UNCHECKED_CAST")
+        // serializer(KType) keeps generic arguments (e.g. List<Foo>), unlike a bare KClass.
+        return jsonParser.decodeFromString(serializer(responseType), responseText) as T
     }
 }

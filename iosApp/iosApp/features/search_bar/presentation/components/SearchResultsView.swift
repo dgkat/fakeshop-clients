@@ -52,7 +52,7 @@ struct SearchResultsView: View {
                                 .onTapGesture {
                                     onResultClick(result)
                                 }
-                            
+
                             if result.productId != results.last?.productId {
                                 Divider()
                             }
@@ -60,7 +60,6 @@ struct SearchResultsView: View {
                     }
                 }
                 .frame(maxHeight: maxHeight)
-                .disabled(!shouldScroll)
                 .onPreferenceChange(SearchResultRowHeightKey.self) { height in
                     if height > 0 {
                         rowHeight = height

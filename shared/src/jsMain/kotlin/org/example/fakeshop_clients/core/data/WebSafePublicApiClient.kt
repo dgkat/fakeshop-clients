@@ -3,6 +3,7 @@ package org.example.fakeshop_clients.core.data
 import org.example.fakeshop_clients.core.data.fetchClient.PublicApiClient
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import kotlin.reflect.typeOf
 
 /**
  * Web-specific safe public API client that wraps the fetch-based PublicApiClient.
@@ -20,22 +21,12 @@ class WebSafePublicApiClient(
 suspend inline fun <reified T : Any, B : Any> WebSafePublicApiClient.post(
     path: String,
     body: B
-): Result<T, NetworkError> {
-    return try {
-        Result.Success(publicApiClient.post(path, body, T::class))
-    } catch (e: Exception) {
-        Result.Error(exceptionMapper.map(e))
-    }
-}
+): Result<T, NetworkError> =
+    safeResult(exceptionMapper) { publicApiClient.post(path, body, typeOf<T>()) }
 
 suspend inline fun <reified T : Any, B : Any> WebSafePublicApiClient.postWithHeaders(
     path: String,
     body: B,
     headers: Map<String, String>
-): Result<T, NetworkError> {
-    return try {
-        Result.Success(publicApiClient.postWithHeaders(path, body, headers, T::class))
-    } catch (e: Exception) {
-        Result.Error(exceptionMapper.map(e))
-    }
-}
+): Result<T, NetworkError> =
+    safeResult(exceptionMapper) { publicApiClient.postWithHeaders(path, body, headers, typeOf<T>()) }

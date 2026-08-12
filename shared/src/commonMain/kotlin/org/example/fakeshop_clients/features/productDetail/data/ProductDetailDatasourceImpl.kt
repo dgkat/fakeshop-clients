@@ -18,6 +18,6 @@ class ProductDetailDatasourceImpl(
     }
 
     override suspend fun getDetailedProductById(id: String): Result<DetailedProductResponse, NetworkError> {
-        return authClient.get(path = "${baseUrl()}/products/detailed/$id")
+        return authClient.get(path = "${baseUrl()}/products/v2/detailed/$id")
     }
 }

@@ -9,6 +9,8 @@ import kotlinx.cinterop.value
 import kotlinx.coroutines.withContext
 import org.example.fakeshop_clients.core.auth.data.TokenStorage
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
+import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.error_handling.StorageError
 import platform.CoreFoundation.CFDictionaryAddValue
 import platform.CoreFoundation.CFDictionaryCreateMutable
 import platform.CoreFoundation.CFRelease
@@ -23,6 +25,7 @@ import platform.Foundation.NSString
 import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.create
 import platform.Foundation.dataUsingEncoding
+import platform.darwin.OSStatus
 import platform.Security.SecItemAdd
 import platform.Security.SecItemCopyMatching
 import platform.Security.SecItemDelete
@@ -30,6 +33,7 @@ import platform.Security.errSecSuccess
 import platform.Security.kSecAttrAccessible
 import platform.Security.kSecAttrAccessibleAfterFirstUnlock
 import platform.Security.kSecAttrAccount
+import platform.Security.kSecAttrService
 import platform.Security.kSecClass
 import platform.Security.kSecClassGenericPassword
 import platform.Security.kSecMatchLimit
@@ -46,19 +50,32 @@ class KeychainTokenStorage(
     @Volatile
     private var cachedAccessToken: String? = null
 
-    override suspend fun saveTokens(accessToken: String, refreshToken: String) {
+    override suspend fun saveTokens(accessToken: String, refreshToken: String): Result<Unit, StorageError> {
         cachedAccessToken = accessToken
-        withContext(dispatcherProvider.io) {
-            saveToKeychain(ACCESS_TOKEN_KEY, accessToken)
-            saveToKeychain(REFRESH_TOKEN_KEY, refreshToken)
+        return withContext(dispatcherProvider.io) {
+            writeTokens(accessToken, refreshToken)
         }
     }
 
-    override suspend fun replaceTokens(accessToken: String, refreshToken: String) {
+    override suspend fun replaceTokens(accessToken: String, refreshToken: String): Result<Unit, StorageError> {
         cachedAccessToken = accessToken
-        withContext(dispatcherProvider.io) {
-            saveToKeychain(ACCESS_TOKEN_KEY, accessToken)
-            saveToKeychain(REFRESH_TOKEN_KEY, refreshToken)
+        return withContext(dispatcherProvider.io) {
+            writeTokens(accessToken, refreshToken)
+        }
+    }
+
+    private fun writeTokens(accessToken: String, refreshToken: String): Result<Unit, StorageError> {
+        return try {
+            val accessStatus = saveToKeychain(ACCESS_TOKEN_KEY, accessToken)
+            val refreshStatus = saveToKeychain(REFRESH_TOKEN_KEY, refreshToken)
+            if (accessStatus == errSecSuccess && refreshStatus == errSecSuccess) {
+                Result.Success(Unit)
+            } else {
+                val failing = if (accessStatus != errSecSuccess) accessStatus else refreshStatus
+                Result.Error(StorageError.WriteFailed("Failed to save tokens to keychain (OSStatus=$failing)"))
+            }
+        } catch (e: Exception) {
+            Result.Error(StorageError.WriteFailed(e.message ?: "Keychain write failed", e))
         }
     }
 
@@ -83,41 +100,52 @@ class KeychainTokenStorage(
         }
     }
 
-    private fun saveToKeychain(key: String, value: String) {
+    private fun saveToKeychain(key: String, value: String): OSStatus {
         deleteFromKeychain(key)
 
         val valueData = value.toNSData()
 
         val queryDict = CFDictionaryCreateMutable(
             null,
-            4,
+            5,
             kCFTypeDictionaryKeyCallBacks.ptr,
             kCFTypeDictionaryValueCallBacks.ptr
         )
 
+        val cfService = CFBridgingRetain(SERVICE)
+        val cfAccount = CFBridgingRetain(key)
+        val cfValue = CFBridgingRetain(valueData)
+
         CFDictionaryAddValue(queryDict, kSecClass, kSecClassGenericPassword)
-        CFDictionaryAddValue(queryDict, kSecAttrAccount, CFBridgingRetain(key))
-        CFDictionaryAddValue(queryDict, kSecValueData, CFBridgingRetain(valueData))
+        CFDictionaryAddValue(queryDict, kSecAttrService, cfService)
+        CFDictionaryAddValue(queryDict, kSecAttrAccount, cfAccount)
+        CFDictionaryAddValue(queryDict, kSecValueData, cfValue)
         CFDictionaryAddValue(queryDict, kSecAttrAccessible, kSecAttrAccessibleAfterFirstUnlock)
 
         val status = SecItemAdd(queryDict, null)
+
+        CFRelease(cfService)
+        CFRelease(cfAccount)
+        CFRelease(cfValue)
         CFRelease(queryDict)
 
-        if (status != errSecSuccess) {
-            throw SecurityException("Failed to save to keychain. Status: $status")
-        }
+        return status
     }
 
     private fun readFromKeychain(key: String): String? {
         val queryDict = CFDictionaryCreateMutable(
             null,
-            4,
+            5,
             kCFTypeDictionaryKeyCallBacks.ptr,
             kCFTypeDictionaryValueCallBacks.ptr
         )
 
+        val cfService = CFBridgingRetain(SERVICE)
+        val cfAccount = CFBridgingRetain(key)
+
         CFDictionaryAddValue(queryDict, kSecClass, kSecClassGenericPassword)
-        CFDictionaryAddValue(queryDict, kSecAttrAccount, CFBridgingRetain(key))
+        CFDictionaryAddValue(queryDict, kSecAttrService, cfService)
+        CFDictionaryAddValue(queryDict, kSecAttrAccount, cfAccount)
         CFDictionaryAddValue(queryDict, kSecReturnData, kCFBooleanTrue)
         CFDictionaryAddValue(queryDict, kSecMatchLimit, kSecMatchLimitOne)
 
@@ -125,6 +153,8 @@ class KeychainTokenStorage(
             val result = alloc<CFTypeRefVar>()
             val status = SecItemCopyMatching(queryDict, result.ptr)
 
+            CFRelease(cfService)
+            CFRelease(cfAccount)
             CFRelease(queryDict)
 
             if (status == errSecSuccess) {
@@ -142,15 +172,22 @@ class KeychainTokenStorage(
     private fun deleteFromKeychain(key: String) {
         val queryDict = CFDictionaryCreateMutable(
             null,
-            2,
+            3,
             kCFTypeDictionaryKeyCallBacks.ptr,
             kCFTypeDictionaryValueCallBacks.ptr
         )
 
+        val cfService = CFBridgingRetain(SERVICE)
+        val cfAccount = CFBridgingRetain(key)
+
         CFDictionaryAddValue(queryDict, kSecClass, kSecClassGenericPassword)
-        CFDictionaryAddValue(queryDict, kSecAttrAccount, CFBridgingRetain(key))
+        CFDictionaryAddValue(queryDict, kSecAttrService, cfService)
+        CFDictionaryAddValue(queryDict, kSecAttrAccount, cfAccount)
 
         SecItemDelete(queryDict)
+
+        CFRelease(cfService)
+        CFRelease(cfAccount)
         CFRelease(queryDict)
     }
 
@@ -167,9 +204,8 @@ class KeychainTokenStorage(
     }
 
     companion object {
+        private const val SERVICE = "org.example.fakeshop-clients.auth"
         private const val ACCESS_TOKEN_KEY = "access_token"
         private const val REFRESH_TOKEN_KEY = "refresh_token"
     }
 }
-
-class SecurityException(message: String) : Exception(message)

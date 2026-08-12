@@ -1,5 +1,7 @@
 package org.example.fakeshop_clients.core.navigation.components
 
+import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -8,39 +10,44 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.util.Consumer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import org.example.fakeshop_clients.core.navigation.AppRoute
+import org.example.fakeshop_clients.core.navigation.AppRouteParser
 import org.example.fakeshop_clients.core.navigation.BottomNavItem
 import org.example.fakeshop_clients.core.navigation.Route
 import org.example.fakeshop_clients.core.navigation.utils.getSearchBarBehavior
 import org.example.fakeshop_clients.features.favorites.presentation.FavoritesScreen
 import org.example.fakeshop_clients.features.home.presentation.HomeScreen
+import org.example.fakeshop_clients.features.notifications.presentation.NotificationEventBus
 import org.example.fakeshop_clients.features.notifications.presentation.NotificationsScreen
+import org.example.fakeshop_clients.features.notifications.presentation.PushNotificationEvent
 import org.example.fakeshop_clients.features.product_detail.presentation.ProductDetailScreen
 import org.example.fakeshop_clients.features.profile.presentation.ProfileScreen
 import org.example.fakeshop_clients.features.profile.presentation.components.LanguagePickerSection
-import org.example.fakeshop_clients.features.notifications.presentation.NotificationEventBus
-import org.example.fakeshop_clients.features.notifications.presentation.PushNotificationEvent
 import org.example.fakeshop_clients.features.search.presentation.SearchBarBehavior
 import org.example.fakeshop_clients.features.search.presentation.SearchEvent
 import org.example.fakeshop_clients.features.search_bar.presentation.SearchViewModel
 import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarLayout
 import org.example.fakeshop_clients.features.search_bar.presentation.components.rememberSearchBarDimensions
+import org.example.fakeshop_clients.features.search_bar.presentation.components.rememberSearchBarScrollState
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun MainNavigation(initialProductId: String? = null) {
+fun MainNavigation(initialProductId: String? = null, initialRoute: AppRoute? = null) {
     val navController = rememberNavController()
 
     LaunchedEffect(initialProductId) {
@@ -48,13 +55,32 @@ fun MainNavigation(initialProductId: String? = null) {
             navController.navigate(Route.ProductDetail.createRoute(productId))
         }
     }
+
+    LaunchedEffect(initialRoute) {
+        initialRoute?.let { navController.navigateToAppRoute(it, replace = false) }
+    }
+
+    // Warm-app deeplinks: MainActivity is singleTop, so an App Link while the app is
+    // alive arrives via onNewIntent instead of a fresh activity intent.
+    val context = LocalContext.current
+    DisposableEffect(navController) {
+        val activity = context as? ComponentActivity
+            ?: return@DisposableEffect onDispose {}
+        val listener = Consumer<Intent> { intent ->
+            intent.data?.toString()?.let(AppRouteParser::parse)?.let { route ->
+                navController.navigateToAppRoute(route, replace = false)
+            }
+        }
+        activity.addOnNewIntentListener(listener)
+        onDispose { activity.removeOnNewIntentListener(listener) }
+    }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     val searchViewModel: SearchViewModel = koinViewModel()
     val searchUiState by searchViewModel.state.collectAsStateWithLifecycle()
 
-    var scrollOffset by remember { mutableFloatStateOf(0f) }
+    val scrollState = rememberSearchBarScrollState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
@@ -89,20 +115,17 @@ fun MainNavigation(initialProductId: String? = null) {
         getSearchBarBehavior(currentRoute)
     }
 
-    // Clear search when navigating to certain screens if needed
     LaunchedEffect(currentRoute, searchBarBehavior) {
-        // Example: Clear search when going to payment screen
-        // if (currentRoute == Route.Payment.route) {
-        //     searchViewModel.clearQuery()
-        // }
-        if (searchBarBehavior != SearchBarBehavior.HIDDEN) {
-            scrollOffset = 0f
+        if (searchBarBehavior == SearchBarBehavior.HIDDEN) {
+            scrollState.animateToHidden()
+        } else {
+            scrollState.animateToShown()
         }
     }
 
     SearchBarLayout(
         searchUiState = searchUiState,
-        scrollOffset = scrollOffset,
+        scrollState = scrollState,
         behavior = searchBarBehavior,
         onQueryChange = { searchViewModel.onEvent(SearchEvent.QueryChanged(query = it)) },
         onClearQuery = { searchViewModel.onEvent(SearchEvent.ClearQuery) },
@@ -139,7 +162,7 @@ fun MainNavigation(initialProductId: String? = null) {
                             navController.navigate(Route.ProductDetail.createRoute(productId))
                         },
                         contentPadding = searchBarPadding,
-                        onScrollOffsetChange = { scrollOffset = it }
+                        scrollState = scrollState
                     )
                 }
 
@@ -180,10 +203,41 @@ fun MainNavigation(initialProductId: String? = null) {
                     ProductDetailScreen(
                         productId = productId,
                         contentPadding = searchBarPadding,
-                        onScrollOffsetChange = { scrollOffset = it }
+                        scrollState = scrollState,
+                        onNavigate = { url, replace ->
+                            // Unparseable url ⇒ safe no-op (BDUI must never dead-end).
+                            AppRouteParser.parse(url)?.let { route ->
+                                navController.navigateToAppRoute(route, replace)
+                            }
+                        }
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * Maps a parsed [AppRoute] onto the nav graph. Tab destinations reuse the bottom bar's
+ * stack behavior; PDPs push (no singleTop, so PDP → PDP chains keep back working).
+ * `replace` pops the current entry first — BDUI navigate's back-stack-replace flag.
+ */
+private fun NavController.navigateToAppRoute(route: AppRoute, replace: Boolean) {
+    val target = when (route) {
+        AppRoute.Home -> Route.Home.route
+        AppRoute.Favorites -> Route.Favorites.route
+        AppRoute.Notifications -> Route.Notifications.route
+        AppRoute.Profile -> Route.Profile.route
+        is AppRoute.ProductDetail -> Route.ProductDetail.createRoute(route.productId)
+    }
+    val currentRoute = currentBackStackEntry?.destination?.route
+    navigate(target) {
+        if (route !is AppRoute.ProductDetail) {
+            popUpTo(target) { inclusive = false }
+            launchSingleTop = true
+        }
+        if (replace && currentRoute != null) {
+            popUpTo(currentRoute) { inclusive = true }
         }
     }
 }

@@ -61,7 +61,7 @@ val ProductCard = FC<ProductCardProps> { props ->
 
             div {
                 className = ClassName("product-price")
-                +"$${props.product.price.asDynamic().toFixed(2)}"
+                +props.product.formattedPrice
             }
         }
     }

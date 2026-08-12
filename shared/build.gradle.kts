@@ -57,6 +57,7 @@ kotlin {
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
         }
 
         val mobileMain by creating {
@@ -95,12 +96,32 @@ kotlin {
             }
         }
 
+        val iosX64Test by getting
+        val iosArm64Test by getting
+        val iosSimulatorArm64Test by getting
+
+        val iosTest by creating {
+            dependsOn(commonTest.get())
+            iosX64Test.dependsOn(this)
+            iosArm64Test.dependsOn(this)
+            iosSimulatorArm64Test.dependsOn(this)
+        }
+
         jvmMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
 
             // Ktor client for SSR
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.cio)
+            implementation(libs.ktor.client.content)
+            implementation(libs.ktor.serialization.kotlinx.json)
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            // MockEngine to drive the SSR HttpClient (validator + mapper) end-to-end.
+            implementation(libs.ktor.client.mock)
             implementation(libs.ktor.client.content)
             implementation(libs.ktor.serialization.kotlinx.json)
         }

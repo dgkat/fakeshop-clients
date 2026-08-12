@@ -16,16 +16,10 @@ class ProductDetailRepositoryImpl(
 ) : ProductDetailRepository {
 
     override suspend fun getBriefProductById(id: String): Result<BriefProduct, NetworkError> {
-        val response = datasource.getBriefProductById(id)
-        return response.map { briefProductResponse ->
-            briefProductMapper.map(briefProductResponse)
-        }
+        return datasource.getBriefProductById(id).map { briefProductMapper.map(it) }
     }
 
     override suspend fun getDetailedProductById(id: String): Result<DetailedProduct, NetworkError> {
-        val response = datasource.getDetailedProductById(id)
-        return response.map { detailedProductResponse ->
-            detailedProductMapper.map(detailedProductResponse)
-        }
+        return datasource.getDetailedProductById(id).map { detailedProductMapper.map(it) }
     }
 }

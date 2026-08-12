@@ -10,7 +10,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.util.reflect.TypeInfo
+import io.ktor.util.reflect.typeInfo
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.features.core.models.Cookies
@@ -27,36 +27,25 @@ class SSRSafeApiClient(
     suspend inline fun <reified T : Any> get(
         path: String,
         cookies: Cookies
-    ): Result<T, NetworkError> {
-        return try {
-            val response = httpClient.get(path) {
-                configureCookiesAndAuth(cookies)
-            }
-            Result.Success(response.body(TypeInfo(T::class)))
-        } catch (e: Exception) {
-            Result.Error(exceptionMapper.map(e))
-        }
+    ): Result<T, NetworkError> = safeResult(exceptionMapper) {
+        httpClient.get(path) {
+            configureCookiesAndAuth(cookies)
+        }.body(typeInfo<T>())
     }
 
     /**
      * Performs a POST request with body, cookie forwarding and automatic error handling.
      */
-    suspend inline fun <reified T : Any, B : Any> post(
+    suspend inline fun <reified T : Any, reified B : Any> post(
         path: String,
         body: B,
         cookies: Cookies
-    ): Result<T, NetworkError> {
-        return try {
-            val bodyType = TypeInfo(body::class)
-            val response = httpClient.post(path) {
-                contentType(ContentType.Application.Json)
-                setBody(body, bodyType)
-                configureCookiesAndAuth(cookies)
-            }
-            Result.Success(response.body(TypeInfo(T::class)))
-        } catch (e: Exception) {
-            Result.Error(exceptionMapper.map(e))
-        }
+    ): Result<T, NetworkError> = safeResult(exceptionMapper) {
+        httpClient.post(path) {
+            contentType(ContentType.Application.Json)
+            setBody(body, typeInfo<B>())
+            configureCookiesAndAuth(cookies)
+        }.body(typeInfo<T>())
     }
 
     /**
@@ -65,15 +54,10 @@ class SSRSafeApiClient(
     suspend inline fun <reified T : Any> post(
         path: String,
         cookies: Cookies
-    ): Result<T, NetworkError> {
-        return try {
-            val response = httpClient.post(path) {
-                configureCookiesAndAuth(cookies)
-            }
-            Result.Success(response.body(TypeInfo(T::class)))
-        } catch (e: Exception) {
-            Result.Error(exceptionMapper.map(e))
-        }
+    ): Result<T, NetworkError> = safeResult(exceptionMapper) {
+        httpClient.post(path) {
+            configureCookiesAndAuth(cookies)
+        }.body(typeInfo<T>())
     }
 
     /**
@@ -82,15 +66,10 @@ class SSRSafeApiClient(
     suspend inline fun <reified T : Any> delete(
         path: String,
         cookies: Cookies
-    ): Result<T, NetworkError> {
-        return try {
-            val response = httpClient.delete(path) {
-                configureCookiesAndAuth(cookies)
-            }
-            Result.Success(response.body(TypeInfo(T::class)))
-        } catch (e: Exception) {
-            Result.Error(exceptionMapper.map(e))
-        }
+    ): Result<T, NetworkError> = safeResult(exceptionMapper) {
+        httpClient.delete(path) {
+            configureCookiesAndAuth(cookies)
+        }.body(typeInfo<T>())
     }
 
     /**

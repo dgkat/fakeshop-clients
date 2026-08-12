@@ -24,6 +24,19 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- App Links: host is a manifest placeholder — set the real public domain
+                 at deploy time (see web-deploy.md). Verification needs the web SSR to
+                 serve /.well-known/assetlinks.json for this host. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="${appLinkHost}" />
+            </intent-filter>
         </activity>
 
         <service

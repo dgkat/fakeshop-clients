@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,17 +22,13 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Button
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,25 +36,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import fakeshop_clients.composeapp.generated.resources.Res
-import fakeshop_clients.composeapp.generated.resources.description
 import fakeshop_clients.composeapp.generated.resources.error_network
-import fakeshop_clients.composeapp.generated.resources.error_product_details
 import fakeshop_clients.composeapp.generated.resources.error_product_not_found
-import fakeshop_clients.composeapp.generated.resources.loading_details
 import fakeshop_clients.composeapp.generated.resources.product_image
 import fakeshop_clients.composeapp.generated.resources.retry
-import fakeshop_clients.composeapp.generated.resources.specifications
 import fakeshop_clients.composeapp.generated.resources.thumbnail
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
-import org.example.fakeshop_clients.core.presentation.models.UiDetailedProduct
-import org.example.fakeshop_clients.features.productDetail.presentation.DetailedProductState
+import org.example.fakeshop_clients.features.product_detail.presentation.bdui.BduiBodySection
+import org.example.fakeshop_clients.features.productDetail.presentation.BduiBodyState
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailError
 import org.example.fakeshop_clients.features.search_bar.presentation.components.SearchBarScrollState
 import org.jetbrains.compose.resources.stringResource
@@ -104,7 +99,8 @@ fun ErrorContent(
 @Composable
 fun ProductContent(
     briefProduct: UiBriefProduct,
-    detailedState: DetailedProductState,
+    galleryUrls: List<String>,
+    bduiBodyState: BduiBodyState,
     isFavorited: Boolean,
     isFavoriteLoading: Boolean,
     onToggleFavorite: () -> Unit,
@@ -128,24 +124,13 @@ fun ProductContent(
     ) {
         // Image Gallery or Single Image with favorite button overlay
         Box(modifier = Modifier.fillMaxWidth()) {
-            when (detailedState) {
-                is DetailedProductState.Success -> {
-                    val galleryUrls = detailedState.product.galleryUrls
-                    if (!galleryUrls.isNullOrEmpty()) {
-                        ImageGallery(imageUrls = galleryUrls)
-                    } else {
-                        SingleProductImage(
-                            imageUrl = briefProduct.imageUrl,
-                            contentDescription = briefProduct.name
-                        )
-                    }
-                }
-                else -> {
-                    SingleProductImage(
-                        imageUrl = briefProduct.imageUrl,
-                        contentDescription = briefProduct.name
-                    )
-                }
+            if (galleryUrls.isNotEmpty()) {
+                ImageGallery(imageUrls = galleryUrls)
+            } else {
+                SingleProductImage(
+                    imageUrl = briefProduct.imageUrl,
+                    contentDescription = briefProduct.name
+                )
             }
 
             FavoriteButton(
@@ -169,18 +154,8 @@ fun ProductContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Detailed Product Info
-            when (detailedState) {
-                is DetailedProductState.Loading -> {
-                    DetailedProductLoadingIndicator()
-                }
-                is DetailedProductState.Success -> {
-                    DetailedProductInfo(detailedProduct = detailedState.product)
-                }
-                is DetailedProductState.Error -> {
-                    DetailedProductErrorIndicator(error = detailedState.error)
-                }
-            }
+            // BDUI body — server-driven bottom half
+            BduiBodySection(state = bduiBodyState)
 
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -213,119 +188,21 @@ private fun BriefProductInfo(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Category
         Text(
             text = briefProduct.category,
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary
         )
-
-        // Name
         Text(
             text = briefProduct.name,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
-
-        // Price
         Text(
-            text = "$${String.format("%.2f", briefProduct.price)}",
+            text = briefProduct.formattedPrice,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-private fun DetailedProductLoadingIndicator(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        CircularProgressIndicator(modifier = Modifier.size(20.dp))
-        Text(
-            text = stringResource(Res.string.loading_details),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun DetailedProductErrorIndicator(
-    error: ProductDetailError,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = stringResource(Res.string.error_product_details),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onErrorContainer
-            )
-        }
-    }
-}
-
-@Composable
-private fun DetailedProductInfo(
-    detailedProduct: UiDetailedProduct,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Description Section
-        detailedProduct.description?.let { description ->
-            HorizontalDivider()
-            ProductSection(
-                title = stringResource(Res.string.description),
-                content = description
-            )
-        }
-
-        // Specifications Section
-        detailedProduct.specs?.let { specs ->
-            HorizontalDivider()
-            ProductSection(
-                title = stringResource(Res.string.specifications),
-                content = specs
-            )
-        }
-    }
-}
-
-@Composable
-private fun ProductSection(
-    title: String,
-    content: String,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(
-            text = content,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -338,7 +215,6 @@ private fun ImageGallery(
     val pagerState = rememberPagerState(pageCount = { imageUrls.size })
 
     Column(modifier = modifier) {
-        // Main Image Pager
         Box(modifier = Modifier.fillMaxWidth()) {
             HorizontalPager(
                 state = pagerState,
@@ -356,7 +232,6 @@ private fun ImageGallery(
                 )
             }
 
-            // Page Indicator
             if (imageUrls.size > 1) {
                 PageIndicator(
                     pageCount = imageUrls.size,
@@ -368,7 +243,6 @@ private fun ImageGallery(
             }
         }
 
-        // Thumbnail Row (if more than one image)
         if (imageUrls.size > 1) {
             ThumbnailRow(imageUrls = imageUrls)
         }
@@ -414,7 +288,6 @@ private fun FavoriteButton(
         modifier = modifier
     ) {
         Box(contentAlignment = Alignment.Center) {
-            // Blurred shadow layer
             Icon(
                 imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 contentDescription = null,
@@ -423,7 +296,6 @@ private fun FavoriteButton(
                     .size(36.dp)
                     .blur(6.dp)
             )
-            // Actual icon
             Icon(
                 imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 contentDescription = if (isFavorited) "Remove from favorites" else "Add to favorites",

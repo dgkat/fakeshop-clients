@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.core.data
 
 import org.example.fakeshop_clients.core.error_handling.NetworkError
+import org.example.fakeshop_clients.core.error_handling.decodeApiErrorEnvelope
 
 /**
  * Axios-specific exception mapper for web platform.
@@ -12,10 +13,12 @@ class AxiosNetworkExceptionMapper : NetworkExceptionMapper {
 
         return when {
             axiosError.response != null -> {
+                val body = JSON.stringify(axiosError.response.data)
+                val envelopeMessage = decodeApiErrorEnvelope(body)?.message
                 NetworkError.HttpError(
                     code = axiosError.response.status as Int,
-                    message = axiosError.response.statusText as? String,
-                    body = JSON.stringify(axiosError.response.data)
+                    message = envelopeMessage ?: axiosError.response.statusText as? String,
+                    body = body
                 )
             }
             axiosError.code == "ECONNABORTED" -> NetworkError.Timeout

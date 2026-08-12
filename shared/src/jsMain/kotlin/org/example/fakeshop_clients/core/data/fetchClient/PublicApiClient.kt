@@ -1,18 +1,18 @@
 package org.example.fakeshop_clients.core.data.fetchClient
 
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 interface PublicApiClient {
     suspend fun <T : Any, B : Any> post(
         path: String,
         body: B,
-        responseType: KClass<T>
+        responseType: KType
     ): T
 
     suspend fun <T : Any, B : Any> postWithHeaders(
         path: String,
         body: B,
         headers: Map<String, String>,
-        responseType: KClass<T>
+        responseType: KType
     ): T = post(path, body, responseType)
 }

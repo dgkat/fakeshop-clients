@@ -27,9 +27,11 @@ class SearchViewModel: ObservableObject {
     }
     
     private func observeState() {
-        stateObservationTask = Task { @MainActor in
+        stateObservationTask = Task { @MainActor [weak self] in
+            guard let stateFlow = self?.viewStore.searchState else { return }
             do {
-                for try await newState in viewStore.searchState {
+                for try await newState in stateFlow {
+                    guard let self else { return }
                     self.state = newState
                 }
             } catch {

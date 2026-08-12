@@ -1,6 +1,6 @@
 package org.example.fakeshop_clients.features.productDetail.di
 
-import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
+import org.example.fakeshop_clients.features.bdui.di.bduiModule
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailDatasource
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailDatasourceImpl
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailRepositoryImpl
@@ -9,15 +9,13 @@ import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailR
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailService
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailServiceImpl
 import org.example.fakeshop_clients.features.productDetail.domain.mappers.DomainToPresentationBriefProductMapper
-import org.example.fakeshop_clients.features.productDetail.domain.mappers.DomainToPresentationDetailedProductMapper
 import org.koin.dsl.module
 
 val productDetailModule = module {
 
-    // Data
-    factory {
-        DataToDomainDetailedProductMapper()
-    }
+    includes(bduiModule)
+
+    factory { DataToDomainDetailedProductMapper() }
 
     factory<ProductDetailDatasource> {
         ProductDetailDatasourceImpl(
@@ -26,11 +24,10 @@ val productDetailModule = module {
         )
     }
 
-    // Domain
     factory<ProductDetailRepository> {
         ProductDetailRepositoryImpl(
             datasource = get(),
-            briefProductMapper = get(), // Reuses home module's DataToDomainBriefProductMapper
+            briefProductMapper = get(),
             detailedProductMapper = get()
         )
     }
@@ -41,12 +38,5 @@ val productDetailModule = module {
         )
     }
 
-    // Presentation
-    factory {
-        DomainToPresentationBriefProductMapper()
-    }
-
-    factory {
-        DomainToPresentationDetailedProductMapper()
-    }
+    factory { DomainToPresentationBriefProductMapper() }
 }

@@ -8,17 +8,14 @@ import kotlinx.html.classes
 import kotlinx.html.div
 import kotlinx.html.footer
 import kotlinx.html.h1
-import kotlinx.html.h2
 import kotlinx.html.head
 import kotlinx.html.header
-import kotlinx.html.hr
 import kotlinx.html.id
 import kotlinx.html.img
 import kotlinx.html.lang
 import kotlinx.html.link
 import kotlinx.html.main
 import kotlinx.html.meta
-import kotlinx.html.onClick
 import kotlinx.html.p
 import kotlinx.html.script
 import kotlinx.html.span
@@ -26,37 +23,50 @@ import kotlinx.html.title
 import kotlinx.html.unsafe
 import org.example.fakeshop_clients.core.assets.AssetManifest
 import org.example.fakeshop_clients.core.assets.ExternalScripts
+import org.example.fakeshop_clients.core.design.IconPaths
 import org.example.fakeshop_clients.core.i18n.WebStrings
+import org.example.fakeshop_clients.core.ui.svgIcon
+import org.example.fakeshop_clients.features.bdui.presentation.render.renderBduiNode
 import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
 import org.example.fakeshop_clients.features.core.navigation.mobile.bottomNavigation
-import org.example.fakeshop_clients.features.productDetailPage.domain.models.FullProduct
-import org.example.fakeshop_clients.core.design.IconPaths
-import org.example.fakeshop_clients.core.ui.svgIcon
+import org.example.fakeshop_clients.features.productDetailPage.domain.models.PdpData
 
 fun HTML.productDetailPage(
-    product: FullProduct,
+    pdpData: PdpData,
     locale: String,
     strings: Map<String, String>,
     stringsJson: String
 ) {
+    val brief = pdpData.brief
     lang = locale
     head {
         meta(charset = "UTF-8")
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
-        title { +product.name }
+        title { +brief.name }
         link(rel = "icon", type = "image/x-icon", href = "/static/favicon_io/favicon.ico")
-        link(rel = "icon", type = "image/png", href = "/static/favicon_io/favicon-32x32.png") { attributes["sizes"] = "32x32" }
-        link(rel = "icon", type = "image/png", href = "/static/favicon_io/favicon-16x16.png") { attributes["sizes"] = "16x16" }
-        link(rel = "apple-touch-icon", href = "/static/favicon_io/apple-touch-icon.png") { attributes["sizes"] = "180x180" }
+        link(
+            rel = "icon",
+            type = "image/png",
+            href = "/static/favicon_io/favicon-32x32.png"
+        ) { attributes["sizes"] = "32x32" }
+        link(
+            rel = "icon",
+            type = "image/png",
+            href = "/static/favicon_io/favicon-16x16.png"
+        ) { attributes["sizes"] = "16x16" }
+        link(
+            rel = "apple-touch-icon",
+            href = "/static/favicon_io/apple-touch-icon.png"
+        ) { attributes["sizes"] = "180x180" }
         link(rel = "manifest", href = "/static/favicon_io/site.webmanifest")
 
         // SEO: hreflang alternate links
         WebStrings.SUPPORTED_LOCALES.forEach { loc ->
-            link(rel = "alternate", href = "/$loc/product/${product.id}") {
+            link(rel = "alternate", href = "/$loc/product/${brief.id}") {
                 attributes["hreflang"] = loc
             }
         }
-        link(rel = "alternate", href = "/en/product/${product.id}") {
+        link(rel = "alternate", href = "/en/product/${brief.id}") {
             attributes["hreflang"] = "x-default"
         }
 
@@ -78,15 +88,13 @@ fun HTML.productDetailPage(
             attributes["defer"] = ""
         }
 
-        // Google Fonts
-        link(rel = "preconnect", href = "https://fonts.googleapis.com")
-        link(rel = "preconnect", href = "https://fonts.gstatic.com") {
+        // Fonts: self-hosted Inter (@font-face in base.css). Preload the primary latin subset so it
+        // downloads before the CSS bundle is parsed; crossorigin is required even for same-origin fonts.
+        link(rel = "preload", href = "/static/fonts/inter-latin-wght-normal.woff2") {
+            attributes["as"] = "font"
+            attributes["type"] = "font/woff2"
             attributes["crossorigin"] = ""
         }
-        link(
-            rel = "stylesheet",
-            href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-        )
 
         // CSS Bundles (split bundle approach for optimal caching)
         link(rel = "stylesheet", href = AssetManifest.commonCss)         // Cached across all pages
@@ -124,108 +132,82 @@ fun HTML.productDetailPage(
                     activeTab = null,
                     locale = locale,
                     strings = strings,
-                    currentPath = "/$locale/product/${product.id}"
+                    currentPath = "/$locale/product/${brief.id}"
                 )
             }
         }
 
         // Main Content
         main(classes = "main-content") {
-                div(classes = "product-detail") {
-                    // Top section: image + basic info (side-by-side on desktop)
-                    div(classes = "product-detail-top") {
-                        // Product Image Section with carousel and like button overlay
-                        div(classes = "product-image-section") {
-                            // Like button - HTMX loads real state on first intersection
-                            button(classes = "btn-like-circle") {
-                                id = "like-button"
-                                attributes["hx-get"] = "/product/like/${product.id}"
-                                attributes["hx-trigger"] = "intersect once"
-                                attributes["hx-swap"] = "outerHTML"
-                                svgIcon(pathData = IconPaths.HEART, cssClass = "like-icon")
-                            }
+            div(classes = "product-detail") {
+                // Top section: image + basic info (side-by-side on desktop)
+                div(classes = "product-detail-top") {
+                    // Product Image Section with carousel and like button overlay
+                    div(classes = "product-image-section") {
+                        // Like button - HTMX loads real state on first intersection
+                        button(classes = "btn-like-circle") {
+                            id = "like-button"
+                            attributes["hx-get"] = "/product/like/${brief.id}"
+                            attributes["hx-trigger"] = "intersect once"
+                            attributes["hx-swap"] = "outerHTML"
+                            svgIcon(pathData = IconPaths.HEART, cssClass = "like-icon")
+                        }
 
-                            // Carousel: main image + gallery images
-                            val allImages = listOf(product.imageUrl) + (product.galleryUrls ?: emptyList())
-                            div(classes = "carousel-track") {
-                                allImages.forEach { url ->
-                                    img(src = url, alt = product.name, classes = "carousel-slide")
-                                }
-                            }
-
-                            // Arrow buttons (visible on desktop only via CSS)
-                            if (allImages.size > 1) {
-                                button(classes = "carousel-arrow carousel-arrow-prev") {
-                                    attributes["aria-label"] = "Previous image"
-                                    unsafe { +"&#8249;" }
-                                }
-                                button(classes = "carousel-arrow carousel-arrow-next") {
-                                    attributes["aria-label"] = "Next image"
-                                    unsafe { +"&#8250;" }
-                                }
-
-                                // Dot indicators
-                                div(classes = "carousel-dots") {
-                                    allImages.forEachIndexed { index, _ ->
-                                        span(classes = if (index == 0) "carousel-dot active" else "carousel-dot")
-                                    }
-                                }
+                        // Carousel: main image + gallery images
+                        val allImages = listOf(brief.imageUrl) + pdpData.galleryUrls
+                        div(classes = "carousel-track") {
+                            allImages.forEach { url ->
+                                img(src = url, alt = brief.name, classes = "carousel-slide")
                             }
                         }
 
-                        // Product Info (category, name, price, description)
-                        div(classes = "product-info-section") {
-                            span(classes = "product-category") {
-                                +product.category
+                        // Arrow buttons (visible on desktop only via CSS)
+                        if (allImages.size > 1) {
+                            button(classes = "carousel-arrow carousel-arrow-prev") {
+                                attributes["aria-label"] = "Previous image"
+                                unsafe { +"&#8249;" }
+                            }
+                            button(classes = "carousel-arrow carousel-arrow-next") {
+                                attributes["aria-label"] = "Next image"
+                                unsafe { +"&#8250;" }
                             }
 
-                            h1(classes = "product-title") {
-                                +product.name
-                            }
-
-                            p(classes = "product-price") {
-                                +"$${String.format("%.2f", product.price)}"
-                            }
-
-                            // Description (inline - visible on desktop, hidden on mobile via CSS)
-                            product.description?.let { desc ->
-                                div(classes = "product-section product-section-inline") {
-                                    h2(classes = "product-section-title") {
-                                        +(strings["description"] ?: "Description")
-                                    }
-                                    p(classes = "product-section-content") {
-                                        +desc
-                                    }
+                            // Dot indicators
+                            div(classes = "carousel-dots") {
+                                allImages.forEachIndexed { index, _ ->
+                                    span(classes = if (index == 0) "carousel-dot active" else "carousel-dot")
                                 }
                             }
                         }
                     }
 
-                    // Description (standalone - visible on mobile, hidden on desktop via CSS)
-                    product.description?.let { desc ->
-                        hr(classes = "product-divider product-divider-mobile") {}
-                        div(classes = "product-section product-section-standalone") {
-                            h2(classes = "product-section-title") {
-                                +(strings["description"] ?: "Description")
-                            }
-                            p(classes = "product-section-content") {
-                                +desc
-                            }
+                    // Product Info (category, name, price)
+                    div(classes = "product-info-section") {
+                        span(classes = "product-category") {
+                            +brief.category
                         }
-                    }
 
-                    // Specs
-                    product.specs?.let { specs ->
-                        div(classes = "product-section") {
-                            h2(classes = "product-section-title") {
-                                +(strings["specifications"] ?: "Specifications")
-                            }
-                            p(classes = "product-section-content") {
-                                +specs
-                            }
+                        h1(classes = "product-title") {
+                            +brief.name
+                        }
+
+                        p(classes = "product-price") {
+                            +"$${String.format("%.2f", brief.price)}"
                         }
                     }
                 }
+
+                // BDUI body — server-driven bottom half
+                div(classes = "product-detail-bdui") {
+                    renderBduiNode(pdpData.template.root, pdpData.bindData, "pdp", brief.id, locale)
+                }
+
+                // Toast region for BDUI action feedback (HTMX swaps content here)
+                div {
+                    id = "bdui-toast-region"
+                    classes = setOf("bdui-toast-region")
+                }
+            }
         }
 
         // Footer
@@ -246,6 +228,47 @@ fun HTML.productDetailPage(
         // ===== HYDRATOR SCRIPT =====
         script(src = "/static/js/universal-hydrator.js") {}
         script(src = "/static/js/view-transitions.js") {}
+
+        // ===== BDUI selection — driven by click, not by server response =====
+        // Navigate to new URL when a size or color chip is clicked in future
+        script {
+            unsafe {
+                +"""
+document.addEventListener('click', function(e) {
+    var chip = e.target.closest('.bdui-size-chip');
+    if (chip) {
+        chip.closest('.bdui-size-selector').querySelectorAll('.bdui-size-chip').forEach(function(c) {
+            c.classList.remove('selected');
+            c.setAttribute('aria-pressed', 'false');
+        });
+        chip.classList.add('selected');
+        chip.setAttribute('aria-pressed', 'true');
+    }
+
+    var swatch = e.target.closest('.bdui-color-swatch');
+    if (swatch) {
+        swatch.closest('.bdui-color-swatch-picker').querySelectorAll('.bdui-color-swatch').forEach(function(s) {
+            s.classList.remove('selected');
+        });
+        swatch.classList.add('selected');
+    }
+
+    // BDUI navigate on subtrees with interactive content render as [data-href] divs
+    // (a real <a> would nest interactive HTML). Innermost handler wins: if the nearest
+    // interactive ancestor of the click is a link/button, it handles the click itself.
+    var tappable = e.target.closest('a,button,[data-href]');
+    if (tappable && tappable.hasAttribute('data-href')) {
+        var href = tappable.getAttribute('data-href');
+        if (tappable.getAttribute('data-replace') === 'true') {
+            window.location.replace(href);
+        } else {
+            window.location.assign(href);
+        }
+    }
+});
+""".trimIndent()
+            }
+        }
 
         // ===== CAROUSEL (arrow nav + dot sync) =====
         script(src = "/static/js/carousel.js") {}

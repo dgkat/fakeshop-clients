@@ -10,12 +10,13 @@ import ComposeApp
 struct FavoritesView: View {
     @StateObject private var viewModel = FavoritesViewModel()
     @Binding var navigationPath: NavigationPath
+    let isActive: Bool
     let onScrollOffsetChange: (CGFloat) -> Void
 
     var body: some View {
         Group {
             let state = viewModel.favoritesState
-            if state.error is FavoritesError.NotLoggedIn {
+            if let err = state.error, case .notLoggedIn = onEnum(of: err) {
                 LoginRequiredContent(onGoToProfile: {})
             } else if state.isLoading && state.products.isEmpty && state.error == nil {
                 ProgressView()
@@ -28,6 +29,11 @@ struct FavoritesView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: isActive) { _, active in
+            if active {
+                viewModel.onFavoritesEvent(FavoritesEvent.LoadFavorites())
+            }
+        }
     }
 }
 
@@ -41,6 +47,7 @@ private struct FavoritesTabbedContent: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            Color.clear.frame(height: 58)
             NotificationPermissionBanner(
                 permissionStatus: viewModel.favoritesState.notificationPermissionStatus,
                 showBanner: viewModel.favoritesState.showNotificationBanner,
@@ -103,7 +110,7 @@ private struct FavoritesTabContent: View {
                 ProductGrid(
                     products: state.products,
                     onProductClick: { productId in
-                        navigationPath.append(productId)
+                        navigationPath.append(ProductRoute(productId))
                     },
                     onRemoveFavorite: { productId in
                         viewModel.onFavoritesEvent(FavoritesEvent.RemoveFavorite(productId: productId))
@@ -112,9 +119,10 @@ private struct FavoritesTabContent: View {
                 )
             }
         }
-        .onAppear {
-            viewModel.onFavoritesEvent(FavoritesEvent.LoadFavorites())
-        }
+        // No onAppear reload here: the FavoritesView-level ProgressView gate tears this view down
+        // and re-adds it on every load, so reloading in onAppear creates an infinite loop whenever a
+        // load finishes empty or errors (e.g. a 429). Initial load comes from the ViewStore init;
+        // re-entry comes from FavoritesView's onChange(of: isActive).
     }
 }
 
@@ -143,7 +151,7 @@ private struct RecentsTabContent: View {
                 ProductGrid(
                     products: state.products,
                     onProductClick: { productId in
-                        navigationPath.append(productId)
+                        navigationPath.append(ProductRoute(productId))
                     },
                     onRemoveFavorite: nil,
                     onScrollOffsetChange: onScrollOffsetChange
@@ -170,7 +178,7 @@ private struct ProductGrid: View {
     ]
 
     var body: some View {
-        ScrollableVStack(onScroll: onScrollOffsetChange) {
+        ReactiveScrollView(onScroll: onScrollOffsetChange, showTopInset: false) {
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(products, id: \.id) { product in
                     ProductCardWithHeart(
@@ -243,7 +251,7 @@ struct ProductCardWithHeart: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         }
-        .buttonStyle(CardButtonStyle())
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

@@ -14,13 +14,11 @@ class SSRProductDetailRepositoryImpl(
     private val productDetailDatasource: ProductDetailDatasource,
     private val dataToDomainBriefProductMapper: DataToDomainBriefProductMapper,
     private val dataToDomainDetailedProductMapper: DataToDomainDetailedProductMapper
-
 ) : ProductDetailRepository {
     override suspend fun getBriefProductById(
         id: String,
         cookies: Cookies
     ): Result<BriefProduct, NetworkError> {
-
         return productDetailDatasource.getBriefProductById(id, cookies).map {
             dataToDomainBriefProductMapper.map(it)
         }

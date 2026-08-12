@@ -5,3 +5,6 @@ PRODUCT_BUNDLE_IDENTIFIER=org.example.fakeshop_clients.fakeshop-clients$(TEAM_ID
 
 CURRENT_PROJECT_VERSION=1
 MARKETING_VERSION=1.0
+
+// Universal Links host — replace with the real public domain at deploy time (see web-deploy.md).
+APP_LINK_HOST=fakeshop.example.com

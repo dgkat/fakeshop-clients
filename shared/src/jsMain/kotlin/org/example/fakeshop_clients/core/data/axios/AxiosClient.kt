@@ -15,6 +15,7 @@ import org.example.fakeshop_clients.core.data.WebAuthDatasource
 import org.example.fakeshop_clients.core.error_handling.Result
 import kotlin.js.Promise
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 class AxiosClient(
     private val baseUrl: String,
@@ -76,39 +77,36 @@ class AxiosClient(
 
                     return@use Promise<AxiosResponse> { resolve, reject ->
                         scope.promise {
-                            val refreshSucceeded = try {
-                                val refreshResult = webAuthDatasource.refreshSession()
-                                refreshResult is Result.Success && refreshResult.data
-                            } catch (_: Throwable) {
-                                false
-                            } finally {
-                                isRefreshing = false
-                            }
-
-                            if (refreshSucceeded) {
-                                onSessionRefreshed()
-                                retryRequest(originalRequest)
-                                    .then { resolve(it) }
-                                    .catch { reject(wrapAxiosError(it.asDynamic())) }
-                            } else {
-                                val installId = installIdProvider.get()
-                                val guestSucceeded = try {
-                                    val guestResult = webAuthDatasource.guest(installId)
-                                    guestResult is Result.Success && guestResult.data
+                            var recovered = false
+                            try {
+                                recovered = try {
+                                    val refreshResult = webAuthDatasource.refreshSession()
+                                    refreshResult is Result.Success && refreshResult.data
                                 } catch (_: Throwable) {
                                     false
                                 }
 
-                                if (guestSucceeded) {
-                                    sessionMutator.setAuthenticated(Role.GUEST)
-                                    onSessionRefreshed()
-                                    retryRequest(originalRequest)
-                                        .then { resolve(it) }
-                                        .catch { reject(wrapAxiosError(it.asDynamic())) }
-                                } else {
-                                    onSessionRefreshFailed()
-                                    reject(wrapAxiosError(error))
+                                if (!recovered) {
+                                    val installId = installIdProvider.get()
+                                    recovered = try {
+                                        val guestResult = webAuthDatasource.guest(installId)
+                                        guestResult is Result.Success && guestResult.data
+                                    } catch (_: Throwable) {
+                                        false
+                                    }
+                                    if (recovered) sessionMutator.setAuthenticated(Role.GUEST)
                                 }
+                            } finally {
+                                isRefreshing = false
+                                if (recovered) onSessionRefreshed() else onSessionRefreshFailed()
+                            }
+
+                            if (recovered) {
+                                retryRequest(originalRequest)
+                                    .then { resolve(it) }
+                                    .catch { reject(wrapAxiosError(it.asDynamic())) }
+                            } else {
+                                reject(wrapAxiosError(error))
                             }
                         }
                     }
@@ -148,7 +146,7 @@ class AxiosClient(
         refreshSubscribers.clear()
     }
 
-    override suspend fun <T : Any> get(path: String, responseType: KClass<T>): T {
+    override suspend fun <T : Any> get(path: String, responseType: KType): T {
         val response = axios.get("$baseUrl$path").await()
         return parseResponse(response.data, responseType)
     }
@@ -157,7 +155,7 @@ class AxiosClient(
     override suspend fun <T : Any, B : Any> post(
         path: String,
         body: B,
-        responseType: KClass<T>
+        responseType: KType
     ): T {
         @Suppress("UNCHECKED_CAST")
         val bodySerializer = body::class.serializer() as SerializationStrategy<B>
@@ -172,7 +170,7 @@ class AxiosClient(
     override suspend fun <T : Any, B : Any> put(
         path: String,
         body: B,
-        responseType: KClass<T>
+        responseType: KType
     ): T {
         @Suppress("UNCHECKED_CAST")
         val bodySerializer = body::class.serializer() as SerializationStrategy<B>
@@ -183,7 +181,7 @@ class AxiosClient(
         return parseResponse(response.data, responseType)
     }
 
-    override suspend fun <T : Any> delete(path: String, responseType: KClass<T>): T {
+    override suspend fun <T : Any> delete(path: String, responseType: KType): T {
         val response = axios.delete("$baseUrl$path").await()
         return parseResponse(response.data, responseType)
     }
@@ -210,9 +208,10 @@ class AxiosClient(
         axios.delete("$baseUrl$path").await()
     }
 
-    @OptIn(InternalSerializationApi::class)
-    private fun <T : Any> parseResponse(data: dynamic, responseType: KClass<T>): T {
+    @Suppress("UNCHECKED_CAST")
+    private fun <T : Any> parseResponse(data: dynamic, responseType: KType): T {
         val jsonString = JSON.stringify(data)
-        return jsonParser.decodeFromString(responseType.serializer(), jsonString)
+        // serializer(KType) keeps generic arguments (e.g. List<Foo>), unlike a bare KClass.
+        return jsonParser.decodeFromString(serializer(responseType), jsonString) as T
     }
 }
