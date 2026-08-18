@@ -7,7 +7,6 @@ import org.example.fakeshop_clients.core.auth.data.models.SignUpRequest
 import org.example.fakeshop_clients.core.auth.data.models.TokenRefreshResponse
 import org.example.fakeshop_clients.core.data.SafePublicApiClient
 import org.example.fakeshop_clients.core.data.post
-import org.example.fakeshop_clients.core.data.postWithHeaders
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.network.UrlProvider
@@ -50,7 +49,7 @@ class MobileAuthDatasourceImpl(
     }
 
     override suspend fun guest(installId: String): Result<TokenRefreshResponse, NetworkError> {
-        return publicClient.postWithHeaders(
+        return publicClient.post(
             path = "${baseUrl()}/auth/guest",
             body = GuestRequest,
             headers = mapOf(INSTALL_ID_HEADER to installId)

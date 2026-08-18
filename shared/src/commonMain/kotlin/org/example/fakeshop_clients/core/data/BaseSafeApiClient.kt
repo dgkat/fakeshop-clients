@@ -14,37 +14,50 @@ abstract class BaseSafeApiClient(
 
 /**
  * Extension functions that provide inline reified type parameters for the safe API client.
+ * [headers] is optional per-call metadata — see [ApiClient].
  */
-suspend inline fun <reified T : Any> BaseSafeApiClient.get(path: String): Result<T, NetworkError> =
-    safeResult(exceptionMapper) { client.get(path) }
+suspend inline fun <reified T : Any> BaseSafeApiClient.get(
+    path: String,
+    headers: Map<String, String> = emptyMap()
+): Result<T, NetworkError> =
+    safeResult(exceptionMapper) { client.get(path, headers) }
 
 suspend inline fun <reified T : Any, B : Any> BaseSafeApiClient.post(
     path: String,
-    body: B
-): Result<T, NetworkError> =
-    safeResult(exceptionMapper) { client.post(path, body) }
-
-suspend inline fun <reified T : Any, B : Any> BaseSafeApiClient.postWithHeaders(
-    path: String,
     body: B,
-    headers: Map<String, String>
+    headers: Map<String, String> = emptyMap()
 ): Result<T, NetworkError> =
-    safeResult(exceptionMapper) { client.postWithHeaders(path, body, headers) }
+    safeResult(exceptionMapper) { client.post(path, body, headers) }
 
 suspend inline fun <reified T : Any, B : Any> BaseSafeApiClient.put(
     path: String,
-    body: B
+    body: B,
+    headers: Map<String, String> = emptyMap()
 ): Result<T, NetworkError> =
-    safeResult(exceptionMapper) { client.put(path, body) }
+    safeResult(exceptionMapper) { client.put(path, body, headers) }
 
-suspend inline fun <reified T : Any> BaseSafeApiClient.delete(path: String): Result<T, NetworkError> =
-    safeResult(exceptionMapper) { client.delete(path) }
+suspend inline fun <reified T : Any> BaseSafeApiClient.delete(
+    path: String,
+    headers: Map<String, String> = emptyMap()
+): Result<T, NetworkError> =
+    safeResult(exceptionMapper) { client.delete(path, headers) }
 
-suspend inline fun <reified B : Any> BaseSafeApiClient.postNoContent(path: String, body: B): Result<Unit, NetworkError> =
-    safeResult(exceptionMapper) { client.postNoContent(path, body) }
+suspend inline fun <reified B : Any> BaseSafeApiClient.postNoContent(
+    path: String,
+    body: B,
+    headers: Map<String, String> = emptyMap()
+): Result<Unit, NetworkError> =
+    safeResult(exceptionMapper) { client.postNoContent(path, body, headers) }
 
-suspend inline fun <reified B : Any> BaseSafeApiClient.putNoContent(path: String, body: B): Result<Unit, NetworkError> =
-    safeResult(exceptionMapper) { client.putNoContent(path, body) }
+suspend inline fun <reified B : Any> BaseSafeApiClient.putNoContent(
+    path: String,
+    body: B,
+    headers: Map<String, String> = emptyMap()
+): Result<Unit, NetworkError> =
+    safeResult(exceptionMapper) { client.putNoContent(path, body, headers) }
 
-suspend fun BaseSafeApiClient.deleteNoContent(path: String): Result<Unit, NetworkError> =
-    safeResult(exceptionMapper) { client.deleteNoContent(path) }
+suspend fun BaseSafeApiClient.deleteNoContent(
+    path: String,
+    headers: Map<String, String> = emptyMap()
+): Result<Unit, NetworkError> =
+    safeResult(exceptionMapper) { client.deleteNoContent(path, headers) }

@@ -1,7 +1,6 @@
 package org.example.fakeshop_clients.features.bdui.data
 
 import org.example.fakeshop_clients.core.data.SafeAuthenticatedApiClient
-import org.example.fakeshop_clients.core.data.postWithHeaders
 import org.example.fakeshop_clients.core.data.post
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
@@ -19,10 +18,10 @@ class BduiActionDatasourceImpl(
         idempotencyKey: String?
     ): Result<BduiActionResponse, NetworkError> {
         val path = "${baseUrl()}/ui/action"
-        return if (!idempotencyKey.isNullOrBlank()) {
-            authClient.postWithHeaders(path, request, mapOf("Idempotency-Key" to idempotencyKey))
-        } else {
-            authClient.post(path, request)
-        }
+        val headers = idempotencyKey
+            ?.takeIf { it.isNotBlank() }
+            ?.let { mapOf("Idempotency-Key" to it) }
+            ?: emptyMap()
+        return authClient.post(path, request, headers)
     }
 }

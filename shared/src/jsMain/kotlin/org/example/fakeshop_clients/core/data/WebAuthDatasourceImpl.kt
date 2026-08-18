@@ -48,7 +48,7 @@ class WebAuthDatasourceImpl(
 
     override suspend fun guest(installId: String?): Result<Boolean, NetworkError> {
         val headers = if (installId != null) mapOf(INSTALL_ID_HEADER to installId) else emptyMap()
-        return publicClient.postWithHeaders<WebAuthResponse, GuestRequest>(
+        return publicClient.post<WebAuthResponse, GuestRequest>(
             path = "${baseUrl()}/auth/guest",
             body = GuestRequest,
             headers = headers
