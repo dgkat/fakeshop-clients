@@ -9,6 +9,8 @@ import ComposeApp
 
 struct ProductDetailView: View {
     let productId: String
+    var surface: InteractionSurface = InteractionSurface.productScreen
+    var position: Int? = nil
     let onScrollOffsetChange: (CGFloat) -> Void
     var onNavigate: (String, Bool) -> Void = { _, _ in }
 
@@ -47,7 +49,13 @@ struct ProductDetailView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
-            viewModel.onEvent(ProductDetailEvent.LoadProduct(productId: productId))
+            viewModel.onEvent(
+                ProductDetailEvent.LoadProduct(
+                    productId: productId,
+                    surface: surface,
+                    position: position.map { KotlinInt(int: Int32($0)) }
+                )
+            )
         }
         .onChange(of: viewModel.effectTick) { _ in
             guard let effect = viewModel.pendingEffect else { return }

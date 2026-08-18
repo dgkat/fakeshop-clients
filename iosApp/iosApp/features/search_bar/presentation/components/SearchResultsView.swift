@@ -18,7 +18,7 @@ struct SearchResultRowHeightKey: PreferenceKey {
 struct SearchResultsView: View {
     let results: [SearchResult]
     let isLoading: Bool
-    let onResultClick: (SearchResult) -> Void
+    let onResultClick: (SearchResult, Int) -> Void
     
     @State private var rowHeight: CGFloat = 56
     private let maxVisibleItems = 10
@@ -33,12 +33,11 @@ struct SearchResultsView: View {
                     .foregroundColor(FakeShopColors.onSurfaceVariant)
                     .padding(32)
             } else {
-                let shouldScroll = results.count > maxVisibleItems
                 let maxHeight = rowHeight * CGFloat(min(results.count, maxVisibleItems))
                 
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        ForEach(results, id: \.productId) { result in
+                        ForEach(Array(results.enumerated()), id: \.element.productId) { index, result in
                             SearchResultRow(result: result)
                                 .background(
                                     GeometryReader { geo in
@@ -50,7 +49,7 @@ struct SearchResultsView: View {
                                     }
                                 )
                                 .onTapGesture {
-                                    onResultClick(result)
+                                    onResultClick(result, index)
                                 }
 
                             if result.productId != results.last?.productId {

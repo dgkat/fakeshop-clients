@@ -12,7 +12,7 @@ import ComposeApp
 struct ProductListContent: View {
     let categories: [UiCategoryRow]
     let favoritedProductIds: Set<String>
-    let onProductClick: (String) -> Void
+    let onProductClick: (String, Int) -> Void
     let onToggleFavorite: (String) -> Void
     let onScrollOffsetChange: (CGFloat) -> Void
 

@@ -44,12 +44,17 @@ struct MainTabView: View {
             searchViewModel: searchViewModel,
             currentTab: selectedTab,
             offsetModel: offsetModel,
-            onResultClick: { result in
+            onResultClick: { result, position in
+                let route = ProductRoute(
+                    result.productId,
+                    surface: InteractionSurface.search,
+                    position: position
+                )
                 switch selectedTab {
-                case .home: homePath.append(ProductRoute(result.productId))
-                case .favorites: favoritesPath.append(ProductRoute(result.productId))
-                case .notifications: notificationsPath.append(ProductRoute(result.productId))
-                case .profile: profilePath.append(ProductRoute(result.productId))
+                case .home: homePath.append(route)
+                case .favorites: favoritesPath.append(route)
+                case .notifications: notificationsPath.append(route)
+                case .profile: profilePath.append(route)
                 }
             }
         ) {
@@ -150,6 +155,8 @@ struct MainTabView: View {
             .navigationDestination(for: ProductRoute.self) { route in
                 ProductDetailView(
                     productId: route.productId,
+                    surface: route.surface,
+                    position: route.position,
                     onScrollOffsetChange: { offset in offsetModel.offset = offset },
                     onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                 )
@@ -167,6 +174,8 @@ struct MainTabView: View {
             .navigationDestination(for: ProductRoute.self) { route in
                 ProductDetailView(
                     productId: route.productId,
+                    surface: route.surface,
+                    position: route.position,
                     onScrollOffsetChange: { offset in offsetModel.offset = offset },
                     onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                 )
@@ -180,6 +189,8 @@ struct MainTabView: View {
                 .navigationDestination(for: ProductRoute.self) { route in
                     ProductDetailView(
                         productId: route.productId,
+                        surface: route.surface,
+                        position: route.position,
                         onScrollOffsetChange: { offset in offsetModel.offset = offset },
                         onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                     )
@@ -194,6 +205,8 @@ struct MainTabView: View {
                 .navigationDestination(for: ProductRoute.self) { route in
                     ProductDetailView(
                         productId: route.productId,
+                        surface: route.surface,
+                        position: route.position,
                         onScrollOffsetChange: { offset in offsetModel.offset = offset },
                         onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                     )

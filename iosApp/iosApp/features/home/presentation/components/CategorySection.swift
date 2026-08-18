@@ -12,7 +12,7 @@ import ComposeApp
 struct CategorySection: View {
     let categoryRow: UiCategoryRow
     let favoritedProductIds: Set<String>
-    let onProductClick: (String) -> Void
+    let onProductClick: (String, Int) -> Void
     let onToggleFavorite: (String) -> Void
 
     var body: some View {
@@ -36,17 +36,18 @@ struct CategorySection: View {
 struct ProductRow: View {
     let products: [UiBriefProduct]
     let favoritedProductIds: Set<String>
-    let onProductClick: (String) -> Void
+    let onProductClick: (String, Int) -> Void
     let onToggleFavorite: (String) -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 12) {
-                ForEach(products, id: \.id) { product in
+                ForEach(Array(products.enumerated()), id: \.element.id) { index, product in
                     ProductCard(
                         product: product,
                         isFavorited: favoritedProductIds.contains(product.id),
-                        onClick: { onProductClick(product.id) },
+                        // 0-based rank within the shelf: not reconstructable after the fact.
+                        onClick: { onProductClick(product.id, index) },
                         onToggleFavorite: { onToggleFavorite(product.id) }
                     )
                 }
