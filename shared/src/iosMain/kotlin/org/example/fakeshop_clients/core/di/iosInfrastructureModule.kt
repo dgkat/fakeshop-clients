@@ -13,6 +13,14 @@ import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
 import org.example.fakeshop_clients.core.concurrency.IosDispatcherProvider
 import org.example.fakeshop_clients.core.data.KeychainTokenStorage
+import org.example.fakeshop_clients.core.interactions.data.UserDefaultsSessionIdStore
+import org.example.fakeshop_clients.core.interactions.domain.DefaultSessionIdProvider
+import org.example.fakeshop_clients.core.interactions.domain.SessionIdProvider
+import org.example.fakeshop_clients.core.interactions.domain.SessionIdStore
+import org.example.fakeshop_clients.core.time.MillisClock
+import platform.Foundation.NSDate
+import platform.Foundation.NSUUID
+import platform.Foundation.timeIntervalSince1970
 import org.example.fakeshop_clients.core.logging.AppLogger
 import org.example.fakeshop_clients.core.logging.IosAppLogger
 import org.example.fakeshop_clients.core.logging.NoOpLogger
@@ -50,6 +58,19 @@ fun iosInfrastructureModule(baseUrl: String, isDebug: Boolean) = module {
     single<InstallIdProvider> {
         IosInstallIdProvider()
     }
+
+    single<MillisClock> { MillisClock { (NSDate().timeIntervalSince1970 * 1000).toLong() } }
+
+    single<SessionIdStore> { UserDefaultsSessionIdStore() }
+
+    single<SessionIdProvider> {
+        DefaultSessionIdProvider(
+            store = get(),
+            generator = { NSUUID().UUIDString },
+            clock = get()
+        )
+    }
+
     single<HttpClientEngine> {
         Darwin.create()
     }

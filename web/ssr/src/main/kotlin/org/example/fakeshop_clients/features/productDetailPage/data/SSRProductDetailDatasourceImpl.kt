@@ -4,6 +4,7 @@ import org.example.fakeshop_clients.core.data.SSRSafeApiClient
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.map
+import org.example.fakeshop_clients.core.interactions.domain.InteractionContext
 import org.example.fakeshop_clients.core.network.UrlProvider
 import org.example.fakeshop_clients.features.core.models.Cookies
 import org.example.fakeshop_clients.features.favorites.data.models.FavoriteCheckResponse
@@ -17,11 +18,13 @@ class SSRProductDetailDatasourceImpl(
 
     override suspend fun getBriefProductById(
         id: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interaction: InteractionContext
     ): Result<BriefProductResponse, NetworkError> {
         return safeApiClient.get(
             path = "${baseUrl()}/products/brief/$id",
-            cookies = cookies
+            cookies = cookies,
+            interactionHeaders = interaction.toHeaders()
         )
     }
 
@@ -37,21 +40,25 @@ class SSRProductDetailDatasourceImpl(
 
     override suspend fun addFavorite(
         productId: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interaction: InteractionContext
     ): Result<Unit, NetworkError> {
         return safeApiClient.post(
             path = "${baseUrl()}/favorites/$productId",
-            cookies = cookies
+            cookies = cookies,
+            interactionHeaders = interaction.toHeaders()
         )
     }
 
     override suspend fun removeFavorite(
         productId: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interaction: InteractionContext
     ): Result<Unit, NetworkError> {
         return safeApiClient.delete(
             path = "${baseUrl()}/favorites/$productId",
-            cookies = cookies
+            cookies = cookies,
+            interactionHeaders = interaction.toHeaders()
         )
     }
 

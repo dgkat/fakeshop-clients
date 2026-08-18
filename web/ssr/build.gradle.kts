@@ -48,6 +48,12 @@ dependencies {
     //Shared modules
     implementation(project(":web:common"))
     implementation(project(":shared"))
+
+    testImplementation(libs.kotlin.test)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 /**

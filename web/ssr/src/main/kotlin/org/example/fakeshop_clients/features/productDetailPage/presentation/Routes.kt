@@ -17,6 +17,8 @@ import org.example.fakeshop_clients.core.ui.svgIcon
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.extensions.ensureGuestSession
 import org.example.fakeshop_clients.core.extensions.extractCookies
+import org.example.fakeshop_clients.core.extensions.interactionContext
+import org.example.fakeshop_clients.core.extensions.productScreenInteractionContext
 import org.example.fakeshop_clients.core.i18n.WebStrings
 import org.example.fakeshop_clients.core.pages.bootstrapFailedPage
 import org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailService
@@ -45,7 +47,11 @@ fun Route.productRoutes() {
                 return@get
             }
 
-        val pdpData = productDetailService.getPdpData(productId, cookies)
+        val pdpData = productDetailService.getPdpData(
+            id = productId,
+            cookies = cookies,
+            interaction = call.interactionContext()
+        )
 
         when (pdpData) {
             is Result.Error -> {
@@ -96,7 +102,9 @@ fun Route.productApiRoutes() {
 
         val cookies = call.extractCookies()
 
-        when (productDetailService.addFavorite(productId, cookies)) {
+        val interaction = call.productScreenInteractionContext()
+
+        when (productDetailService.addFavorite(productId, cookies, interaction)) {
             is Result.Error -> call.respondText(
                 "Unable to process request. Please try again later.",
                 status = HttpStatusCode.InternalServerError
@@ -116,7 +124,9 @@ fun Route.productApiRoutes() {
 
         val cookies = call.extractCookies()
 
-        when (productDetailService.removeFavorite(productId, cookies)) {
+        val interaction = call.productScreenInteractionContext()
+
+        when (productDetailService.removeFavorite(productId, cookies, interaction)) {
             is Result.Error -> call.respondText(
                 "Unable to process request. Please try again later.",
                 status = HttpStatusCode.InternalServerError

@@ -13,6 +13,8 @@ import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.WebAuthDatasource
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.interactions.data.WebSessionIdProvider
+import org.example.fakeshop_clients.core.interactions.domain.InteractionHeaders
 import kotlin.js.Promise
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -22,6 +24,7 @@ class AxiosClient(
     private val webAuthDatasource: WebAuthDatasource,
     private val sessionMutator: SessionMutator,
     private val installIdProvider: InstallIdProvider,
+    private val sessionIdProvider: WebSessionIdProvider,
     private val scope: CoroutineScope
 ) : ApiClient {
 
@@ -42,6 +45,17 @@ class AxiosClient(
         axios.interceptors.request.use(
             onFulfilled = { config ->
                 config.withCredentials = true
+                // Synchronous by necessity — an axios request interceptor cannot await, which is
+                // why WebSessionIdProvider keeps a non-suspend read as its primitive.
+                val sessionId = try {
+                    sessionIdProvider.currentSync()
+                } catch (_: Throwable) {
+                    null
+                }
+                if (!sessionId.isNullOrBlank()) {
+                    if (config.headers == null) config.headers = js("{}")
+                    config.headers[InteractionHeaders.SESSION_ID] = sessionId
+                }
                 config
             },
             onRejected = { error ->

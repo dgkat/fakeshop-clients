@@ -3,6 +3,7 @@ package org.example.fakeshop_clients.features.productDetailPage.data
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.map
+import org.example.fakeshop_clients.core.interactions.domain.InteractionContext
 import org.example.fakeshop_clients.features.core.models.Cookies
 import org.example.fakeshop_clients.features.home.data.mappers.DataToDomainBriefProductMapper
 import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
@@ -17,9 +18,10 @@ class SSRProductDetailRepositoryImpl(
 ) : ProductDetailRepository {
     override suspend fun getBriefProductById(
         id: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interaction: InteractionContext
     ): Result<BriefProduct, NetworkError> {
-        return productDetailDatasource.getBriefProductById(id, cookies).map {
+        return productDetailDatasource.getBriefProductById(id, cookies, interaction).map {
             dataToDomainBriefProductMapper.map(it)
         }
     }
@@ -35,16 +37,18 @@ class SSRProductDetailRepositoryImpl(
 
     override suspend fun addFavorite(
         productId: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interaction: InteractionContext
     ): Result<Unit, NetworkError> {
-        return productDetailDatasource.addFavorite(productId, cookies)
+        return productDetailDatasource.addFavorite(productId, cookies, interaction)
     }
 
     override suspend fun removeFavorite(
         productId: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interaction: InteractionContext
     ): Result<Unit, NetworkError> {
-        return productDetailDatasource.removeFavorite(productId, cookies)
+        return productDetailDatasource.removeFavorite(productId, cookies, interaction)
     }
 
     override suspend fun checkFavorite(

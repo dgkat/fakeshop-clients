@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.interactions.domain.InteractionContext
 
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import org.example.fakeshop_clients.features.bdui.data.SSRBduiTemplateDatasource
@@ -20,9 +21,12 @@ class ProductDetailServiceImpl(
 
     override suspend fun getPdpData(
         id: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interaction: InteractionContext
     ): Result<PdpData, NetworkError> = coroutineScope {
-        val briefDef = async { productDetailRepository.getBriefProductById(id, cookies) }
+        // Only the brief call carries the interaction context — it is the one the gateway records
+        // the VIEW from. Attaching it to the detailed call too would double-count the view.
+        val briefDef = async { productDetailRepository.getBriefProductById(id, cookies, interaction) }
         val detailedDef = async { productDetailRepository.getDetailedProductById(id, cookies) }
 
         val briefRes = briefDef.await()
@@ -61,16 +65,18 @@ class ProductDetailServiceImpl(
 
     override suspend fun addFavorite(
         productId: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interaction: InteractionContext
     ): Result<Unit, NetworkError> {
-        return productDetailRepository.addFavorite(productId, cookies)
+        return productDetailRepository.addFavorite(productId, cookies, interaction)
     }
 
     override suspend fun removeFavorite(
         productId: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interaction: InteractionContext
     ): Result<Unit, NetworkError> {
-        return productDetailRepository.removeFavorite(productId, cookies)
+        return productDetailRepository.removeFavorite(productId, cookies, interaction)
     }
 
     override suspend fun checkFavorite(

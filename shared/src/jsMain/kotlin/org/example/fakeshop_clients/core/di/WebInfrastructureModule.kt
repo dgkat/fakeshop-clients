@@ -27,6 +27,8 @@ import org.example.fakeshop_clients.core.data.WebSafePublicApiClient
 import org.example.fakeshop_clients.core.data.axios.AxiosClient
 import org.example.fakeshop_clients.core.data.fetchClient.PublicApiClient
 import org.example.fakeshop_clients.core.data.fetchClient.PublicFetchClient
+import org.example.fakeshop_clients.core.interactions.data.WebSessionIdProvider
+import org.example.fakeshop_clients.core.interactions.domain.SessionIdProvider
 import org.example.fakeshop_clients.core.network.UrlProvider
 import org.example.fakeshop_clients.core.network.WebUrlProvider
 import org.koin.core.qualifier.named
@@ -46,6 +48,8 @@ val webInfrastructureModule = module {
     single<RoleResolver> { WebRoleResolver(authClient = get(), baseUrl = get()) }
 
     single<InstallIdProvider> { WebInstallIdProvider() }
+
+    single { WebSessionIdProvider() } binds arrayOf(SessionIdProvider::class)
 
     single {
         SessionBootstrapper(
@@ -80,6 +84,7 @@ val webInfrastructureModule = module {
             webAuthDatasource = webAuthDatasource,
             sessionMutator = get(),
             installIdProvider = get(),
+            sessionIdProvider = get<WebSessionIdProvider>(),
             scope = get(AppScopeQualifier)
         )
     }
@@ -112,7 +117,8 @@ val webInfrastructureModule = module {
     factory<LogoutUser> {
         WebLogoutUser(
             authClient = get<SafeAuthenticatedApiClient>(),
-            baseUrl = get()
+            baseUrl = get(),
+            sessionIdProvider = get()
         )
     }
 

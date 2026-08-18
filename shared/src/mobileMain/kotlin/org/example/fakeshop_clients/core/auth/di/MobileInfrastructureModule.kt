@@ -41,6 +41,8 @@ import org.example.fakeshop_clients.core.data.SafePublicApiClient
 import org.example.fakeshop_clients.core.data.post
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.core.favorites.di.mobileFavoritesCacheModule
+import org.example.fakeshop_clients.core.interactions.data.InteractionHeadersPlugin
+import org.example.fakeshop_clients.core.interactions.domain.SessionIdProvider
 import org.example.fakeshop_clients.core.network.MobileUrlProvider
 import org.example.fakeshop_clients.core.network.UrlProvider
 import org.koin.core.qualifier.named
@@ -73,6 +75,7 @@ val mobileInfrastructureModule = module {
     single<HttpClient>(named("publicHttpClient")) {
         val parsedUrl: Url = get(named("parsedUrl"))
         val ktorLogger = getOrNull<Logger>(named("ktorLogger"))
+        val sessionIds: SessionIdProvider = get()
 
         HttpClient(get<HttpClientEngine>()) {
             expectSuccess = true
@@ -82,6 +85,9 @@ val mobileInfrastructureModule = module {
                     ignoreUnknownKeys = true
                     isLenient = true
                 })
+            }
+            install(InteractionHeadersPlugin) {
+                sessionIdProvider = sessionIds
             }
             ktorLogger?.let {
                 install(Logging) {
@@ -106,6 +112,7 @@ val mobileInfrastructureModule = module {
         val installIdProvider: InstallIdProvider = get()
         val sessionMutator: SessionMutator = get()
         val ktorLogger = getOrNull<Logger>(named("ktorLogger"))
+        val sessionIds: SessionIdProvider = get()
 
         HttpClient(get<HttpClientEngine>()) {
             expectSuccess = true
@@ -115,6 +122,9 @@ val mobileInfrastructureModule = module {
                     ignoreUnknownKeys = true
                     isLenient = true
                 })
+            }
+            install(InteractionHeadersPlugin) {
+                sessionIdProvider = sessionIds
             }
             ktorLogger?.let {
                 install(Logging) {
@@ -193,7 +203,8 @@ val mobileInfrastructureModule = module {
             authClient = get(),
             tokenStorage = get(),
             baseUrl = get(),
-            tokenCacheInvalidator = get()
+            tokenCacheInvalidator = get(),
+            sessionIdProvider = get()
         )
     }
 }

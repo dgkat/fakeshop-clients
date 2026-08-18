@@ -275,5 +275,8 @@ document.addEventListener('click', function(e) {
 
         // ===== HEADER SCROLL BEHAVIOR (Desktop only) =====
         script(src = "/static/js/header-scroll.js") {}
+
+        // ===== BROWSING SESSION CLOCK (SSR mints, the browser maintains) =====
+        script(src = "/static/js/session-id.js") {}
     }
 }
