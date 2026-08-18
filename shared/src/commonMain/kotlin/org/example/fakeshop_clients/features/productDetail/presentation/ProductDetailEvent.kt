@@ -1,9 +1,14 @@
 package org.example.fakeshop_clients.features.productDetail.presentation
 
 import kotlinx.serialization.json.JsonObject
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 
 sealed class ProductDetailEvent {
-    data class LoadProduct(val productId: String) : ProductDetailEvent()
+    data class LoadProduct(
+        val productId: String,
+        val surface: InteractionSurface = InteractionSurface.PRODUCT_SCREEN,
+        val position: Int? = null
+    ) : ProductDetailEvent()
     data object Retry : ProductDetailEvent()
     data object ToggleFavorite : ProductDetailEvent()
     /**

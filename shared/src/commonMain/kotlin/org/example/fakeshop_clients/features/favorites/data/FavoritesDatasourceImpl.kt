@@ -7,6 +7,8 @@ import org.example.fakeshop_clients.core.data.post
 import org.example.fakeshop_clients.core.data.postNoContent
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.interactions.domain.InteractionContext
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import org.example.fakeshop_clients.core.network.UrlProvider
 import org.example.fakeshop_clients.features.favorites.data.models.BulkFavoriteCheckRequest
 import org.example.fakeshop_clients.features.favorites.data.models.BulkFavoriteCheckResponse
@@ -18,12 +20,27 @@ class FavoritesDatasourceImpl(
     private val baseUrl: UrlProvider
 ) : FavoritesDatasource {
 
-    override suspend fun addFavorite(productId: String): Result<Unit, NetworkError> {
-        return authClient.postNoContent("${baseUrl()}/favorites/$productId", "")
+    override suspend fun addFavorite(
+        productId: String,
+        surface: InteractionSurface,
+        position: Int?
+    ): Result<Unit, NetworkError> {
+        return authClient.postNoContent(
+            path = "${baseUrl()}/favorites/$productId",
+            body = "",
+            headers = InteractionContext(surface = surface, position = position).toHeaders()
+        )
     }
 
-    override suspend fun removeFavorite(productId: String): Result<Unit, NetworkError> {
-        return authClient.deleteNoContent("${baseUrl()}/favorites/$productId")
+    override suspend fun removeFavorite(
+        productId: String,
+        surface: InteractionSurface,
+        position: Int?
+    ): Result<Unit, NetworkError> {
+        return authClient.deleteNoContent(
+            path = "${baseUrl()}/favorites/$productId",
+            headers = InteractionContext(surface = surface, position = position).toHeaders()
+        )
     }
 
     override suspend fun getFavorites(): Result<BriefProductsResponse, NetworkError> {

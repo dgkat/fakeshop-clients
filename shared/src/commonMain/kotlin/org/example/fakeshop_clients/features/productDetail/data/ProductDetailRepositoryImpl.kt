@@ -2,6 +2,7 @@ package org.example.fakeshop_clients.features.productDetail.data
 
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import org.example.fakeshop_clients.core.error_handling.map
 import org.example.fakeshop_clients.features.home.data.mappers.DataToDomainBriefProductMapper
 import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
@@ -15,8 +16,12 @@ class ProductDetailRepositoryImpl(
     private val detailedProductMapper: DataToDomainDetailedProductMapper
 ) : ProductDetailRepository {
 
-    override suspend fun getBriefProductById(id: String): Result<BriefProduct, NetworkError> {
-        return datasource.getBriefProductById(id).map { briefProductMapper.map(it) }
+    override suspend fun getBriefProductById(
+        id: String,
+        surface: InteractionSurface,
+        position: Int?
+    ): Result<BriefProduct, NetworkError> {
+        return datasource.getBriefProductById(id, surface, position).map { briefProductMapper.map(it) }
     }
 
     override suspend fun getDetailedProductById(id: String): Result<DetailedProduct, NetworkError> {

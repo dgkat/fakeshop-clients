@@ -16,6 +16,7 @@ import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.auth.domain.SessionState
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import org.example.fakeshop_clients.features.bdui.BduiConstants
 import org.example.fakeshop_clients.features.bdui.domain.BduiActionService
 import org.example.fakeshop_clients.features.bdui.domain.BduiTemplateService
@@ -43,8 +44,17 @@ class ProductDetailViewStoreNavigateTest {
     // --- Fakes ---
 
     private class FakeProductDetailService : ProductDetailService {
-        override suspend fun getBriefProductById(id: String): Result<BriefProduct, NetworkError> =
-            Result.Success(BriefProduct(id, "Socks", 9.99, "https://img/socks.png", "apparel"))
+        /** Every brief load, with the attribution it was made under. */
+        val briefCalls = mutableListOf<Triple<String, InteractionSurface, Int?>>()
+
+        override suspend fun getBriefProductById(
+            id: String,
+            surface: InteractionSurface,
+            position: Int?
+        ): Result<BriefProduct, NetworkError> {
+            briefCalls += Triple(id, surface, position)
+            return Result.Success(BriefProduct(id, "Socks", 9.99, "https://img/socks.png", "apparel"))
+        }
 
         override suspend fun getDetailedProductById(id: String): Result<DetailedProduct, NetworkError> =
             Result.Success(
@@ -96,7 +106,9 @@ class ProductDetailViewStoreNavigateTest {
 
         override suspend fun toggleFavorite(
             productId: String,
-            currentlyFavorited: Boolean
+            currentlyFavorited: Boolean,
+            surface: InteractionSurface,
+            position: Int?
         ): Result<Unit, NetworkError> = Result.Success(Unit)
 
         override suspend fun checkFavorite(productId: String): Result<Boolean, NetworkError> =

@@ -3,6 +3,7 @@ package org.example.fakeshop_clients.features.favorites.domain
 import kotlinx.coroutines.flow.StateFlow
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
 
 class FavoritesServiceImpl(
@@ -15,8 +16,13 @@ class FavoritesServiceImpl(
         return repository.getFavorites()
     }
 
-    override suspend fun toggleFavorite(productId: String, currentlyFavorited: Boolean): Result<Unit, NetworkError> {
-        return repository.toggleFavorite(productId, currentlyFavorited)
+    override suspend fun toggleFavorite(
+        productId: String,
+        currentlyFavorited: Boolean,
+        surface: InteractionSurface,
+        position: Int?
+    ): Result<Unit, NetworkError> {
+        return repository.toggleFavorite(productId, currentlyFavorited, surface, position)
     }
 
     override suspend fun checkFavorite(productId: String): Result<Boolean, NetworkError> {

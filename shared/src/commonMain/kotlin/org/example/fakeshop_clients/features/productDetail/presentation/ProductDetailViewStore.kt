@@ -19,6 +19,7 @@ import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.navigation.AppRouteParser
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.fold
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import org.example.fakeshop_clients.features.bdui.BduiConstants
 import org.example.fakeshop_clients.features.bdui.domain.BduiActionService
 import org.example.fakeshop_clients.features.bdui.domain.BduiMutationApplier
@@ -54,6 +55,11 @@ class ProductDetailViewStore(
 
     private var currentProductId: String? = null
 
+    /** Attribution of the navigation that opened the current product, so a retry reports the
+     * surface the user actually came from rather than collapsing to PRODUCT_SCREEN. */
+    private var currentSurface: InteractionSurface = InteractionSurface.PRODUCT_SCREEN
+    private var currentPosition: Int? = null
+
     /** In-flight product load; cancelled when a new product loads so a stale product's brief/bdui
      * responses can't overwrite the newer load (item 8). */
     private var loadJob: Job? = null
@@ -78,7 +84,9 @@ class ProductDetailViewStore(
 
     fun onEvent(event: ProductDetailEvent) {
         when (event) {
-            is ProductDetailEvent.LoadProduct -> loadProduct(event.productId)
+            is ProductDetailEvent.LoadProduct -> loadProduct(
+                event.productId, event.surface, event.position
+            )
             ProductDetailEvent.Retry -> retry()
             ProductDetailEvent.ToggleFavorite -> toggleFavorite()
             is ProductDetailEvent.DispatchAction -> dispatchAction(
@@ -87,9 +95,15 @@ class ProductDetailViewStore(
         }
     }
 
-    private fun loadProduct(productId: String) {
+    private fun loadProduct(
+        productId: String,
+        surface: InteractionSurface = InteractionSurface.PRODUCT_SCREEN,
+        position: Int? = null
+    ) {
         loadJob?.cancel()
         currentProductId = productId
+        currentSurface = surface
+        currentPosition = position
         currentReplaceBindings = emptyList()
         _state.update {
             it.copy(
@@ -102,7 +116,7 @@ class ProductDetailViewStore(
 
         loadJob = scope.launch {
             coroutineScope {
-                launch { loadBriefAndBdui(productId) }
+                launch { loadBriefAndBdui(productId, surface, position) }
                 launch { loadReplaceBindings(productId) }
                 launch {
                     val isFav = isFavorite(productId)
@@ -142,8 +156,12 @@ class ProductDetailViewStore(
      * Drives briefState (top half), galleryUrls (top-half carousel) and bduiBodyState (bottom half).
      * brief + detailed fan out in parallel; the template fetch chains off brief.category.
      */
-    private suspend fun loadBriefAndBdui(productId: String) = coroutineScope {
-        val briefDef = async { productDetailService.getBriefProductById(productId) }
+    private suspend fun loadBriefAndBdui(
+        productId: String,
+        surface: InteractionSurface,
+        position: Int?
+    ) = coroutineScope {
+        val briefDef = async { productDetailService.getBriefProductById(productId, surface, position) }
         val detailedDef = async { productDetailService.getDetailedProductById(productId) }
 
         val briefRes = briefDef.await()
@@ -360,6 +378,6 @@ class ProductDetailViewStore(
     }
 
     private fun retry() {
-        currentProductId?.let { loadProduct(it) }
+        currentProductId?.let { loadProduct(it, currentSurface, currentPosition) }
     }
 }
