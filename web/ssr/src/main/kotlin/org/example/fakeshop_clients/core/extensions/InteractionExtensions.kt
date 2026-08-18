@@ -4,6 +4,7 @@ import io.ktor.http.CookieEncoding
 import io.ktor.server.application.ApplicationCall
 import org.example.fakeshop_clients.core.interactions.domain.InteractionContext
 import org.example.fakeshop_clients.core.interactions.domain.InteractionHeaders
+import org.example.fakeshop_clients.core.interactions.domain.InteractionQuery
 import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import org.example.fakeshop_clients.core.interactions.domain.SessionStaleness
 import java.util.UUID
@@ -44,8 +45,10 @@ fun ApplicationCall.ensureInteractionSession(): String {
  */
 fun ApplicationCall.interactionContext(): InteractionContext = InteractionContext(
     sessionId = runCatching { ensureInteractionSession() }.getOrNull(),
-    surface = InteractionSurface.fromWireValue(request.queryParameters["src"]),
-    position = request.queryParameters["pos"]?.toIntOrNull()
+    surface = InteractionSurface.fromWireValue(
+        request.queryParameters[InteractionQuery.SURFACE_PARAM]
+    ),
+    position = request.queryParameters[InteractionQuery.POSITION_PARAM]?.toIntOrNull()
 )
 
 /**

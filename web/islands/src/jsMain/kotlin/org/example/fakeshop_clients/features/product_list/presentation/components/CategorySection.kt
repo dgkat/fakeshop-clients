@@ -12,7 +12,7 @@ import web.cssom.ClassName
 
 external interface CategorySectionProps : Props {
     var category: UiCategoryRow
-    var onProductClick: (String) -> Unit
+    var onProductClick: (productId: String, position: Int) -> Unit
     var favoritedProductIds: Set<String>
     var onToggleFavorite: ((String) -> Unit)?
 }
@@ -68,11 +68,13 @@ val CategorySection = FC<CategorySectionProps> { props ->
                     checkScroll()
                 }
 
-                props.category.products.forEach { product ->
+                props.category.products.forEachIndexed { index, product ->
                     ProductCard {
                         key = product.id
                         this.product = product
-                        onClick = props.onProductClick
+                        // 0-based rank within the shelf, carried so CTR can be corrected for
+                        // position bias later; it is gone the moment the page is rendered.
+                        onClick = { productId -> props.onProductClick(productId, index) }
                         isFavorited = product.id in props.favoritedProductIds
                         onToggleFavorite = props.onToggleFavorite?.let { toggle ->
                             { toggle(product.id) }

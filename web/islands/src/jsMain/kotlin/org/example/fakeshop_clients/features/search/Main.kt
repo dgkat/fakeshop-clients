@@ -1,3 +1,5 @@
+import org.example.fakeshop_clients.core.interactions.domain.InteractionQuery
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
@@ -43,9 +45,13 @@ fun setupSearchIsland() {
         SearchBar.create {
             this.viewModel = viewModel
             this.behavior = behavior
-            this.onNavigateToProduct = { productId ->
-                val locale = I18n.locale
-                window.location.href = "/$locale/product/$productId"
+            this.onNavigateToProduct = { productId, position ->
+                window.location.href = InteractionQuery.productDetailPath(
+                    locale = I18n.locale,
+                    productId = productId,
+                    surface = InteractionSurface.SEARCH,
+                    position = position
+                )
             }
         }
     )
