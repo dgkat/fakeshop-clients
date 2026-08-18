@@ -13,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import org.example.fakeshop_clients.features.productDetail.presentation.BriefProductState
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailEffect
 import org.example.fakeshop_clients.features.productDetail.presentation.ProductDetailEvent
@@ -27,6 +28,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ProductDetailScreen(
     productId: String,
+    surface: InteractionSurface = InteractionSurface.PRODUCT_SCREEN,
+    position: Int? = null,
     contentPadding: PaddingValues,
     scrollState: SearchBarScrollState,
     onNavigate: (url: String, replace: Boolean) -> Unit = { _, _ -> },
@@ -37,7 +40,7 @@ fun ProductDetailScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(productId) {
-        viewModel.onEvent(ProductDetailEvent.LoadProduct(productId))
+        viewModel.onEvent(ProductDetailEvent.LoadProduct(productId, surface, position))
     }
 
     LaunchedEffect(lifecycleOwner) {

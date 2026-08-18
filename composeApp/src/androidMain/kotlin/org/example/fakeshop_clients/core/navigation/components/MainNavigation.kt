@@ -25,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import org.example.fakeshop_clients.core.navigation.AppRoute
 import org.example.fakeshop_clients.core.navigation.AppRouteParser
 import org.example.fakeshop_clients.core.navigation.BottomNavItem
@@ -130,8 +131,14 @@ fun MainNavigation(initialProductId: String? = null, initialRoute: AppRoute? = n
         onQueryChange = { searchViewModel.onEvent(SearchEvent.QueryChanged(query = it)) },
         onClearQuery = { searchViewModel.onEvent(SearchEvent.ClearQuery) },
         onDismissSearch = { searchViewModel.onEvent(SearchEvent.CancelClicked) },
-        onResultClick = { result ->
-            navController.navigate(Route.ProductDetail.createRoute(result.productId))
+        onResultClick = { result, index ->
+            navController.navigate(
+                Route.ProductDetail.createRoute(
+                    productId = result.productId,
+                    surface = InteractionSurface.SEARCH,
+                    position = index
+                )
+            )
         }
     ) {
         val searchBarDimensions = rememberSearchBarDimensions()
@@ -158,8 +165,14 @@ fun MainNavigation(initialProductId: String? = null, initialRoute: AppRoute? = n
             ) {
                 composable(Route.Home.route) {
                     HomeScreen(
-                        onProductClick = { productId ->
-                            navController.navigate(Route.ProductDetail.createRoute(productId))
+                        onProductClick = { productId, position ->
+                            navController.navigate(
+                                Route.ProductDetail.createRoute(
+                                    productId = productId,
+                                    surface = InteractionSurface.HOME_SHELF,
+                                    position = position
+                                )
+                            )
                         },
                         contentPadding = searchBarPadding,
                         scrollState = scrollState
@@ -195,13 +208,34 @@ fun MainNavigation(initialProductId: String? = null, initialRoute: AppRoute? = n
                 composable(
                     route = Route.ProductDetail.route,
                     arguments = listOf(
-                        navArgument("productId") { type = NavType.StringType }
+                        navArgument(Route.ProductDetail.ARG_PRODUCT_ID) {
+                            type = NavType.StringType
+                        },
+                        navArgument(Route.ProductDetail.ARG_SURFACE) {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        },
+                        navArgument(Route.ProductDetail.ARG_POSITION) {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        }
                     )
                 ) { backStackEntry ->
+                    val args = backStackEntry.arguments
                     val productId =
-                        backStackEntry.arguments?.getString("productId") ?: return@composable
+                        args?.getString(Route.ProductDetail.ARG_PRODUCT_ID) ?: return@composable
+                    // Unrecognised values degrade to PRODUCT_SCREEN / no position rather than
+                    // failing: a stale deeplink must still open the product.
+                    val surface = InteractionSurface.fromWireValue(
+                        args.getString(Route.ProductDetail.ARG_SURFACE)
+                    )
+                    val position = args.getString(Route.ProductDetail.ARG_POSITION)?.toIntOrNull()
                     ProductDetailScreen(
                         productId = productId,
+                        surface = surface,
+                        position = position,
                         contentPadding = searchBarPadding,
                         scrollState = scrollState,
                         onNavigate = { url, replace ->
