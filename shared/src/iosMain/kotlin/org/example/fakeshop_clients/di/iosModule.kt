@@ -71,6 +71,7 @@ val iosModule = module {
             bduiActionService = get(),
             replaceService = get(),
             favoritesService = get(),
+            recommendationsService = get(),
             briefProductMapper = get(),
             sessionObserver = get()
         )

@@ -2,6 +2,9 @@ package org.example.fakeshop_clients.features.productDetail.presentation
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertTrue
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
@@ -25,31 +28,28 @@ import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailService
-import org.example.fakeshop_clients.features.recommendations.domain.RecommendationsService
 import org.example.fakeshop_clients.features.productDetail.domain.mappers.DomainToPresentationBriefProductMapper
 import org.example.fakeshop_clients.features.productDetail.domain.models.DetailedProduct
+import org.example.fakeshop_clients.features.recommendations.domain.RecommendationsService
 
 /**
- * Pins the originating-surface rule at the ViewStore boundary: the surface a list reports when the
- * user taps an item must reach the brief-product call unchanged, and a retry must keep reporting
- * the surface the user actually came from rather than collapsing to `PRODUCT_SCREEN`.
- *
- * The failure mode this guards against is silent — every request still returns 200 and every
- * screen still renders, the `surface` column just stops carrying information.
+ * The "similar products" shelf is a third, non-blocking leg of the product load. What these tests
+ * protect is the *asymmetry*: a recommendations failure must cost nothing — the product page stays
+ * fully usable and the shelf simply isn't there — while a stale response from a product the user
+ * has already navigated away from must never land in the newer product's state.
  */
-class ProductDetailViewStoreSurfaceTest {
+class ProductDetailViewStoreRecommendationsTest {
 
-    private class RecordingProductDetailService : ProductDetailService {
-        val briefCalls = mutableListOf<Triple<String, InteractionSurface, Int?>>()
+    private fun product(id: String) =
+        BriefProduct(id, "Socks $id", 9.99, "https://img/$id.png", "apparel")
 
+    private class FakeProductDetailService : ProductDetailService {
         override suspend fun getBriefProductById(
             id: String,
             surface: InteractionSurface,
             position: Int?
-        ): Result<BriefProduct, NetworkError> {
-            briefCalls += Triple(id, surface, position)
-            return Result.Success(BriefProduct(id, "Socks", 9.99, "https://img/socks.png", "apparel"))
-        }
+        ): Result<BriefProduct, NetworkError> =
+            Result.Success(BriefProduct(id, "Socks", 9.99, "https://img/socks.png", "apparel"))
 
         override suspend fun getDetailedProductById(id: String): Result<DetailedProduct, NetworkError> =
             Result.Success(
@@ -89,9 +89,7 @@ class ProductDetailViewStoreSurfaceTest {
         ): Result<ResolvedReplace?, NetworkError> = Result.Success(null)
     }
 
-    private class RecordingFavoritesService : FavoritesService {
-        val toggles = mutableListOf<Triple<String, InteractionSurface, Int?>>()
-
+    private class FakeFavoritesService : FavoritesService {
         override val favoritedIds: StateFlow<Set<String>> = MutableStateFlow(emptySet())
         override suspend fun getFavorites(): Result<List<BriefProduct>, NetworkError> =
             Result.Success(emptyList())
@@ -101,10 +99,7 @@ class ProductDetailViewStoreSurfaceTest {
             currentlyFavorited: Boolean,
             surface: InteractionSurface,
             position: Int?
-        ): Result<Unit, NetworkError> {
-            toggles += Triple(productId, surface, position)
-            return Result.Success(Unit)
-        }
+        ): Result<Unit, NetworkError> = Result.Success(Unit)
 
         override suspend fun checkFavorite(productId: String): Result<Boolean, NetworkError> =
             Result.Success(false)
@@ -115,116 +110,110 @@ class ProductDetailViewStoreSurfaceTest {
         override fun clearCache() {}
     }
 
-    private class FakeRecommendationsService : RecommendationsService {
-        override suspend fun getRecommendations(
-            productId: String,
-            limit: Int
-        ): Result<List<BriefProduct>, NetworkError> = Result.Success(emptyList())
-    }
-
     private class FakeSessionObserver : SessionObserver {
         override val state: StateFlow<SessionState> = MutableStateFlow(SessionState.Unknown)
         override val upgradeInProgress: StateFlow<Boolean> = MutableStateFlow(false)
     }
 
-    private class Harness(scope: TestScope) {
-        val productDetailService = RecordingProductDetailService()
-        val favoritesService = RecordingFavoritesService()
-        val store = ProductDetailViewStore(
+    /** Answers per seed product, so a slow first product can be left in flight on purpose. */
+    private class ScriptedRecommendationsService(
+        private val answers: Map<String, Result<List<BriefProduct>, NetworkError>>,
+        private val gates: Map<String, CompletableDeferred<Unit>> = emptyMap()
+    ) : RecommendationsService {
+        val seenProductIds = mutableListOf<String>()
+
+        override suspend fun getRecommendations(
+            productId: String,
+            limit: Int
+        ): Result<List<BriefProduct>, NetworkError> {
+            seenProductIds += productId
+            gates[productId]?.await()
+            return answers[productId] ?: Result.Success(emptyList())
+        }
+    }
+
+    private fun storeWith(recommendations: RecommendationsService, scope: TestScope) =
+        ProductDetailViewStore(
             scope = scope,
-            productDetailService = productDetailService,
+            productDetailService = FakeProductDetailService(),
             bduiTemplateService = FakeBduiTemplateService(),
             bduiActionService = FakeBduiActionService(),
             replaceService = FakeReplaceService(),
-            favoritesService = favoritesService,
-            recommendationsService = FakeRecommendationsService(),
+            favoritesService = FakeFavoritesService(),
+            recommendationsService = recommendations,
             briefProductMapper = DomainToPresentationBriefProductMapper(),
             sessionObserver = FakeSessionObserver()
         )
-    }
 
     @Test
-    fun originatingSurfaceAndPositionReachTheBriefProductCall() = runTest {
-        val h = Harness(this)
-
-        h.store.onEvent(
-            ProductDetailEvent.LoadProduct(
-                productId = "socks-123",
-                surface = InteractionSurface.HOME_SHELF,
-                position = 3
-            )
-        )
-        testScheduler.advanceUntilIdle()
-
-        assertEquals(
-            listOf<Triple<String, InteractionSurface, Int?>>(
-                Triple("socks-123", InteractionSurface.HOME_SHELF, 3)
+    fun successPopulatesTheShelf() = runTest {
+        val store = storeWith(
+            ScriptedRecommendationsService(
+                mapOf("socks-123" to Result.Success(listOf(product("a"), product("b"))))
             ),
-            h.productDetailService.briefCalls
+            this
         )
+
+        store.onEvent(ProductDetailEvent.LoadProduct("socks-123"))
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(listOf("a", "b"), store.state.value.recommendations.map { it.id })
     }
 
     @Test
-    fun aLoadWithoutAttributionReportsProductScreen() = runTest {
-        val h = Harness(this)
-
-        h.store.onEvent(ProductDetailEvent.LoadProduct("socks-123"))
-        testScheduler.advanceUntilIdle()
-
-        assertEquals(
-            listOf<Triple<String, InteractionSurface, Int?>>(
-                Triple("socks-123", InteractionSurface.PRODUCT_SCREEN, null)
+    fun failureHidesTheShelfAndLeavesTheProductPageUsable() = runTest {
+        val store = storeWith(
+            ScriptedRecommendationsService(
+                mapOf("socks-123" to Result.Error(NetworkError.NoConnection))
             ),
-            h.productDetailService.briefCalls
+            this
         )
+
+        store.onEvent(ProductDetailEvent.LoadProduct("socks-123"))
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(store.state.value.recommendations.isEmpty())
+        // The product itself is unaffected — no error state, body rendered.
+        assertIs<BriefProductState.Success>(store.state.value.briefState)
+        assertIs<BduiBodyState.Ready>(store.state.value.bduiBodyState)
     }
 
     @Test
-    fun retryKeepsTheOriginatingSurfaceRatherThanCollapsingToProductScreen() = runTest {
-        val h = Harness(this)
-
-        h.store.onEvent(
-            ProductDetailEvent.LoadProduct(
-                productId = "socks-123",
-                surface = InteractionSurface.SEARCH,
-                position = 1
-            )
+    fun anEmptyResponseHidesTheShelf() = runTest {
+        val store = storeWith(
+            ScriptedRecommendationsService(mapOf("socks-123" to Result.Success(emptyList()))),
+            this
         )
+
+        store.onEvent(ProductDetailEvent.LoadProduct("socks-123"))
         testScheduler.advanceUntilIdle()
 
-        h.store.onEvent(ProductDetailEvent.Retry)
-        testScheduler.advanceUntilIdle()
-
-        assertEquals(
-            List<Triple<String, InteractionSurface, Int?>>(2) {
-                Triple("socks-123", InteractionSurface.SEARCH, 1)
-            },
-            h.productDetailService.briefCalls
-        )
+        assertTrue(store.state.value.recommendations.isEmpty())
     }
 
     @Test
-    fun favoritingOnThePdpIsAlwaysAttributedToTheProductScreen() = runTest {
-        val h = Harness(this)
-
-        h.store.onEvent(
-            ProductDetailEvent.LoadProduct(
-                productId = "socks-123",
-                surface = InteractionSurface.HOME_SHELF,
-                position = 3
-            )
-        )
-        testScheduler.advanceUntilIdle()
-
-        h.store.onEvent(ProductDetailEvent.ToggleFavorite)
-        testScheduler.advanceUntilIdle()
-
-        // The favorite did not originate in a list — it is a tap on the product screen itself.
-        assertEquals(
-            listOf<Triple<String, InteractionSurface, Int?>>(
-                Triple("socks-123", InteractionSurface.PRODUCT_SCREEN, null)
+    fun navigatingToAnotherProductCancelsTheInFlightRequestAndNoStaleShelfLands() = runTest {
+        val firstProductGate = CompletableDeferred<Unit>()
+        val service = ScriptedRecommendationsService(
+            answers = mapOf(
+                "socks-123" to Result.Success(listOf(product("stale"))),
+                "socks-456" to Result.Success(listOf(product("fresh")))
             ),
-            h.favoritesService.toggles
+            gates = mapOf("socks-123" to firstProductGate)
         )
+        val store = storeWith(service, this)
+
+        store.onEvent(ProductDetailEvent.LoadProduct("socks-123"))
+        testScheduler.advanceUntilIdle()
+
+        store.onEvent(ProductDetailEvent.LoadProduct("socks-456"))
+        testScheduler.advanceUntilIdle()
+
+        // Release the first product's response only after the user has moved on.
+        firstProductGate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(listOf("socks-123", "socks-456"), service.seenProductIds)
+        assertEquals(listOf("fresh"), store.state.value.recommendations.map { it.id })
     }
 }

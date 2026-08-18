@@ -12,7 +12,8 @@ data class ProductDetailState(
     val bduiBodyState: BduiBodyState = BduiBodyState.Loading,
     val galleryUrls: List<String> = emptyList(),
     val isFavorited: Boolean = false,
-    val isFavoriteLoading: Boolean = false
+    val isFavoriteLoading: Boolean = false,
+    val recommendations: List<UiBriefProduct> = emptyList()
 )
 
 sealed class BriefProductState {

@@ -30,6 +30,7 @@ import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailService
+import org.example.fakeshop_clients.features.recommendations.domain.RecommendationsService
 import org.example.fakeshop_clients.features.productDetail.domain.mappers.DomainToPresentationBriefProductMapper
 import org.example.fakeshop_clients.features.productDetail.domain.models.DetailedProduct
 
@@ -120,6 +121,13 @@ class ProductDetailViewStoreNavigateTest {
         override fun clearCache() {}
     }
 
+    private class FakeRecommendationsService : RecommendationsService {
+        override suspend fun getRecommendations(
+            productId: String,
+            limit: Int
+        ): Result<List<BriefProduct>, NetworkError> = Result.Success(emptyList())
+    }
+
     private class FakeSessionObserver : SessionObserver {
         override val state: StateFlow<SessionState> =
             MutableStateFlow(SessionState.Unknown)
@@ -137,6 +145,7 @@ class ProductDetailViewStoreNavigateTest {
             bduiActionService = actionService,
             replaceService = FakeReplaceService(),
             favoritesService = FakeFavoritesService(),
+            recommendationsService = FakeRecommendationsService(),
             briefProductMapper = DomainToPresentationBriefProductMapper(),
             sessionObserver = FakeSessionObserver()
         )
@@ -329,6 +338,7 @@ class ProductDetailViewStoreNavigateTest {
             bduiActionService = RecordingBduiActionService(),
             replaceService = FakeReplaceService(),
             favoritesService = FakeFavoritesService(),
+            recommendationsService = FakeRecommendationsService(),
             briefProductMapper = DomainToPresentationBriefProductMapper(),
             sessionObserver = FakeSessionObserver()
         )

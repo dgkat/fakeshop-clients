@@ -16,10 +16,10 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import org.example.fakeshop_clients.core.auth.domain.SessionObserver
-import org.example.fakeshop_clients.core.navigation.AppRouteParser
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
+import org.example.fakeshop_clients.core.navigation.AppRouteParser
 import org.example.fakeshop_clients.features.bdui.BduiConstants
 import org.example.fakeshop_clients.features.bdui.domain.BduiActionService
 import org.example.fakeshop_clients.features.bdui.domain.BduiMutationApplier
@@ -35,6 +35,7 @@ import org.example.fakeshop_clients.features.bdui.presentation.BduiError
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.productDetail.domain.ProductDetailService
 import org.example.fakeshop_clients.features.productDetail.domain.mappers.DomainToPresentationBriefProductMapper
+import org.example.fakeshop_clients.features.recommendations.domain.RecommendationsService
 
 class ProductDetailViewStore(
     private val scope: CoroutineScope,
@@ -43,6 +44,7 @@ class ProductDetailViewStore(
     private val bduiActionService: BduiActionService,
     private val replaceService: ReplaceService,
     private val favoritesService: FavoritesService,
+    private val recommendationsService: RecommendationsService,
     private val briefProductMapper: DomainToPresentationBriefProductMapper,
     private val sessionObserver: SessionObserver
 ) {
@@ -78,7 +80,11 @@ class ProductDetailViewStore(
      * would mangle it / crash on `Map#get`). Every platform routes through here; the
      * [ProductDetailEvent.DispatchAction] constructor is `internal` to enforce it.
      */
-    fun dispatchBduiAction(actionId: String, context: ActionContext, idempotencyKey: String? = null) {
+    fun dispatchBduiAction(
+        actionId: String,
+        context: ActionContext,
+        idempotencyKey: String? = null
+    ) {
         onEvent(ProductDetailEvent.DispatchAction(actionId, context.json, idempotencyKey))
     }
 
@@ -87,6 +93,7 @@ class ProductDetailViewStore(
             is ProductDetailEvent.LoadProduct -> loadProduct(
                 event.productId, event.surface, event.position
             )
+
             ProductDetailEvent.Retry -> retry()
             ProductDetailEvent.ToggleFavorite -> toggleFavorite()
             is ProductDetailEvent.DispatchAction -> dispatchAction(
@@ -110,7 +117,8 @@ class ProductDetailViewStore(
                 briefState = BriefProductState.Loading,
                 bduiBodyState = BduiBodyState.Loading,
                 galleryUrls = emptyList(),
-                isFavorited = false
+                isFavorited = false,
+                recommendations = emptyList()
             )
         }
 
@@ -118,6 +126,7 @@ class ProductDetailViewStore(
             coroutineScope {
                 launch { loadBriefAndBdui(productId, surface, position) }
                 launch { loadReplaceBindings(productId) }
+                launch { loadRecommendations(productId) }
                 launch {
                     val isFav = isFavorite(productId)
                     _state.update { it.copy(isFavorited = isFav) }
@@ -144,6 +153,17 @@ class ProductDetailViewStore(
         )
     }
 
+    private suspend fun loadRecommendations(productId: String) {
+        recommendationsService.getRecommendations(productId).fold(
+            onSuccess = { products ->
+                _state.update { state ->
+                    state.copy(recommendations = products.map(briefProductMapper::map))
+                }
+            },
+            onError = { }
+        )
+    }
+
     private suspend fun isFavorite(productId: String): Boolean {
         if (productId in favoritesService.favoritedIds.value) return true
         return favoritesService.checkFavorite(productId).fold(
@@ -161,7 +181,8 @@ class ProductDetailViewStore(
         surface: InteractionSurface,
         position: Int?
     ) = coroutineScope {
-        val briefDef = async { productDetailService.getBriefProductById(productId, surface, position) }
+        val briefDef =
+            async { productDetailService.getBriefProductById(productId, surface, position) }
         val detailedDef = async { productDetailService.getDetailedProductById(productId) }
 
         val briefRes = briefDef.await()
@@ -243,7 +264,12 @@ class ProductDetailViewStore(
                     _state.update { it.copy(isFavoriteLoading = false) }
                 },
                 onError = {
-                    _state.update { it.copy(isFavorited = currentlyFavorited, isFavoriteLoading = false) }
+                    _state.update {
+                        it.copy(
+                            isFavorited = currentlyFavorited,
+                            isFavoriteLoading = false
+                        )
+                    }
                 }
             )
         }
