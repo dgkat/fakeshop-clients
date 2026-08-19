@@ -1,16 +1,13 @@
 {
   "app_name": "E-Shop",
-
   "tab_home": "Inicio",
   "tab_favorites": "Favoritos",
   "tab_notifications": "Notificaciones",
   "tab_profile": "Perfil",
-
   "search_placeholder": "Buscar productos...",
   "search": "Buscar",
   "clear_search": "Borrar búsqueda",
   "no_results": "No se encontraron resultados",
-
   "loading": "Cargando...",
   "loading_products": "Cargando productos...",
   "loading_details": "Cargando detalles...",
@@ -21,12 +18,10 @@
   "error_product_details": "No se pudieron cargar los detalles adicionales",
   "no_products": "No hay productos disponibles",
   "error": "Error",
-
   "description": "Descripción",
   "specifications": "Especificaciones",
   "product_image": "Imagen del producto",
   "thumbnail": "Miniatura",
-
   "favorites_empty": "Tus productos favoritos aparecerán aquí",
   "recents_empty": "Los productos que has visto aparecerán aquí",
   "tab_recently_seen": "Vistos recientemente",
@@ -34,7 +29,6 @@
   "go_to_profile": "Ir al perfil",
   "notifications_empty": "Mantente atento a las novedades",
   "profile_subtitle": "Administra tu cuenta",
-
   "welcome": "Bienvenido",
   "email": "Correo electrónico",
   "password": "Contraseña",
@@ -44,7 +38,6 @@
   "processing": "Procesando...",
   "logged_in": "Has iniciado sesión",
   "logging_out": "Cerrando sesión...",
-
   "profile_error_invalid_credentials": "Correo o contraseña incorrectos",
   "profile_error_account_locked": "Cuenta bloqueada. Inténtalo más tarde o restablece tu contraseña",
   "profile_error_account_not_verified": "Verifica tu correo electrónico antes de iniciar sesión",
@@ -58,15 +51,12 @@
   "profile_error_server": "Algo salió mal en nuestro lado. Inténtalo de nuevo",
   "profile_error_network": "Error de red. Comprueba tu conexión e inténtalo de nuevo",
   "profile_error_unknown": "Algo salió mal. Inténtalo de nuevo",
-
   "back": "Atrás",
   "home_page_title": "E-Shop Inicio",
   "footer_copyright": "2024 E-Shop. Construido con Kotlin Multiplatform",
-
   "language": "Idioma",
   "language_english": "Inglés",
   "language_spanish": "Español",
-
   "notification_permission_title": "Mantente al día con las bajadas de precio",
   "notification_permission_message": "Recibe notificaciones cuando los productos que te gustan estén en oferta",
   "notification_permission_enable": "Activar notificaciones",
@@ -76,12 +66,11 @@
   "notification_prefs_price_drop": "Alertas de bajada de precio",
   "notification_prefs_price_drop_desc": "Recibe notificaciones cuando tus productos favoritos bajen de precio",
   "price_drop_snackbar_action": "Ver",
-
   "guest_profile_cta_title": "Guarda tus favoritos en todos los dispositivos",
   "guest_profile_cta_body": "Regístrate o inicia sesión para sincronizar.",
   "guest_favorites_device_note": "Guardado en este dispositivo",
-
   "bootstrap_failed_title": "Sin conexión al servidor",
   "bootstrap_failed_body": "Comprueba tu conexión e inténtalo de nuevo.",
-  "bootstrap_failed_retry": "Reintentar"
+  "bootstrap_failed_retry": "Reintentar",
+  "similar_products": "Productos similares"
 }

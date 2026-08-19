@@ -33,6 +33,7 @@ fun ProductDetailScreen(
     contentPadding: PaddingValues,
     scrollState: SearchBarScrollState,
     onNavigate: (url: String, replace: Boolean) -> Unit = { _, _ -> },
+    onRecommendationClick: (productId: String, position: Int) -> Unit = { _, _ -> },
     viewModel: ProductDetailViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -79,6 +80,8 @@ fun ProductDetailScreen(
                     isFavorited = state.isFavorited,
                     isFavoriteLoading = state.isFavoriteLoading,
                     onToggleFavorite = { viewModel.onEvent(ProductDetailEvent.ToggleFavorite) },
+                    recommendations = state.recommendations,
+                    onRecommendationClick = onRecommendationClick,
                     scrollState = scrollState,
                     contentPadding = contentPadding,
                     modifier = Modifier

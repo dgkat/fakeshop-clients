@@ -236,6 +236,15 @@ fun MainNavigation(initialProductId: String? = null, initialRoute: AppRoute? = n
                         productId = productId,
                         surface = surface,
                         position = position,
+                        onRecommendationClick = { recommendedId, index ->
+                            navController.navigate(
+                                Route.ProductDetail.createRoute(
+                                    productId = recommendedId,
+                                    surface = InteractionSurface.RECOMMENDATIONS,
+                                    position = index
+                                )
+                            )
+                        },
                         contentPadding = searchBarPadding,
                         scrollState = scrollState,
                         onNavigate = { url, replace ->
