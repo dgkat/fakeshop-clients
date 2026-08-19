@@ -157,6 +157,7 @@ struct MainTabView: View {
                     productId: route.productId,
                     surface: route.surface,
                     position: route.position,
+                    navigationPath: $homePath,
                     onScrollOffsetChange: { offset in offsetModel.offset = offset },
                     onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                 )
@@ -176,6 +177,7 @@ struct MainTabView: View {
                     productId: route.productId,
                     surface: route.surface,
                     position: route.position,
+                    navigationPath: $favoritesPath,
                     onScrollOffsetChange: { offset in offsetModel.offset = offset },
                     onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                 )
@@ -191,6 +193,7 @@ struct MainTabView: View {
                         productId: route.productId,
                         surface: route.surface,
                         position: route.position,
+                        navigationPath: $notificationsPath,
                         onScrollOffsetChange: { offset in offsetModel.offset = offset },
                         onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                     )
@@ -207,6 +210,7 @@ struct MainTabView: View {
                         productId: route.productId,
                         surface: route.surface,
                         position: route.position,
+                        navigationPath: $profilePath,
                         onScrollOffsetChange: { offset in offsetModel.offset = offset },
                         onNavigate: { url, replace in navigationRouter.navigate(url: url, replace: replace) }
                     )
