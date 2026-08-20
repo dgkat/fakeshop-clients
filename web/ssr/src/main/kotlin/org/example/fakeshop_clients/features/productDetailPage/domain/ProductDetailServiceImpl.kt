@@ -38,7 +38,7 @@ class ProductDetailServiceImpl(
             return@coroutineScope Result.Error(briefRes.error)
         }
         val brief = (briefRes as Result.Success).data
-        
+
         val templateDef = async { bduiTemplateDatasource.getPdpTemplate(brief.category, cookies) }
 
         val detailedRes = detailedDef.await()
