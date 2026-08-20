@@ -9,6 +9,7 @@ import org.example.fakeshop_clients.core.network.UrlProvider
 import org.example.fakeshop_clients.features.core.models.Cookies
 import org.example.fakeshop_clients.features.favorites.data.models.FavoriteCheckResponse
 import org.example.fakeshop_clients.features.home.data.models.BriefProductResponse
+import org.example.fakeshop_clients.features.home.data.models.BriefProductsResponse
 import org.example.fakeshop_clients.features.productDetail.data.models.DetailedProductResponse
 
 class SSRProductDetailDatasourceImpl(
@@ -34,6 +35,17 @@ class SSRProductDetailDatasourceImpl(
     ): Result<DetailedProductResponse, NetworkError> {
         return safeApiClient.get(
             path = "${baseUrl()}/products/v2/detailed/$id",
+            cookies = cookies
+        )
+    }
+
+    override suspend fun getRecommendations(
+        productId: String,
+        cookies: Cookies,
+        limit: Int
+    ): Result<BriefProductsResponse, NetworkError> {
+        return safeApiClient.get(
+            path = "${baseUrl()}/products/$productId/recommendations?limit=$limit",
             cookies = cookies
         )
     }

@@ -34,6 +34,7 @@ class ProductDetailServiceImpl(
         val brief = (briefRes as Result.Success).data
 
         val templateDef = async { bduiTemplateDatasource.getPdpTemplate(brief.category, cookies) }
+        val recommendationsDef = async { productDetailRepository.getRecommendations(id, cookies) }
 
         val detailedRes = detailedDef.await()
         if (detailedRes is Result.Error) return@coroutineScope Result.Error(detailedRes.error)
@@ -51,12 +52,18 @@ class ProductDetailServiceImpl(
                     category = brief.category
                 )
                 val bindData = buildPdpBindData(uiBrief, detailed)
+                // Failure degrades to an empty shelf, never to a failed page.
+                val recommendations = when (val res = recommendationsDef.await()) {
+                    is Result.Success -> res.data
+                    is Result.Error -> emptyList()
+                }
                 Result.Success(
                     PdpData(
                         brief = brief,
                         galleryUrls = detailed.galleryUrls,
                         template = template,
-                        bindData = bindData
+                        bindData = bindData,
+                        recommendations = recommendations
                     )
                 )
             }

@@ -8,5 +8,6 @@ data class PdpData(
     val brief: BriefProduct,
     val galleryUrls: List<String>,
     val template: BduiTemplate,
-    val bindData: JsonObject
+    val bindData: JsonObject,
+    val recommendations: List<BriefProduct> = emptyList()
 )

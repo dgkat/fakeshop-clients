@@ -270,3 +270,36 @@
     opacity: 0;
     transition: opacity 200ms ease-in;
 }
+
+/* ===== SIMILAR PRODUCTS SHELF =====
+ * Cards come from shared/product-card.css. Here they are real anchors rather than JS-driven
+ * divs, so the shelf works with JavaScript disabled — hence the link reset.
+ */
+.similar-products {
+    margin-top: var(--spacing-xl);
+}
+
+.similar-products-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+    padding-left: 12px;
+}
+
+.similar-products .product-card {
+    text-decoration: none;
+    color: inherit;
+}
+
+@media (max-width: 768px) {
+    .similar-products-title {
+        font-size: 20px;
+        padding: 0 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .similar-products-title {
+        font-size: 18px;
+    }
+}

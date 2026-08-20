@@ -10,6 +10,7 @@ import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
 import org.example.fakeshop_clients.features.productDetail.data.mappers.DataToDomainDetailedProductMapper
 import org.example.fakeshop_clients.features.productDetail.domain.models.DetailedProduct
 import org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailRepository
+import org.example.fakeshop_clients.features.recommendations.data.RecommendationsDatasource
 
 class SSRProductDetailRepositoryImpl(
     private val productDetailDatasource: ProductDetailDatasource,
@@ -32,6 +33,16 @@ class SSRProductDetailRepositoryImpl(
     ): Result<DetailedProduct, NetworkError> {
         return productDetailDatasource.getDetailedProductById(id, cookies).map {
             dataToDomainDetailedProductMapper.map(it)
+        }
+    }
+
+    override suspend fun getRecommendations(
+        productId: String,
+        cookies: Cookies,
+        limit: Int
+    ): Result<List<BriefProduct>, NetworkError> {
+        return productDetailDatasource.getRecommendations(productId, cookies, limit).map {
+            dataToDomainBriefProductMapper.map(it)
         }
     }
 

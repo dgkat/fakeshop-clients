@@ -6,6 +6,7 @@ import org.example.fakeshop_clients.core.interactions.domain.InteractionContext
 import org.example.fakeshop_clients.features.core.models.Cookies
 import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
 import org.example.fakeshop_clients.features.productDetail.domain.models.DetailedProduct
+import org.example.fakeshop_clients.features.recommendations.data.RecommendationsDatasource
 
 interface ProductDetailRepository {
     suspend fun getBriefProductById(
@@ -18,6 +19,12 @@ interface ProductDetailRepository {
         id: String,
         cookies: Cookies
     ): Result<DetailedProduct, NetworkError>
+
+    suspend fun getRecommendations(
+        productId: String,
+        cookies: Cookies,
+        limit: Int = RecommendationsDatasource.DEFAULT_LIMIT
+    ): Result<List<BriefProduct>, NetworkError>
 
     suspend fun addFavorite(
         productId: String,
