@@ -29,19 +29,31 @@ class ProductDetailServiceImpl(
         val briefDef = async { productDetailRepository.getBriefProductById(id, cookies, interaction) }
         val detailedDef = async { productDetailRepository.getDetailedProductById(id, cookies) }
 
-        val briefRes = briefDef.await()
-        if (briefRes is Result.Error) return@coroutineScope Result.Error(briefRes.error)
-        val brief = (briefRes as Result.Success).data
-
-        val templateDef = async { bduiTemplateDatasource.getPdpTemplate(brief.category, cookies) }
         val recommendationsDef = async { productDetailRepository.getRecommendations(id, cookies) }
 
+        val briefRes = briefDef.await()
+        if (briefRes is Result.Error) {
+            detailedDef.cancel()
+            recommendationsDef.cancel()
+            return@coroutineScope Result.Error(briefRes.error)
+        }
+        val brief = (briefRes as Result.Success).data
+        
+        val templateDef = async { bduiTemplateDatasource.getPdpTemplate(brief.category, cookies) }
+
         val detailedRes = detailedDef.await()
-        if (detailedRes is Result.Error) return@coroutineScope Result.Error(detailedRes.error)
+        if (detailedRes is Result.Error) {
+            templateDef.cancel()
+            recommendationsDef.cancel()
+            return@coroutineScope Result.Error(detailedRes.error)
+        }
         val detailed = (detailedRes as Result.Success).data
 
         when (val templateRes = templateDef.await()) {
-            is Result.Error -> Result.Error(templateRes.error)
+            is Result.Error -> {
+                recommendationsDef.cancel()
+                Result.Error(templateRes.error)
+            }
             is Result.Success -> {
                 val template = bduiTemplateMapper.map(templateRes.data)
                 val uiBrief = UiBriefProduct(
