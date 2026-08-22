@@ -1,19 +1,21 @@
 package org.example.fakeshop_clients.features.productDetailPage.presentation
 
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.html.respondHtml
+import io.ktor.server.request.userAgent
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
 import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import kotlinx.html.FlowContent
 import kotlinx.html.body
 import kotlinx.html.button
 import kotlinx.html.id
 import org.example.fakeshop_clients.core.auth.SSRGuestDatasource
+import org.example.fakeshop_clients.core.crawlers.CrawlerDetection
 import org.example.fakeshop_clients.core.design.IconPaths
-import org.example.fakeshop_clients.core.ui.svgIcon
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.extensions.ensureGuestSession
 import org.example.fakeshop_clients.core.extensions.extractCookies
@@ -21,8 +23,10 @@ import org.example.fakeshop_clients.core.extensions.interactionContext
 import org.example.fakeshop_clients.core.extensions.productScreenInteractionContext
 import org.example.fakeshop_clients.core.i18n.WebStrings
 import org.example.fakeshop_clients.core.pages.bootstrapFailedPage
+import org.example.fakeshop_clients.core.ui.svgIcon
 import org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailService
 import org.example.fakeshop_clients.features.productDetailPage.presentation.pages.productDetailPage
+import org.example.fakeshop_clients.features.productDetailPage.presentation.pages.similarProductsShelf
 import org.koin.ktor.ext.inject
 
 fun Route.productRoutes() {
@@ -62,9 +66,41 @@ fun Route.productRoutes() {
             }
 
             is Result.Success -> {
-                call.respondHtml(HttpStatusCode.OK) {
-                    productDetailPage(pdpData.data, locale, strings, stringsJson)
+                val isCrawler = CrawlerDetection.isCrawler(call.request.userAgent())
+                if (isCrawler) {
+                    call.response.headers.append(HttpHeaders.CacheControl, "private, no-store")
                 }
+                call.respondHtml(HttpStatusCode.OK) {
+                    productDetailPage(pdpData.data, locale, strings, stringsJson, isCrawler)
+                }
+            }
+        }
+    }
+
+    // HTMX fragment - the similar-products shelf, deferred off the page's critical path.
+    get("/product/{id}/recommendations") {
+        val locale = call.parameters["locale"] ?: WebStrings.DEFAULT_LOCALE
+        val strings = WebStrings.getAll(locale)
+        val productId = call.parameters["id"] ?: return@get call.respondText(
+            "Product ID is required",
+            status = HttpStatusCode.BadRequest
+        )
+
+        // extractCookies, not ensureGuestSession: the page response already mints. A second mint
+        // racing it would hand the browser a different session id mid-render, splitting one
+        // sitting into two sessions.
+        val cookies = call.extractCookies()
+        val products =
+            when (val result = productDetailService.getRecommendations(productId, cookies)) {
+                is Result.Success -> result.data
+                is Result.Error -> emptyList()
+            }
+
+        // Per-user output: must never be held in a shared cache.
+        call.response.headers.append(HttpHeaders.CacheControl, "private, no-store")
+        call.respondHtml(HttpStatusCode.OK) {
+            body {
+                similarProductsShelf(products = products, locale = locale, strings = strings)
             }
         }
     }
@@ -109,6 +145,7 @@ fun Route.productApiRoutes() {
                 "Unable to process request. Please try again later.",
                 status = HttpStatusCode.InternalServerError
             )
+
             is Result.Success -> call.respondHtml(HttpStatusCode.OK) {
                 body { likeButton(productId = productId, isLiked = true) }
             }
@@ -131,6 +168,7 @@ fun Route.productApiRoutes() {
                 "Unable to process request. Please try again later.",
                 status = HttpStatusCode.InternalServerError
             )
+
             is Result.Success -> call.respondHtml(HttpStatusCode.OK) {
                 body { likeButton(productId = productId, isLiked = false) }
             }

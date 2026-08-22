@@ -41,7 +41,8 @@ fun HTML.productDetailPage(
     pdpData: PdpData,
     locale: String,
     strings: Map<String, String>,
-    stringsJson: String
+    stringsJson: String,
+    isCrawler: Boolean = false
 ) {
     val brief = pdpData.brief
     lang = locale
@@ -208,13 +209,14 @@ fun HTML.productDetailPage(
                     renderBduiNode(pdpData.template.root, pdpData.bindData, "pdp", brief.id, locale)
                 }
 
-                // Similar products shelf — server-rendered, so it needs no JS and is in the
-                // initial HTML.
-                similarProductsShelf(
-                    products = pdpData.recommendations,
-                    locale = locale,
-                    strings = strings
-                )
+                // Similar products shelf — deferred, because it is the one per-user call on the
+                // page and most sessions never scroll to it. The placeholder reserves its height
+                // so the footer does not jump when the fragment lands.
+                div(classes = "similar-products-placeholder") {
+                    attributes["hx-get"] = "/$locale/product/${brief.id}/recommendations"
+                    attributes["hx-trigger"] = if (isCrawler) "load" else "intersect once"
+                    attributes["hx-swap"] = "outerHTML"
+                }
 
                 // Toast region for BDUI action feedback (HTMX swaps content here)
                 div {

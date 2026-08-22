@@ -4,6 +4,7 @@ import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.interactions.domain.InteractionContext
 import org.example.fakeshop_clients.features.core.models.Cookies
+import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
 import org.example.fakeshop_clients.features.productDetailPage.domain.models.PdpData
 
 interface ProductDetailService {
@@ -12,6 +13,11 @@ interface ProductDetailService {
         cookies: Cookies,
         interaction: InteractionContext = InteractionContext.None
     ): Result<PdpData, NetworkError>
+
+    suspend fun getRecommendations(
+        productId: String,
+        cookies: Cookies
+    ): Result<List<BriefProduct>, NetworkError>
 
     suspend fun addFavorite(
         productId: String,

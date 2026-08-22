@@ -273,8 +273,17 @@
 
 /* ===== SIMILAR PRODUCTS SHELF =====
  * Cards come from shared/product-card.css. Here they are real anchors rather than JS-driven
- * divs, so the shelf works with JavaScript disabled — hence the link reset.
+ * divs — hence the link reset. Note the shelf itself is NOT in the initial HTML: it arrives via
+ * an HTMX fragment, so with JavaScript off the placeholder below is all there is.
  */
+
+/* Reserves the shelf's height before the fragment lands, so the footer does not jump under the
+ * user mid-scroll. Height = square card image (card width) + info block + row padding + title.
+ * Keep these in step with .product-card's width at each breakpoint in shared/product-card.css.
+ */
+.similar-products-placeholder {
+    min-height: 390px;
+}
 .similar-products {
     margin-top: var(--spacing-xl);
 }
@@ -296,10 +305,20 @@
         font-size: 20px;
         padding: 0 4px;
     }
+
+    /* Card drops to 160px wide */
+    .similar-products-placeholder {
+        min-height: 292px;
+    }
 }
 
 @media (max-width: 480px) {
     .similar-products-title {
         font-size: 18px;
+    }
+
+    /* Card drops to 140px wide */
+    .similar-products-placeholder {
+        min-height: 266px;
     }
 }
