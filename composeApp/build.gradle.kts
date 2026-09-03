@@ -96,7 +96,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         // version code = yymmddxx
-        versionCode = 26090301
+        versionCode = 26090302
         versionName = "1.0.2"
 
         // App Links host — replace with the real public domain at deploy time.
