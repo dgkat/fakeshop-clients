@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonObject
 import org.example.fakeshop_clients.features.bdui.domain.models.BduiTemplate
 import org.example.fakeshop_clients.features.bdui.domain.models.UiNode
 import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
+import org.example.fakeshop_clients.features.productDetailPage.domain.models.PdpBody
 import org.example.fakeshop_clients.features.productDetailPage.domain.models.PdpData
 import org.example.fakeshop_clients.features.productDetailPage.presentation.pages.productDetailPage
 import kotlin.test.Test
@@ -29,13 +30,15 @@ class ProductDetailPageShelfDeferralTest {
                 category = "shoes"
             ),
             galleryUrls = emptyList(),
-            template = BduiTemplate(
-                schemaVersion = 1,
-                screen = "pdp",
-                category = "shoes",
-                root = UiNode.Column()
-            ),
-            bindData = JsonObject(emptyMap())
+            body = PdpBody.Ready(
+                template = BduiTemplate(
+                    schemaVersion = 1,
+                    screen = "pdp",
+                    category = "shoes",
+                    root = UiNode.Column()
+                ),
+                bindData = JsonObject(emptyMap())
+            )
         )
         return createHTML().html {
             productDetailPage(

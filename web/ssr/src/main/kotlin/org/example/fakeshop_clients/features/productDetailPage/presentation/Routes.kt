@@ -16,6 +16,7 @@ import kotlinx.html.id
 import org.example.fakeshop_clients.core.auth.SSRGuestDatasource
 import org.example.fakeshop_clients.core.crawlers.CrawlerDetection
 import org.example.fakeshop_clients.core.design.IconPaths
+import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.extensions.ensureGuestSession
 import org.example.fakeshop_clients.core.extensions.extractCookies
@@ -59,10 +60,22 @@ fun Route.productRoutes() {
 
         when (pdpData) {
             is Result.Error -> {
-                call.respondText(
-                    "Unable to load product details. Please try again later.",
-                    status = HttpStatusCode.InternalServerError
-                )
+                // Only the brief leg can fail the page now (a missing BDUI body degrades in
+                // place). A 404 from it means the product genuinely is not there — say so,
+                // rather than telling crawlers the server broke.
+                val error = pdpData.error
+                val isMissing = error is NetworkError.HttpError && error.code == 404
+                if (isMissing) {
+                    call.respondText(
+                        "Product not found.",
+                        status = HttpStatusCode.NotFound
+                    )
+                } else {
+                    call.respondText(
+                        "Unable to load product details. Please try again later.",
+                        status = HttpStatusCode.InternalServerError
+                    )
+                }
             }
 
             is Result.Success -> {

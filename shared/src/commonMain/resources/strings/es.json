@@ -72,5 +72,6 @@
   "bootstrap_failed_title": "Sin conexión al servidor",
   "bootstrap_failed_body": "Comprueba tu conexión e inténtalo de nuevo.",
   "bootstrap_failed_retry": "Reintentar",
+  "product_details_unavailable": "El resto de los detalles de este producto no está disponible en este momento.",
   "similar_products": "Productos similares"
 }

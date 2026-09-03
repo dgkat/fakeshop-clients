@@ -35,6 +35,7 @@ import org.example.fakeshop_clients.features.bdui.presentation.render.renderBdui
 import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
 import org.example.fakeshop_clients.features.core.navigation.mobile.bottomNavigation
 import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
+import org.example.fakeshop_clients.features.productDetailPage.domain.models.PdpBody
 import org.example.fakeshop_clients.features.productDetailPage.domain.models.PdpData
 
 fun HTML.productDetailPage(
@@ -204,9 +205,20 @@ fun HTML.productDetailPage(
                     }
                 }
 
-                // BDUI body — server-driven bottom half
+                // BDUI body — server-driven bottom half. Degrades on its own: a product whose
+                // detailed record or category template is missing still gets the top half.
                 div(classes = "product-detail-bdui") {
-                    renderBduiNode(pdpData.template.root, pdpData.bindData, "pdp", brief.id, locale)
+                    when (val pdpBody = pdpData.body) {
+                        is PdpBody.Ready -> renderBduiNode(
+                            pdpBody.template.root,
+                            pdpBody.bindData,
+                            "pdp",
+                            brief.id,
+                            locale
+                        )
+
+                        is PdpBody.Unavailable -> productBodyFallback(pdpBody, strings)
+                    }
                 }
 
                 // Similar products shelf — deferred, because it is the one per-user call on the
@@ -294,6 +306,19 @@ document.addEventListener('click', function(e) {
 
         // ===== BROWSING SESSION CLOCK (SSR mints, the browser maintains) =====
         script(src = "/static/js/session-id.js") {}
+    }
+}
+
+fun FlowContent.productBodyFallback(pdpBody: PdpBody.Unavailable, strings: Map<String, String>) {
+    section(classes = "product-section product-body-fallback") {
+        pdpBody.fullDescription?.takeIf { it.isNotBlank() }?.let { description ->
+            p(classes = "product-section-content") { +description }
+        }
+
+        p(classes = "product-body-unavailable") {
+            +(strings["product_details_unavailable"]
+                ?: "The rest of this product's details aren't available right now.")
+        }
     }
 }
 

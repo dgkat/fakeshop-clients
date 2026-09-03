@@ -178,6 +178,20 @@
     padding: 0 var(--spacing-lg);
 }
 
+/* Fallback shown when the BDUI body could not be built (missing detailed record or
+   category template). Deliberately quiet: the top half of the page is fine. */
+.product-body-fallback {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.product-body-unavailable {
+    font-size: var(--font-size-body-small);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-on-surface-variant);
+    margin: var(--spacing-md) 0 0;
+}
+
 /* Desktop layout */
 @media (min-width: 769px) {
     .product-detail {
