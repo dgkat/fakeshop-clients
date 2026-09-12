@@ -7,13 +7,15 @@ import org.example.fakeshop_clients.core.data.post
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
 import org.example.fakeshop_clients.core.error_handling.map
+import org.example.fakeshop_clients.core.interactions.domain.SessionIdProvider
 import org.example.fakeshop_clients.core.network.UrlProvider
 
 class MobileLogoutUser(
     private val authClient: SafeAuthenticatedApiClient,
     private val tokenStorage: TokenStorage,
     private val baseUrl: UrlProvider,
-    private val tokenCacheInvalidator: TokenCacheInvalidator
+    private val tokenCacheInvalidator: TokenCacheInvalidator,
+    private val sessionIdProvider: SessionIdProvider
 ) : LogoutUser {
     override suspend operator fun invoke(): Result<Unit, NetworkError> {
         val refreshToken = tokenStorage.getRefreshToken()
@@ -26,6 +28,7 @@ class MobileLogoutUser(
         ).map { _ ->
             tokenStorage.clearTokens()
             tokenCacheInvalidator.invalidate()
+            sessionIdProvider.reset()
         }
     }
 }

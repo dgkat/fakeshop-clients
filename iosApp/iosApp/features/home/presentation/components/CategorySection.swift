@@ -12,7 +12,7 @@ import ComposeApp
 struct CategorySection: View {
     let categoryRow: UiCategoryRow
     let favoritedProductIds: Set<String>
-    let onProductClick: (String) -> Void
+    let onProductClick: (String, Int) -> Void
     let onToggleFavorite: (String) -> Void
 
     var body: some View {
@@ -36,17 +36,18 @@ struct CategorySection: View {
 struct ProductRow: View {
     let products: [UiBriefProduct]
     let favoritedProductIds: Set<String>
-    let onProductClick: (String) -> Void
+    let onProductClick: (String, Int) -> Void
     let onToggleFavorite: (String) -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 12) {
-                ForEach(products, id: \.id) { product in
+                ForEach(Array(products.enumerated()), id: \.element.id) { index, product in
                     ProductCard(
                         product: product,
                         isFavorited: favoritedProductIds.contains(product.id),
-                        onClick: { onProductClick(product.id) },
+                        // 0-based rank within the shelf: not reconstructable after the fact.
+                        onClick: { onProductClick(product.id, index) },
                         onToggleFavorite: { onToggleFavorite(product.id) }
                     )
                 }
@@ -61,9 +62,9 @@ struct ProductRow: View {
 // ProductCard.swift
 struct ProductCard: View {
     let product: UiBriefProduct
-    let isFavorited: Bool
+    var isFavorited: Bool = false
     let onClick: () -> Void
-    let onToggleFavorite: () -> Void
+    var onToggleFavorite: (() -> Void)? = nil
 
     @State private var isPressed: Bool = false
 
@@ -86,14 +87,16 @@ struct ProductCard: View {
                 .clipped()
 
                 // Favorite button
-                Button(action: onToggleFavorite) {
-                    Image(systemName: isFavorited ? "heart.fill" : "heart")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(isFavorited ? FakeShopColors.error : .white)
-                        .shadow(color: .black.opacity(0.35), radius: 4, x: 0, y: 1)
+                if let onToggleFavorite {
+                    Button(action: onToggleFavorite) {
+                        Image(systemName: isFavorited ? "heart.fill" : "heart")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(isFavorited ? FakeShopColors.error : .white)
+                            .shadow(color: .black.opacity(0.35), radius: 4, x: 0, y: 1)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(8)
                 }
-                .buttonStyle(PlainButtonStyle())
-                .padding(8)
             }
 
             // Product Info

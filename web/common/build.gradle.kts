@@ -311,12 +311,16 @@ tasks.register("bundleCss") {
             "home" to listOf(
                 "shared/view-transitions.css",
                 "shared/search-bar.css",
+                "shared/product-card.css",
                 "pages/product-list.css"
             ),
+            // product-card.css comes before product-details.css so the PDP's own
+            // .product-price / .product-category keep winning for the seed product's header.
             "product-detail" to listOf(
                 "shared/view-transitions.css",
                 "shared/search-bar.css",
                 "shared/bdui.css",
+                "shared/product-card.css",
                 "pages/product-details.css"
             ),
             "spa" to listOf(

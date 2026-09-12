@@ -36,8 +36,8 @@ import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 fun ProductCard(
     product: UiBriefProduct,
     onClick: () -> Unit,
-    isFavorited: Boolean,
-    onToggleFavorite: () -> Unit,
+    isFavorited: Boolean = false,
+    onToggleFavorite: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -60,13 +60,15 @@ fun ProductCard(
                         .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
                 )
 
-                FavoriteCardButton(
-                    isFavorited = isFavorited,
-                    onClick = onToggleFavorite,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(4.dp)
-                )
+                onToggleFavorite?.let { toggle ->
+                    FavoriteCardButton(
+                        isFavorited = isFavorited,
+                        onClick = toggle,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(4.dp)
+                    )
+                }
             }
 
             Column(

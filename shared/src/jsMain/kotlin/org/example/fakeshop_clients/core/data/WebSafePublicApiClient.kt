@@ -20,13 +20,7 @@ class WebSafePublicApiClient(
  */
 suspend inline fun <reified T : Any, B : Any> WebSafePublicApiClient.post(
     path: String,
-    body: B
-): Result<T, NetworkError> =
-    safeResult(exceptionMapper) { publicApiClient.post(path, body, typeOf<T>()) }
-
-suspend inline fun <reified T : Any, B : Any> WebSafePublicApiClient.postWithHeaders(
-    path: String,
     body: B,
-    headers: Map<String, String>
+    headers: Map<String, String> = emptyMap()
 ): Result<T, NetworkError> =
-    safeResult(exceptionMapper) { publicApiClient.postWithHeaders(path, body, headers, typeOf<T>()) }
+    safeResult(exceptionMapper) { publicApiClient.post(path, body, typeOf<T>(), headers) }

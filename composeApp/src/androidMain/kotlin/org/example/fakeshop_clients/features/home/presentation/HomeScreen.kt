@@ -32,7 +32,7 @@ fun HomeScreen(
     productListViewModel: ProductListViewModel = koinViewModel(),
     contentPadding: PaddingValues,
     scrollState: SearchBarScrollState,
-    onProductClick: (String) -> Unit,
+    onProductClick: (productId: String, position: Int) -> Unit,
 ) {
     val uiState by productListViewModel.uiState.collectAsStateWithLifecycle()
     HomeContent(

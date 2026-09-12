@@ -6,6 +6,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.cookie
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -23,13 +24,19 @@ class SSRSafeApiClient(
 
     /**
      * Performs a GET request with cookie forwarding and automatic error handling.
+     *
+     * [interactionHeaders] carries `X-Session-Id` / `X-Surface` / `X-Position`. The gateway reads
+     * these as headers, so forwarding the session *cookie* alone achieves nothing — they must be
+     * passed per-request, never held on this (singleton) client.
      */
     suspend inline fun <reified T : Any> get(
         path: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interactionHeaders: Map<String, String> = emptyMap()
     ): Result<T, NetworkError> = safeResult(exceptionMapper) {
         httpClient.get(path) {
             configureCookiesAndAuth(cookies)
+            applyInteractionHeaders(interactionHeaders)
         }.body(typeInfo<T>())
     }
 
@@ -39,12 +46,14 @@ class SSRSafeApiClient(
     suspend inline fun <reified T : Any, reified B : Any> post(
         path: String,
         body: B,
-        cookies: Cookies
+        cookies: Cookies,
+        interactionHeaders: Map<String, String> = emptyMap()
     ): Result<T, NetworkError> = safeResult(exceptionMapper) {
         httpClient.post(path) {
             contentType(ContentType.Application.Json)
             setBody(body, typeInfo<B>())
             configureCookiesAndAuth(cookies)
+            applyInteractionHeaders(interactionHeaders)
         }.body(typeInfo<T>())
     }
 
@@ -53,10 +62,12 @@ class SSRSafeApiClient(
      */
     suspend inline fun <reified T : Any> post(
         path: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interactionHeaders: Map<String, String> = emptyMap()
     ): Result<T, NetworkError> = safeResult(exceptionMapper) {
         httpClient.post(path) {
             configureCookiesAndAuth(cookies)
+            applyInteractionHeaders(interactionHeaders)
         }.body(typeInfo<T>())
     }
 
@@ -65,10 +76,12 @@ class SSRSafeApiClient(
      */
     suspend inline fun <reified T : Any> delete(
         path: String,
-        cookies: Cookies
+        cookies: Cookies,
+        interactionHeaders: Map<String, String> = emptyMap()
     ): Result<T, NetworkError> = safeResult(exceptionMapper) {
         httpClient.delete(path) {
             configureCookiesAndAuth(cookies)
+            applyInteractionHeaders(interactionHeaders)
         }.body(typeInfo<T>())
     }
 
@@ -83,6 +96,13 @@ class SSRSafeApiClient(
         // This includes the session ID cookie that the backend uses for authentication
         cookies.data.forEach { (name, value) ->
             cookie(name, value)
+        }
+    }
+
+    @PublishedApi
+    internal fun HttpRequestBuilder.applyInteractionHeaders(interactionHeaders: Map<String, String>) {
+        interactionHeaders.forEach { (name, value) ->
+            header(name, value)
         }
     }
 }

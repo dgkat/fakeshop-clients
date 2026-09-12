@@ -1,5 +1,7 @@
 package org.example.fakeshop_clients
 
+import org.example.fakeshop_clients.core.interactions.domain.InteractionQuery
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
@@ -180,8 +182,13 @@ val SpaLayout = FC<Props> {
         SearchBar {
             this.viewModel = viewModel
             this.behavior = searchBehavior
-            this.onNavigateToProduct = { productId ->
-                window.location.href = "/$locale/product/$productId"
+            this.onNavigateToProduct = { productId, position ->
+                window.location.href = InteractionQuery.productDetailPath(
+                    locale = locale,
+                    productId = productId,
+                    surface = InteractionSurface.SEARCH,
+                    position = position
+                )
             }
         }
     }
@@ -191,8 +198,13 @@ val SpaLayout = FC<Props> {
         this.behavior = headerBehavior
         this.searchViewModel = viewModel
         this.searchBehavior = searchBehavior
-        this.onNavigateToProduct = { productId ->
-            window.location.href = "/$locale/product/$productId"
+        this.onNavigateToProduct = { productId, position ->
+            window.location.href = InteractionQuery.productDetailPath(
+                locale = locale,
+                productId = productId,
+                surface = InteractionSurface.SEARCH,
+                position = position
+            )
         }
     }
 

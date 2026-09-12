@@ -1,5 +1,6 @@
 package org.example.fakeshop_clients.features.productDetailPage.presentation.pages
 
+import kotlinx.html.FlowContent
 import kotlinx.html.HTML
 import kotlinx.html.a
 import kotlinx.html.body
@@ -8,6 +9,8 @@ import kotlinx.html.classes
 import kotlinx.html.div
 import kotlinx.html.footer
 import kotlinx.html.h1
+import kotlinx.html.h2
+import kotlinx.html.section
 import kotlinx.html.head
 import kotlinx.html.header
 import kotlinx.html.id
@@ -25,17 +28,22 @@ import org.example.fakeshop_clients.core.assets.AssetManifest
 import org.example.fakeshop_clients.core.assets.ExternalScripts
 import org.example.fakeshop_clients.core.design.IconPaths
 import org.example.fakeshop_clients.core.i18n.WebStrings
+import org.example.fakeshop_clients.core.interactions.domain.InteractionQuery
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import org.example.fakeshop_clients.core.ui.svgIcon
 import org.example.fakeshop_clients.features.bdui.presentation.render.renderBduiNode
 import org.example.fakeshop_clients.features.core.navigation.desktop.desktopNavigation
 import org.example.fakeshop_clients.features.core.navigation.mobile.bottomNavigation
+import org.example.fakeshop_clients.features.home.domain.models.BriefProduct
+import org.example.fakeshop_clients.features.productDetailPage.domain.models.PdpBody
 import org.example.fakeshop_clients.features.productDetailPage.domain.models.PdpData
 
 fun HTML.productDetailPage(
     pdpData: PdpData,
     locale: String,
     strings: Map<String, String>,
-    stringsJson: String
+    stringsJson: String,
+    isCrawler: Boolean = false
 ) {
     val brief = pdpData.brief
     lang = locale
@@ -197,9 +205,29 @@ fun HTML.productDetailPage(
                     }
                 }
 
-                // BDUI body — server-driven bottom half
+                // BDUI body — server-driven bottom half. Degrades on its own: a product whose
+                // detailed record or category template is missing still gets the top half.
                 div(classes = "product-detail-bdui") {
-                    renderBduiNode(pdpData.template.root, pdpData.bindData, "pdp", brief.id, locale)
+                    when (val pdpBody = pdpData.body) {
+                        is PdpBody.Ready -> renderBduiNode(
+                            pdpBody.template.root,
+                            pdpBody.bindData,
+                            "pdp",
+                            brief.id,
+                            locale
+                        )
+
+                        is PdpBody.Unavailable -> productBodyFallback(pdpBody, strings)
+                    }
+                }
+
+                // Similar products shelf — deferred, because it is the one per-user call on the
+                // page and most sessions never scroll to it. The placeholder reserves its height
+                // so the footer does not jump when the fragment lands.
+                div(classes = "similar-products-placeholder") {
+                    attributes["hx-get"] = "/$locale/product/${brief.id}/recommendations"
+                    attributes["hx-trigger"] = if (isCrawler) "load" else "intersect once"
+                    attributes["hx-swap"] = "outerHTML"
                 }
 
                 // Toast region for BDUI action feedback (HTMX swaps content here)
@@ -275,5 +303,59 @@ document.addEventListener('click', function(e) {
 
         // ===== HEADER SCROLL BEHAVIOR (Desktop only) =====
         script(src = "/static/js/header-scroll.js") {}
+
+        // ===== BROWSING SESSION CLOCK (SSR mints, the browser maintains) =====
+        script(src = "/static/js/session-id.js") {}
+    }
+}
+
+fun FlowContent.productBodyFallback(pdpBody: PdpBody.Unavailable, strings: Map<String, String>) {
+    section(classes = "product-section product-body-fallback") {
+        pdpBody.fullDescription?.takeIf { it.isNotBlank() }?.let { description ->
+            p(classes = "product-section-content") { +description }
+        }
+
+        p(classes = "product-body-unavailable") {
+            +(strings["product_details_unavailable"]
+                ?: "The rest of this product's details aren't available right now.")
+        }
+    }
+}
+
+fun FlowContent.similarProductsShelf(
+    products: List<BriefProduct>,
+    locale: String,
+    strings: Map<String, String>
+) {
+    if (products.isEmpty()) return
+
+    section(classes = "similar-products") {
+        h2(classes = "similar-products-title") {
+            +(strings["similar_products"] ?: "Similar products")
+        }
+
+        div(classes = "products-row") {
+            products.forEachIndexed { index, product ->
+                a(
+                    href = InteractionQuery.productDetailPath(
+                        locale = locale,
+                        productId = product.id,
+                        surface = InteractionSurface.RECOMMENDATIONS,
+                        // 0-based rank within the shelf: gone the moment the page is rendered.
+                        position = index
+                    ),
+                    classes = "product-card"
+                ) {
+                    div(classes = "product-image-container") {
+                        img(src = product.imageUrl, alt = product.name, classes = "product-image")
+                    }
+
+                    div(classes = "product-info") {
+                        div(classes = "product-name") { +product.name }
+                        div(classes = "product-price") { +"$${String.format("%.2f", product.price)}" }
+                    }
+                }
+            }
+        }
     }
 }

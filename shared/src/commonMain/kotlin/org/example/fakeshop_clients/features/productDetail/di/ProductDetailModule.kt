@@ -1,6 +1,7 @@
 package org.example.fakeshop_clients.features.productDetail.di
 
 import org.example.fakeshop_clients.features.bdui.di.bduiModule
+import org.example.fakeshop_clients.features.recommendations.di.recommendationsModule
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailDatasource
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailDatasourceImpl
 import org.example.fakeshop_clients.features.productDetail.data.ProductDetailRepositoryImpl
@@ -13,7 +14,7 @@ import org.koin.dsl.module
 
 val productDetailModule = module {
 
-    includes(bduiModule)
+    includes(bduiModule, recommendationsModule)
 
     factory { DataToDomainDetailedProductMapper() }
 

@@ -14,12 +14,18 @@ import org.example.fakeshop_clients.core.concurrency.AndroidDispatcherProvider
 import org.example.fakeshop_clients.core.concurrency.AppScopeQualifier
 import org.example.fakeshop_clients.core.concurrency.DispatcherProvider
 import org.example.fakeshop_clients.core.data.DataStoreTokenStorage
+import org.example.fakeshop_clients.core.interactions.data.DataStoreSessionIdStore
+import org.example.fakeshop_clients.core.interactions.domain.DefaultSessionIdProvider
+import org.example.fakeshop_clients.core.interactions.domain.SessionIdProvider
+import org.example.fakeshop_clients.core.interactions.domain.SessionIdStore
+import org.example.fakeshop_clients.core.time.MillisClock
 import org.example.fakeshop_clients.core.logging.AndroidAppLogger
 import org.example.fakeshop_clients.core.logging.AppLogger
 import org.example.fakeshop_clients.core.logging.NoOpLogger
 import org.example.fakeshop_clients.shared.BuildConfig
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import java.util.UUID
 
 val androidInfrastructureModule = module {
     val parsedUrl = Url(BuildConfig.BASE_URL)
@@ -46,6 +52,20 @@ val androidInfrastructureModule = module {
 
     single<InstallIdProvider> {
         AndroidInstallIdProvider(context = get(), dispatcherProvider = get())
+    }
+
+    single<MillisClock> { MillisClock { System.currentTimeMillis() } }
+
+    single<SessionIdStore> {
+        DataStoreSessionIdStore(context = get(), dispatcherProvider = get())
+    }
+
+    single<SessionIdProvider> {
+        DefaultSessionIdProvider(
+            store = get(),
+            generator = { UUID.randomUUID().toString() },
+            clock = get()
+        )
     }
 
     single<HttpClientEngine> {

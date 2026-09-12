@@ -18,6 +18,7 @@ import org.example.fakeshop_clients.core.auth.domain.SessionObserver
 import org.example.fakeshop_clients.core.auth.domain.SessionState
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import org.example.fakeshop_clients.features.favorites.domain.FavoritesService
 import org.example.fakeshop_clients.features.home.domain.ProductListService
 import org.example.fakeshop_clients.features.home.domain.mappers.DomainToPresentationBriefProductMapper
@@ -51,7 +52,9 @@ class ProductListViewStoreLoadCategoriesTest {
 
         override suspend fun toggleFavorite(
             productId: String,
-            currentlyFavorited: Boolean
+            currentlyFavorited: Boolean,
+            surface: InteractionSurface,
+            position: Int?
         ): Result<Unit, NetworkError> = Result.Success(Unit)
 
         override suspend fun checkFavorite(productId: String): Result<Boolean, NetworkError> =

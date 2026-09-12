@@ -5,6 +5,18 @@
         </encoder>
     </appender>
 
+    <!--
+      Per-leg PDP backend timings — one line per product-page render, naming which leg decided the
+      page. Not scaffolding: this is how we confirm the shape once the shared legs are served from
+      Redis, and how the BDUI template/bind-data split gets scoped. Keep it.
+
+      It logs on every render, so it wants raising to INFO before this ships anywhere with real
+      traffic. Do that by editing the level here — an env-var indirection was tried and could not
+      be confirmed to reach the JVM under `./gradlew :web:ssr:run`, so it is not offered.
+    -->
+    <logger name="org.example.fakeshop_clients.features.productDetailPage.domain.ProductDetailServiceImpl"
+            level="DEBUG"/>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>

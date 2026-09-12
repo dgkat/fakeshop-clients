@@ -2,7 +2,9 @@ package org.example.fakeshop_clients.core.api_client
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.delete
+import io.ktor.client.request.header
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
@@ -26,55 +28,87 @@ class KtorClient(val http: HttpClient) : ApiClient {
      */
     private fun KType.toTypeInfo(): TypeInfo = TypeInfo(classifier as KClass<*>, this)
 
-    override suspend fun <T : Any> get(path: String, responseType: KType): T {
-        val response = http.get(path)
+    override suspend fun <T : Any> get(
+        path: String,
+        responseType: KType,
+        headers: Map<String, String>
+    ): T {
+        val response = http.get(path) { applyHeaders(headers) }
         return response.body(responseType.toTypeInfo()) as T
     }
 
     override suspend fun <T : Any, B : Any> post(
         path: String,
         body: B,
-        responseType: KType
+        responseType: KType,
+        headers: Map<String, String>
     ): T {
         val bodyType = TypeInfo(body::class)
         val response = http.post(path) {
             contentType(ContentType.Application.Json)
             setBody(body, bodyType)
+            applyHeaders(headers)
         }
         return response.body(responseType.toTypeInfo()) as T
     }
 
-    override suspend fun <T : Any, B : Any> put(path: String, body: B, responseType: KType): T {
+    override suspend fun <T : Any, B : Any> put(
+        path: String,
+        body: B,
+        responseType: KType,
+        headers: Map<String, String>
+    ): T {
         val bodyType = TypeInfo(body::class)
         val response = http.put(path) {
             contentType(ContentType.Application.Json)
             setBody(body, bodyType)
+            applyHeaders(headers)
         }
         return response.body(responseType.toTypeInfo()) as T
     }
 
-    override suspend fun <T : Any> delete(path: String, responseType: KType): T {
-        val response = http.delete(path)
+    override suspend fun <T : Any> delete(
+        path: String,
+        responseType: KType,
+        headers: Map<String, String>
+    ): T {
+        val response = http.delete(path) { applyHeaders(headers) }
         return response.body(responseType.toTypeInfo()) as T
     }
 
-    override suspend fun <B : Any> postNoContent(path: String, body: B, bodyType: KClass<B>) {
+    override suspend fun <B : Any> postNoContent(
+        path: String,
+        body: B,
+        bodyType: KClass<B>,
+        headers: Map<String, String>
+    ) {
         val bodyTypeInfo = TypeInfo(bodyType)
         http.post(path) {
             contentType(ContentType.Application.Json)
             setBody(body, bodyTypeInfo)
+            applyHeaders(headers)
         }
     }
 
-    override suspend fun <B : Any> putNoContent(path: String, body: B, bodyType: KClass<B>) {
+    override suspend fun <B : Any> putNoContent(
+        path: String,
+        body: B,
+        bodyType: KClass<B>,
+        headers: Map<String, String>
+    ) {
         val bodyTypeInfo = TypeInfo(bodyType)
         http.put(path) {
             contentType(ContentType.Application.Json)
             setBody(body, bodyTypeInfo)
+            applyHeaders(headers)
         }
     }
 
-    override suspend fun deleteNoContent(path: String) {
-        http.delete(path)
+    override suspend fun deleteNoContent(path: String, headers: Map<String, String>) {
+        http.delete(path) { applyHeaders(headers) }
+    }
+
+    private fun HttpRequestBuilder.applyHeaders(extra: Map<String, String>) {
+        extra.forEach { (key, value) -> header(key, value) }
     }
 }

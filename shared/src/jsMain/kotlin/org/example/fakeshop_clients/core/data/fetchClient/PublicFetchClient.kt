@@ -23,26 +23,13 @@ class PublicFetchClient(private val baseUrl: String) : PublicApiClient {
     override suspend fun <T : Any, B : Any> post(
         path: String,
         body: B,
-        responseType: KType
+        responseType: KType,
+        headers: Map<String, String>
     ): T {
         @Suppress("UNCHECKED_CAST")
         val bodySerializer = body::class.serializer() as SerializationStrategy<B>
         val bodyJson = jsonParser.encodeToString(bodySerializer, body)
 
-        return fetchPost(path, bodyJson, emptyMap(), responseType)
-    }
-
-    @OptIn(InternalSerializationApi::class)
-    @Suppress("UNCHECKED_CAST")
-    override suspend fun <T : Any, B : Any> postWithHeaders(
-        path: String,
-        body: B,
-        headers: Map<String, String>,
-        responseType: KType
-    ): T {
-        @Suppress("UNCHECKED_CAST")
-        val bodySerializer = body::class.serializer() as SerializationStrategy<B>
-        val bodyJson = jsonParser.encodeToString(bodySerializer, body)
         return fetchPost(path, bodyJson, headers, responseType)
     }
 

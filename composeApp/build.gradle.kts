@@ -96,11 +96,11 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         // version code = yymmddxx
-        versionCode = 26050701
-        versionName = "1.0.1"
+        versionCode = 26090302
+        versionName = "1.0.2"
 
         // App Links host — replace with the real public domain at deploy time.
-        manifestPlaceholders["appLinkHost"] = "fakeshop.example.com"
+        manifestPlaceholders["appLinkHost"] = "dgkat.com"
     }
     packaging {
         resources {
@@ -112,11 +112,14 @@ android {
     productFlavors {
         create("dev") {
             dimension = "env"
+            // Emulator host is plain HTTP; scoped by dev's network_security_config.
+            manifestPlaceholders["usesCleartextTraffic"] = "true"
         }
         create("prod") {
             dimension = "env"
             applicationIdSuffix = ".prod"
             versionNameSuffix = "-prod"
+            manifestPlaceholders["usesCleartextTraffic"] = "false"
         }
     }
 

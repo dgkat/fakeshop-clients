@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -54,7 +54,7 @@ fun SearchBarOverlay(
     onQueryChange: (String) -> Unit,
     onClearQuery: () -> Unit,
     onDismissSearch: () -> Unit,
-    onResultClick: (SearchResult) -> Unit,
+    onResultClick: (result: SearchResult, position: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val dimensions = rememberSearchBarDimensions()
@@ -99,8 +99,8 @@ fun SearchBarOverlay(
             SearchResultsDropdown(
                 results = uiState.results,
                 isLoading = uiState.isLoading,
-                onResultClick = {
-                    onResultClick(it)
+                onResultClick = { result, position ->
+                    onResultClick(result, position)
                     onDismissSearch()
                 },
                 modifier = Modifier
@@ -163,7 +163,7 @@ private fun SearchBarContent(
 private fun SearchResultsDropdown(
     results: List<SearchResult>,
     isLoading: Boolean,
-    onResultClick: (SearchResult) -> Unit,
+    onResultClick: (result: SearchResult, position: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -203,10 +203,10 @@ private fun SearchResultsDropdown(
 
             else -> {
                 LazyColumn {
-                    items(results) { result ->
+                    itemsIndexed(results) { index, result ->
                         SearchResultItem(
                             result = result,
-                            onClick = { onResultClick(result) }
+                            onClick = { onResultClick(result, index) }
                         )
                     }
                 }

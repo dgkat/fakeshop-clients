@@ -1,5 +1,7 @@
 package org.example.fakeshop_clients.features.product_list.presentation.components
 
+import org.example.fakeshop_clients.core.interactions.domain.InteractionQuery
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -55,9 +57,13 @@ val ProductListView = FC<ProductListProps> { props ->
             else -> {
                 CategoriesView {
                     categories = state.categories
-                    onProductClick = { productId ->
-                        val locale = I18n.locale
-                        window.location.href = "/$locale/product/$productId"
+                    onProductClick = { productId, position ->
+                        window.location.href = InteractionQuery.productDetailPath(
+                            locale = I18n.locale,
+                            productId = productId,
+                            surface = InteractionSurface.HOME_SHELF,
+                            position = position
+                        )
                     }
                     favoritedProductIds = state.favoritedProductIds
                     onToggleFavorite = props.viewModel?.let { vm ->

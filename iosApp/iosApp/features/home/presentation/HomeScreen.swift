@@ -31,8 +31,14 @@ struct HomeView: View {
                 ProductListContent(
                     categories: productListViewModel.state.categories,
                     favoritedProductIds: Set(productListViewModel.state.favoritedProductIds),
-                    onProductClick: { productId in
-                        navigationPath.append(ProductRoute(productId))
+                    onProductClick: { productId, position in
+                        navigationPath.append(
+                            ProductRoute(
+                                productId,
+                                surface: InteractionSurface.homeShelf,
+                                position: position
+                            )
+                        )
                     },
                     onToggleFavorite: { productId in
                         productListViewModel.toggleFavorite(productId: productId)

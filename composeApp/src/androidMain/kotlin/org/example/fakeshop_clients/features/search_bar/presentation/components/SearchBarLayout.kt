@@ -24,7 +24,7 @@ fun SearchBarLayout(
     onQueryChange: (String) -> Unit,
     onClearQuery: () -> Unit,
     onDismissSearch: () -> Unit,
-    onResultClick: (SearchResult) -> Unit,
+    onResultClick: (result: SearchResult, position: Int) -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable (PaddingValues) -> Unit
 ) {

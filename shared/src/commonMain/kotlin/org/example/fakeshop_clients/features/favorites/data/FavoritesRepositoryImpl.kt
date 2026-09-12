@@ -3,6 +3,7 @@ package org.example.fakeshop_clients.features.favorites.data
 import kotlinx.coroutines.flow.StateFlow
 import org.example.fakeshop_clients.core.error_handling.NetworkError
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.interactions.domain.InteractionSurface
 import org.example.fakeshop_clients.core.error_handling.fold
 import org.example.fakeshop_clients.core.error_handling.map
 import org.example.fakeshop_clients.features.favorites.data.models.BulkFavoriteCheckRequest
@@ -18,12 +19,20 @@ class FavoritesRepositoryImpl(
 
     override val favoritedIds: StateFlow<Set<String>> = cache.favoritedIds
 
-    override suspend fun addFavorite(productId: String): Result<Unit, NetworkError> {
-        return datasource.addFavorite(productId)
+    override suspend fun addFavorite(
+        productId: String,
+        surface: InteractionSurface,
+        position: Int?
+    ): Result<Unit, NetworkError> {
+        return datasource.addFavorite(productId, surface, position)
     }
 
-    override suspend fun removeFavorite(productId: String): Result<Unit, NetworkError> {
-        return datasource.removeFavorite(productId)
+    override suspend fun removeFavorite(
+        productId: String,
+        surface: InteractionSurface,
+        position: Int?
+    ): Result<Unit, NetworkError> {
+        return datasource.removeFavorite(productId, surface, position)
     }
 
     override suspend fun getFavorites(): Result<List<BriefProduct>, NetworkError> {
@@ -63,13 +72,18 @@ class FavoritesRepositoryImpl(
         }
     }
 
-    override suspend fun toggleFavorite(productId: String, currentlyFavorited: Boolean): Result<Unit, NetworkError> {
+    override suspend fun toggleFavorite(
+        productId: String,
+        currentlyFavorited: Boolean,
+        surface: InteractionSurface,
+        position: Int?
+    ): Result<Unit, NetworkError> {
         cache.toggle(productId)
 
         val result = if (currentlyFavorited) {
-            removeFavorite(productId)
+            removeFavorite(productId, surface, position)
         } else {
-            addFavorite(productId)
+            addFavorite(productId, surface, position)
         }
 
         result.fold(

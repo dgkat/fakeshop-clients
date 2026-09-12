@@ -12,7 +12,7 @@ struct SearchBarContainer<Content: View>: View {
     @ObservedObject var searchViewModel: SearchViewModel
     let currentTab: Tab
     let behavior: SearchBarBehavior
-    let onResultClick: (SearchResult) -> Void
+    let onResultClick: (SearchResult, Int) -> Void
     let content: Content
 
     // Only this container observes the offset, so scrolling re-renders the search bar alone —
@@ -25,7 +25,7 @@ struct SearchBarContainer<Content: View>: View {
         searchViewModel: SearchViewModel,
         currentTab: Tab,
         offsetModel: SearchBarOffsetModel,
-        onResultClick: @escaping (SearchResult) -> Void,
+        onResultClick: @escaping (SearchResult, Int) -> Void,
         @ViewBuilder content: () -> Content
     ) {
         self.searchViewModel = searchViewModel
@@ -87,8 +87,8 @@ struct SearchBarContainer<Content: View>: View {
                         SearchResultsView(
                             results: state.results,
                             isLoading: state.isLoading,
-                            onResultClick: { result in
-                                onResultClick(result)
+                            onResultClick: { result, position in
+                                onResultClick(result, position)
                                 searchViewModel.onEvent(SearchEvent.CancelClicked())
                             }
                         )

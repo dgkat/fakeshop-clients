@@ -26,7 +26,7 @@ import web.html.HTMLElement
 external interface SearchBarProps : Props {
     var viewModel: SearchViewModel
     var behavior: SearchBarBehavior
-    var onNavigateToProduct: (String) -> Unit
+    var onNavigateToProduct: (productId: String, position: Int) -> Unit
 }
 
 val SearchBar = FC<SearchBarProps> { props ->
@@ -139,8 +139,8 @@ val SearchBar = FC<SearchBarProps> { props ->
                     SearchResultsOverlay {
                         this.results = searchState.results
                         this.isLoading = searchState.isLoading
-                        this.onResultClick = { result ->
-                            props.onNavigateToProduct(result.productId)
+                        this.onResultClick = { result, position ->
+                            props.onNavigateToProduct(result.productId, position)
                             props.viewModel.onEvent(SearchEvent.CancelClicked)
                         }
                     }
@@ -156,8 +156,8 @@ val SearchBar = FC<SearchBarProps> { props ->
             SearchResultsOverlay {
                 this.results = searchState.results
                 this.isLoading = searchState.isLoading
-                this.onResultClick = { result ->
-                    props.onNavigateToProduct(result.productId)
+                this.onResultClick = { result, position ->
+                    props.onNavigateToProduct(result.productId, position)
                     props.viewModel.onEvent(SearchEvent.CancelClicked)
                 }
             }

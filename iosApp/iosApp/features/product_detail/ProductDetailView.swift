@@ -9,6 +9,9 @@ import ComposeApp
 
 struct ProductDetailView: View {
     let productId: String
+    var surface: InteractionSurface = InteractionSurface.productScreen
+    var position: Int? = nil
+    @Binding var navigationPath: NavigationPath
     let onScrollOffsetChange: (CGFloat) -> Void
     var onNavigate: (String, Bool) -> Void = { _, _ in }
 
@@ -37,8 +40,18 @@ struct ProductDetailView: View {
                     bduiBodyState: viewModel.state.bduiBodyState,
                     isFavorited: viewModel.state.isFavorited,
                     isFavoriteLoading: viewModel.state.isFavoriteLoading,
+                    recommendations: viewModel.state.recommendations,
                     onToggleFavorite: { viewModel.onEvent(ProductDetailEvent.ToggleFavorite()) },
                     onAction: { actionId, context in viewModel.dispatchAction(actionId: actionId, context: context) },
+                    onRecommendationClick: { productId, position in
+                        navigationPath.append(
+                            ProductRoute(
+                                productId,
+                                surface: InteractionSurface.recommendations,
+                                position: position
+                            )
+                        )
+                    },
                     onScrollOffsetChange: onScrollOffsetChange
                 )
             }
@@ -47,7 +60,13 @@ struct ProductDetailView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
-            viewModel.onEvent(ProductDetailEvent.LoadProduct(productId: productId))
+            viewModel.onEvent(
+                ProductDetailEvent.LoadProduct(
+                    productId: productId,
+                    surface: surface,
+                    position: position.map { KotlinInt(int: Int32($0)) }
+                )
+            )
         }
         .onChange(of: viewModel.effectTick) { _ in
             guard let effect = viewModel.pendingEffect else { return }
@@ -102,8 +121,10 @@ struct ProductContentView: View {
     let bduiBodyState: BduiBodyState
     let isFavorited: Bool
     let isFavoriteLoading: Bool
+    let recommendations: [UiBriefProduct]
     let onToggleFavorite: () -> Void
     let onAction: BduiActionHandler
+    let onRecommendationClick: (String, Int) -> Void
     let onScrollOffsetChange: (CGFloat) -> Void
 
     var body: some View {
@@ -126,8 +147,45 @@ struct ProductContentView: View {
                     BduiBodySection(state: bduiBodyState, onAction: onAction)
                 }
                 .padding(.horizontal, 16)
+
+                SimilarProductsShelf(
+                    products: recommendations,
+                    onProductClick: onRecommendationClick
+                )
+                .padding(.top, 16)
                 .padding(.bottom, 16)
             }
+        }
+    }
+}
+
+struct SimilarProductsShelf: View {
+    let products: [UiBriefProduct]
+    let onProductClick: (String, Int) -> Void
+
+    var body: some View {
+        if !products.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(String(localized: "similar_products"))
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .padding(.horizontal, 16)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 12) {
+                        ForEach(Array(products.enumerated()), id: \.element.id) { index, product in
+                            ProductCard(
+                                product: product,
+                                // 0-based rank within the shelf: not reconstructable after the fact.
+                                onClick: { onProductClick(product.id, index) }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+                .scrollClipDisabled()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

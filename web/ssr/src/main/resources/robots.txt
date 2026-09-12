@@ -12,6 +12,10 @@ Disallow: /*/profile
 # HTMX API endpoints
 Disallow: /product/like/
 
+# NOTE: /{locale}/product/{id}/recommendations is ALSO an HTMX endpoint, but it must stay
+# crawlable. It serves the similar-products shelf, whose links are how crawlers discover
+# related products — there is no sitemap. Disallowing it leaves bots with an empty placeholder.
+
 # Assets and infra
 Disallow: /static/
 Disallow: /common/

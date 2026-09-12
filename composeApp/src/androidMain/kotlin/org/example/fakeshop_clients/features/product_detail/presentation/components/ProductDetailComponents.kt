@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -50,7 +51,9 @@ import fakeshop_clients.composeapp.generated.resources.error_network
 import fakeshop_clients.composeapp.generated.resources.error_product_not_found
 import fakeshop_clients.composeapp.generated.resources.product_image
 import fakeshop_clients.composeapp.generated.resources.retry
+import fakeshop_clients.composeapp.generated.resources.similar_products
 import fakeshop_clients.composeapp.generated.resources.thumbnail
+import org.example.fakeshop_clients.core.presentation.components.ProductCard
 import org.example.fakeshop_clients.core.presentation.models.UiBriefProduct
 import org.example.fakeshop_clients.features.product_detail.presentation.bdui.BduiBodySection
 import org.example.fakeshop_clients.features.productDetail.presentation.BduiBodyState
@@ -104,6 +107,8 @@ fun ProductContent(
     isFavorited: Boolean,
     isFavoriteLoading: Boolean,
     onToggleFavorite: () -> Unit,
+    recommendations: List<UiBriefProduct>,
+    onRecommendationClick: (productId: String, position: Int) -> Unit,
     scrollState: SearchBarScrollState,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier
@@ -158,6 +163,56 @@ fun ProductContent(
             BduiBodySection(state = bduiBodyState)
 
             Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        SimilarProductsShelf(
+            products = recommendations,
+            onProductClick = onRecommendationClick
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+/**
+ * The "similar products" shelf. Renders nothing at all when there is nothing to show — loading,
+ * failure and an empty response are the same case, and none of them should take attention away
+ * from the product itself.
+ *
+ * Taps report [InteractionSurface.RECOMMENDATIONS]; without that the resulting views are
+ * indistinguishable from any other product view and the shelf teaches the algorithm nothing
+ * about itself.
+ */
+@Composable
+private fun SimilarProductsShelf(
+    products: List<UiBriefProduct>,
+    onProductClick: (productId: String, position: Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (products.isEmpty()) return
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(Res.string.similar_products),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            itemsIndexed(
+                items = products,
+                key = { _, product -> product.id }
+            ) { index, product ->
+                ProductCard(
+                    product = product,
+                    onClick = { onProductClick(product.id, index) }
+                )
+            }
         }
     }
 }

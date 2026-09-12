@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,7 +40,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun HomeContent(
     productListState: ProductListState,
-    onProductClick: (String) -> Unit,
+    onProductClick: (productId: String, position: Int) -> Unit,
     onToggleFavorite: (String) -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
@@ -79,7 +80,7 @@ fun HomeContent(
 private fun ProductListContent(
     categories: List<UiCategoryRow>,
     favoritedProductIds: Set<String>,
-    onProductClick: (String) -> Unit,
+    onProductClick: (productId: String, position: Int) -> Unit,
     onToggleFavorite: (String) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
@@ -113,7 +114,7 @@ private fun ProductListContent(
 private fun CategorySection(
     categoryRow: UiCategoryRow,
     favoritedProductIds: Set<String>,
-    onProductClick: (String) -> Unit,
+    onProductClick: (productId: String, position: Int) -> Unit,
     onToggleFavorite: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -140,7 +141,7 @@ private fun CategorySection(
 private fun ProductRow(
     products: List<UiBriefProduct>,
     favoritedProductIds: Set<String>,
-    onProductClick: (String) -> Unit,
+    onProductClick: (productId: String, position: Int) -> Unit,
     onToggleFavorite: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -181,13 +182,15 @@ private fun ProductRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(
+            itemsIndexed(
                 items = products,
-                key = { it.id }
-            ) { product ->
+                key = { _, product -> product.id }
+            ) { index, product ->
                 ProductCard(
                     product = product,
-                    onClick = { onProductClick(product.id) },
+                    // 0-based rank within the shelf, so CTR can be corrected for position bias
+                    // later. It is not reconstructable after the fact.
+                    onClick = { onProductClick(product.id, index) },
                     isFavorited = product.id in favoritedProductIds,
                     onToggleFavorite = { onToggleFavorite(product.id) }
                 )

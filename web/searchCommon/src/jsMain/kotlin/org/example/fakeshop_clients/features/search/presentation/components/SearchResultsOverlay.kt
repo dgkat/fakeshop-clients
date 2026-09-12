@@ -11,7 +11,7 @@ import web.cssom.ClassName
 external interface SearchResultsOverlayProps : Props {
     var results: List<SearchResult>
     var isLoading: Boolean
-    var onResultClick: (SearchResult) -> Unit
+    var onResultClick: (SearchResult, Int) -> Unit
 }
 
 val SearchResultsOverlay = FC<SearchResultsOverlayProps> { props ->
@@ -32,10 +32,10 @@ val SearchResultsOverlay = FC<SearchResultsOverlayProps> { props ->
                 }
             }
             else -> {
-                props.results.forEach { result ->
+                props.results.forEachIndexed { index, result ->
                     SearchResultItem {
                         this.result = result
-                        this.onClick = { props.onResultClick(result) }
+                        this.onClick = { props.onResultClick(result, index) }
                     }
                 }
             }

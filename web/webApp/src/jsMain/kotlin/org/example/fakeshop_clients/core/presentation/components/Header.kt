@@ -24,7 +24,7 @@ external interface HeaderProps : Props {
     var behavior: String? // "scroll-reactive", "static", or "hidden"
     var searchViewModel: SearchViewModel
     var searchBehavior: SearchBarBehavior
-    var onNavigateToProduct: (String) -> Unit
+    var onNavigateToProduct: (productId: String, position: Int) -> Unit
 }
 
 val Header = FC<HeaderProps> { props ->

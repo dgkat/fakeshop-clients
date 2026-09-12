@@ -84,5 +84,8 @@ fun HTML.spaPage(
             attributes["type"] = "module"
         }
         script(src = "/static/js/view-transitions.js") {}
+
+        // ===== BROWSING SESSION CLOCK — the SPA is exactly the sitting SSR cannot see =====
+        script(src = "/static/js/session-id.js") {}
     }
 }

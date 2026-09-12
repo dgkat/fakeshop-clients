@@ -13,6 +13,8 @@ import org.example.fakeshop_clients.core.auth.domain.SessionMutator
 import org.example.fakeshop_clients.core.data.ApiClient
 import org.example.fakeshop_clients.core.data.WebAuthDatasource
 import org.example.fakeshop_clients.core.error_handling.Result
+import org.example.fakeshop_clients.core.interactions.data.WebSessionIdProvider
+import org.example.fakeshop_clients.core.interactions.domain.InteractionHeaders
 import kotlin.js.Promise
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -22,6 +24,7 @@ class AxiosClient(
     private val webAuthDatasource: WebAuthDatasource,
     private val sessionMutator: SessionMutator,
     private val installIdProvider: InstallIdProvider,
+    private val sessionIdProvider: WebSessionIdProvider,
     private val scope: CoroutineScope
 ) : ApiClient {
 
@@ -42,6 +45,17 @@ class AxiosClient(
         axios.interceptors.request.use(
             onFulfilled = { config ->
                 config.withCredentials = true
+                // Synchronous by necessity — an axios request interceptor cannot await, which is
+                // why WebSessionIdProvider keeps a non-suspend read as its primitive.
+                val sessionId = try {
+                    sessionIdProvider.currentSync()
+                } catch (_: Throwable) {
+                    null
+                }
+                if (!sessionId.isNullOrBlank()) {
+                    if (config.headers == null) config.headers = js("{}")
+                    config.headers[InteractionHeaders.SESSION_ID] = sessionId
+                }
                 config
             },
             onRejected = { error ->
@@ -146,8 +160,12 @@ class AxiosClient(
         refreshSubscribers.clear()
     }
 
-    override suspend fun <T : Any> get(path: String, responseType: KType): T {
-        val response = axios.get("$baseUrl$path").await()
+    override suspend fun <T : Any> get(
+        path: String,
+        responseType: KType,
+        headers: Map<String, String>
+    ): T {
+        val response = axios.get("$baseUrl$path", headerConfig(headers)).await()
         return parseResponse(response.data, responseType)
     }
 
@@ -155,14 +173,10 @@ class AxiosClient(
     override suspend fun <T : Any, B : Any> post(
         path: String,
         body: B,
-        responseType: KType
+        responseType: KType,
+        headers: Map<String, String>
     ): T {
-        @Suppress("UNCHECKED_CAST")
-        val bodySerializer = body::class.serializer() as SerializationStrategy<B>
-        val bodyJson = jsonParser.encodeToString(bodySerializer, body)
-        val bodyObject = JSON.parse<dynamic>(bodyJson)
-
-        val response = axios.post("$baseUrl$path", bodyObject).await()
+        val response = axios.post("$baseUrl$path", body.toJsBody(), headerConfig(headers)).await()
         return parseResponse(response.data, responseType)
     }
 
@@ -170,42 +184,61 @@ class AxiosClient(
     override suspend fun <T : Any, B : Any> put(
         path: String,
         body: B,
-        responseType: KType
+        responseType: KType,
+        headers: Map<String, String>
     ): T {
-        @Suppress("UNCHECKED_CAST")
-        val bodySerializer = body::class.serializer() as SerializationStrategy<B>
-        val bodyJson = jsonParser.encodeToString(bodySerializer, body)
-        val bodyObject = JSON.parse<dynamic>(bodyJson)
-
-        val response = axios.put("$baseUrl$path", bodyObject).await()
+        val response = axios.put("$baseUrl$path", body.toJsBody(), headerConfig(headers)).await()
         return parseResponse(response.data, responseType)
     }
 
-    override suspend fun <T : Any> delete(path: String, responseType: KType): T {
-        val response = axios.delete("$baseUrl$path").await()
+    override suspend fun <T : Any> delete(
+        path: String,
+        responseType: KType,
+        headers: Map<String, String>
+    ): T {
+        val response = axios.delete("$baseUrl$path", headerConfig(headers)).await()
         return parseResponse(response.data, responseType)
     }
 
     @OptIn(InternalSerializationApi::class)
-    override suspend fun <B : Any> postNoContent(path: String, body: B, bodyType: KClass<B>) {
-        @Suppress("UNCHECKED_CAST")
-        val bodySerializer = bodyType.serializer() as SerializationStrategy<B>
-        val bodyJson = jsonParser.encodeToString(bodySerializer, body)
-        val bodyObject = JSON.parse<dynamic>(bodyJson)
-        axios.post("$baseUrl$path", bodyObject).await()
+    override suspend fun <B : Any> postNoContent(
+        path: String,
+        body: B,
+        bodyType: KClass<B>,
+        headers: Map<String, String>
+    ) {
+        axios.post("$baseUrl$path", body.toJsBody(bodyType), headerConfig(headers)).await()
     }
 
     @OptIn(InternalSerializationApi::class)
-    override suspend fun <B : Any> putNoContent(path: String, body: B, bodyType: KClass<B>) {
-        @Suppress("UNCHECKED_CAST")
-        val bodySerializer = bodyType.serializer() as SerializationStrategy<B>
-        val bodyJson = jsonParser.encodeToString(bodySerializer, body)
-        val bodyObject = JSON.parse<dynamic>(bodyJson)
-        axios.put("$baseUrl$path", bodyObject).await()
+    override suspend fun <B : Any> putNoContent(
+        path: String,
+        body: B,
+        bodyType: KClass<B>,
+        headers: Map<String, String>
+    ) {
+        axios.put("$baseUrl$path", body.toJsBody(bodyType), headerConfig(headers)).await()
     }
 
-    override suspend fun deleteNoContent(path: String) {
-        axios.delete("$baseUrl$path").await()
+    override suspend fun deleteNoContent(path: String, headers: Map<String, String>) {
+        axios.delete("$baseUrl$path", headerConfig(headers)).await()
+    }
+
+    private fun headerConfig(headers: Map<String, String>): AxiosRequestConfig {
+        val config = js("{}").unsafeCast<AxiosRequestConfig>()
+        if (headers.isNotEmpty()) {
+            val headerObject = js("{}")
+            headers.forEach { (key, value) -> headerObject[key] = value }
+            config.headers = headerObject
+        }
+        return config
+    }
+
+    @OptIn(InternalSerializationApi::class)
+    @Suppress("UNCHECKED_CAST")
+    private fun <B : Any> B.toJsBody(bodyType: KClass<B> = this::class as KClass<B>): dynamic {
+        val bodySerializer = bodyType.serializer() as SerializationStrategy<B>
+        return JSON.parse(jsonParser.encodeToString(bodySerializer, this))
     }
 
     @Suppress("UNCHECKED_CAST")
